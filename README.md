@@ -102,7 +102,6 @@ Contributions are welcome from the community. If you would like to contribute to
 
 The MIT License (MIT)
 
-
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Toricat/PAPERY&type=Date)](https://star-history.com/#Toricat/PAPERY&Date)
