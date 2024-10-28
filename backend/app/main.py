@@ -70,7 +70,10 @@ if __name__ == "__main__":
     import uvicorn
     logger.info("Environment: " + settings.ENVIRONMENT) 
     logger.info("Starting server...")
-    logger.info(f"Server run at: {settings.server_host}")
+    logger.info(f"Server run at: {settings.server_host}"  )
+    logger.info(f"Server API Docs run at: {settings.server_host}{settings.API_VERSION}/docs")
+    logger.info(f"Server Documentation run at: {settings.server_host}{settings.API_VERSION}/redoc")
+              
     uvicorn.run("main:app", host=settings.DOMAIN, port=settings.DOMAIN_HOST, reload=settings.RELOAD)
 
 

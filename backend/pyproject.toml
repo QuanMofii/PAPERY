@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "server"
+name = "backend"
 version = "0.1.0"
 description = "Backend Fastapi full Authentication"
 authors = ["HaMinhQuan <haminhquan12c7@gmail.com>"]
