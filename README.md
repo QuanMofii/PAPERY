@@ -95,4 +95,4 @@ The MIT License (MIT)
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Toricat/Experience-System,Toricat/PAPERY&type=Date)](https://star-history.com/#Toricat/Experience-System&Toricat/PAPERY&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=Toricat/Experience-System,Toricat/PAPERY&type=Date)](https://star-history.com/#Toricat/PAPERY&Date)
