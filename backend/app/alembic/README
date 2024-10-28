@@ -1,0 +1,6 @@
+Generic single-database configuration.
+#alembic init app/alembic
+#alembic stamp base
+#alembic revision --autogenerate -m "Initial migration"
+#alembic revision -m "change"
+#alembic upgrade head

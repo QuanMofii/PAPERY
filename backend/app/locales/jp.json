@@ -1,0 +1,37 @@
+{
+    "user_already_exists": "ユーザーはすでに存在します。",
+    "user_not_found": "ユーザーが見つかりません。",
+    "user_account_locked": "ユーザーアカウントがロックされています。",
+    "user_permission_denied": "この操作を行う権限がありません。",
+    "user_account_inactive": "ユーザーアカウントが無効です。",
+    "user_account_already_activated": "ユーザーアカウントはすでにアクティブ化されています。",
+    
+    "invalid_access_token": "アクセス トークンが無効です。",
+    "invalid_refresh_token": "リフレッシュ トークンが無効または期限切れです。",
+    "access_token_expired": "アクセス トークンの期限が切れています。",
+    "refresh_token_expired": "リフレッシュ トークンの期限が切れています。",
+    "token_revoked": "トークンは無効になっています。",
+    "token_malformed": "トークンの形式が不正です。",
+    
+    "item_not_found": "アイテムが見つかりませんでした。",
+    "item_already_exists": "アイテムはすでに存在します。",
+    "item_out_of_stock": "アイテムは在庫切れです。",
+    "item_permission_denied": "このアイテムにアクセスする権限がありません。",
+    "item_invalid_request": "アイテムに対するリクエストが無効です。",
+    
+    "oauth_provider_not_supported": "OAuth プロバイダーがサポートされていません。",
+    "oauth_client_error": "OAuth クライアントの作成に問題がありました。",
+    "oauth_state_mismatch": "OAuth 状態の不一致。",
+    "invalid_credentials": "資格情報が無効です。",
+    "email_send_failure": "メールの送信に失敗しました。",
+    "invalid_email": "メールアドレスが無効です。",
+    
+    "activate_code_not_found": "アクティベーションコードが見つかりませんでした。",
+    "activate_code_expired": "アクティベーションコードの有効期限が切れています。",
+    "activate_code_already_used": "アクティベーションコードはすでに使用されています。",
+    
+    "recovery_code_not_found": "リカバリーコードが見つかりませんでした。",
+    "recovery_code_expired": "リカバリーコードの有効期限が切れています。",
+    "recovery_code_already_used": "リカバリーコードはすでに使用されています。"
+  }
+  

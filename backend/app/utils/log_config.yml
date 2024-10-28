@@ -1,0 +1,60 @@
+version: 1
+disable_existing_loggers: false
+formatters:
+  standard:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  json:
+    format: '{"timestamp": "%(asctime)s", "logger": "%(name)s", "level": "%(levelname)s", "message": "%(message)s"}'
+
+handlers:
+  file:
+    class: logging.handlers.RotatingFileHandler  
+    formatter: standard  
+    level: DEBUG
+    maxBytes: 10000000
+    backupCount: 5
+    filename: "logs/logs_%d_%m_%Y.log"
+  console:
+    class: logging.StreamHandler
+    formatter: standard 
+    level: INFO
+    stream: ext://sys.stdout
+
+
+loggers:
+  api_calls:
+    level: DEBUG
+    handlers: [console, file]
+    propagate: False
+  watchfiles:
+    level: WARNING
+    handlers: [console, file]
+    propagate: False
+  httpcore:
+    level: WARNING
+    handlers: [console, file]
+    propagate: False
+  multipart.multipart:
+    level: WARNING
+    handlers: [console, file]
+    propagate: False 
+  aiomysql:
+    level: WARNING
+    handlers: [console, file]
+    propagate: False
+  passlib:
+    level: WARNING
+    handlers: [console, file]
+    propagate: False
+  asyncio:
+    level: WARNING
+    handlers: [console, file]
+    propagate: False
+  httpx:
+    level: WARNING
+    handlers: [console, file]
+    propagate: False
+
+root:
+  level: DEBUG
+  handlers: [console, file]

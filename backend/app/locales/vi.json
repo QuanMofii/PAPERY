@@ -1,0 +1,37 @@
+{
+    "user_already_exists": "Người dùng đã tồn tại.",
+    "user_not_found": "Không tìm thấy người dùng.",
+    "user_account_locked": "Tài khoản người dùng đã bị khóa.",
+    "user_permission_denied": "Bạn không có quyền thực hiện hành động này.",
+    "user_account_inactive": "Tài khoản người dùng không hoạt động.",
+    "user_account_already_activated": "Tài khoản người dùng đã được kích hoạt.",
+    
+    "invalid_access_token": "Token truy cập không hợp lệ.",
+    "invalid_refresh_token": "Token làm mới không hợp lệ hoặc đã hết hạn.",
+    "access_token_expired": "Token truy cập đã hết hạn.",
+    "refresh_token_expired": "Token làm mới đã hết hạn.",
+    "token_revoked": "Token đã bị thu hồi.",
+    "token_malformed": "Token không đúng định dạng hoặc không hợp lệ.",
+    
+    "item_not_found": "Không tìm thấy mục.",
+    "item_already_exists": "Mục đã tồn tại.",
+    "item_out_of_stock": "Mục đã hết hàng.",
+    "item_permission_denied": "Bạn không có quyền truy cập mục này.",
+    "item_invalid_request": "Yêu cầu đối với mục không hợp lệ.",
+    
+    "oauth_provider_not_supported": "Nhà cung cấp OAuth không được hỗ trợ.",
+    "oauth_client_error": "Đã xảy ra sự cố khi tạo OAuth client.",
+    "oauth_state_mismatch": "Trạng thái OAuth không khớp.",
+    "invalid_credentials": "Thông tin đăng nhập không hợp lệ.",
+    "email_send_failure": "Gửi email thất bại.",
+    "invalid_email": "Địa chỉ email không hợp lệ.",
+    
+    "activate_code_not_found": "Không tìm thấy mã kích hoạt.",
+    "activate_code_expired": "Mã kích hoạt đã hết hạn.",
+    "activate_code_already_used": "Mã kích hoạt đã được sử dụng.",
+    
+    "recovery_code_not_found": "Không tìm thấy mã khôi phục.",
+    "recovery_code_expired": "Mã khôi phục đã hết hạn.",
+    "recovery_code_already_used": "Mã khôi phục đã được sử dụng."
+  }
+  
