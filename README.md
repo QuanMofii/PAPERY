@@ -16,7 +16,7 @@
 <p align="center">
   <a href="https://www.papery.com/"><img src="https://img.shields.io/badge/Website-blue?logo=googlechrome&logoColor=white"/></a>
   <a href="https://docs.papery.com/"><img src="https://img.shields.io/badge/Docs-yellow?logo=gitbook&logoColor=white"/></a>
-  <a href="https://discord.gg/paperydiscord"><img src="https://img.shields.io/discord/1300352164748591205/1300352164748591208?logo=discord&label=discord"/></a>
+  <a href="https://discord.gg/paperydiscord"><img src="https://img.shields.io/discord/1300352164748591205?logo=discord&label=discord"/></a>
   <a href="https://github.com/papery/papery"><img src="https://img.shields.io/github/stars/Toricat/PAPERY" /></a>
   <a href="https://github.com/papery/papery/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Toricat/PAPERY"/></a>
   <!-- <a href="https://twitter.com/paperyai"><img src="https://img.shields.io/twitter/follow/paperyai?style=social"/></a> -->
