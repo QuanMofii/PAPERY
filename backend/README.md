@@ -1,4 +1,3 @@
-```
 <!-- DOCTOC SKIP -->
 
 <h1 align="center">
@@ -44,4 +43,4 @@ python app/main.py
 ## Usage
 
 - Backend API will be available by default at \`http://localhost:8000\`.
-```
+
