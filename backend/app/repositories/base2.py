@@ -16,7 +16,7 @@ class QueryOperator(str, Enum):
     NEQ = "neq"  # Not Equal
     GT = "gt"  # Greater Than
     LT = "lt"  # Less Than
-    GTE = "gte"  # Greater Than or Equal
+    GTE = "gte"  # Greater Than or EqualS
     LTE = "lte"  # Less Than or Equal
     LIKE = "like"  # LIKE
     ILIKE = "ilike"  # Case-insensitive LIKE
@@ -221,13 +221,9 @@ class BaseRepository(Generic[T, Entity]):
             return entities if config.return_data else None
 
     # Simplified public methods
-    async def get(self, id: int, config: QueryConfig = None) -> Optional[T]:
-        """Get by ID"""
-        basic_config = QueryConfig(
-            filters={"id": id},
-            limit=1
-        )
-        return await self.execute_query(config or basic_config)
+    async def get(self, config: QueryConfig = None) -> Optional[T]:
+        """Get with config"""
+        return await self.execute_query(config or QueryConfig())
 
     async def get_all(self, config: QueryConfig = None) -> List[T]:
         """Get all with config"""
@@ -235,7 +231,7 @@ class BaseRepository(Generic[T, Entity]):
 
     async def create(self, data: Union[T, Dict[str, Any]], config: QueryConfig = None) -> Optional[T]:
         """Create entity"""
-        data_dict = data.dict() if isinstance(data, BaseModel) else data
+        data_dict = data.model_dump() if isinstance(data, BaseModel) else data
         return await self.execute_operation("create", config or QueryConfig(), data_dict)
 
     async def update(self, data: Dict[str, Any], config: QueryConfig = None) -> Optional[Union[T, List[T]]]:
