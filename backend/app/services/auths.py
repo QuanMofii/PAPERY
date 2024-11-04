@@ -6,8 +6,8 @@ from core.security import create_access_token, create_refresh_token, create_veri
 from core.config import settings
 from core.redis import get_redis_client
 
-from repositories.users import crud_user
-from repositories.tokens import crud_token
+from repositories.users import user_repo
+from repositories.tokens import token_repo
 
 from schemas.tokens import TokenInDB, TokenLogin
 from schemas.users import UserInDB, UserCreate, UserBase, UserUpdate
@@ -48,7 +48,7 @@ class AuthService():
             redirect_uri=f"{settings.server_host}/auth/callback/github",
             userinfo_endpoint="https://api.github.com/user"
         )
-        self.curd_user = crud_user
+        self.curd_user = user_repo
 
         self.redis_client = asyncio.run(get_redis_client()) 
     async def oauth_login_service(self, request, provider: str):
@@ -78,7 +78,7 @@ class AuthService():
         token = await client.authorize_access_token(request)
         user_info = await client.userinfo(token=token)
         email = user_info.get('email')
-        user = await crud_user.get(session, email=email)
+        user = await user_repo.get(session,filters={"email": email})
         if user is None:
             new_user = UserInDB(
                     email=email,
@@ -88,9 +88,9 @@ class AuthService():
                     is_active=True,
                     hashed_password="" 
                 )
-            user = await crud_user.create(session, obj_in=new_user)
-
-        existing_token = await crud_token.get(session, user_id=user.id)
+            user = await user_repo.create(session=session, entity_data=new_user)
+            
+        existing_token = await token_repo.get(session,filters={"user_id": user.id})
         access_token = create_access_token(user)
 
         if existing_token and existing_token.exp > datetime.now():
@@ -99,33 +99,31 @@ class AuthService():
             refresh_token, expire = create_refresh_token()
             obj_in = TokenInDB(refresh_token=refresh_token, user_id=user.id, exp=expire)
             if existing_token:
-                await crud_token.update(session, user_id=user.id, obj_in=obj_in)
+                await token_repo.update(session,filters={"user_id": user.id}, entity_data=obj_in)
             else:
-                await crud_token.create(session, obj_in=obj_in)
+                await token_repo.create(session, entity_data=obj_in)
 
         return TokenLogin(token_type="bearer", refresh_token=refresh_token, access_token=access_token)
     
     async def login_service(self, session, data: Login):
-        user = await crud_user.get(session, email=data.username)
-
+        user = await user_repo.get(session, filters={"email": data.username})
+       
         if not user or user.account_type != "local" or not is_valid_password(data.password, user.hashed_password):
             raise InvalidCredentialsError()  
         if not user.is_active:
             raise UserAccountInactiveError()  
-
-        existing_token = await crud_token.get(session, user_id=user.id)
-
+        print("datoi")
+        existing_token = await token_repo.get(session, filters={"user_id": user.id})
         access_token = create_access_token(user)
-
+        print("datoi1")
         if existing_token and existing_token.exp > datetime.now():
             refresh_token = existing_token.refresh_token
         else:
             refresh_token, expire = create_refresh_token()
-            obj_in = TokenInDB(refresh_token=refresh_token, user_id=user.id, exp=expire)
             if existing_token:
-                await crud_token.update(session, user_id=user.id, obj_in=obj_in)
+                await token_repo.update(session, filters={"user_id": user.id}, data={ 'refresh_token': refresh_token, 'exp': expire })
             else:
-                await crud_token.create(session, obj_in=obj_in)
+                await token_repo.create(session,  data={ 'refresh_token': refresh_token, 'exp': expire,'user_id':  user.id })
 
         return TokenLogin(token_type="bearer", refresh_token=refresh_token, access_token=access_token)    
     
@@ -141,13 +139,13 @@ class AuthService():
             account_type="local", 
             is_active=False, 
         )
-        user = await crud_user.create(session, obj_in=new_user)
+        user = await user_repo.create(session, entity_data=new_user)
         code_active, exp_active = create_verify_code()
         
         await self.redis_client.setex(f"activate_code:{user.id}", exp_active, code_active) 
 
         info = InfoEmailSend(email=data.email, name=user.full_name, verification_code=code_active)
-        html_content = await render_email_template("register_code.html", **info.dict())
+        html_content = await render_email_template("register_code.html", **info.model_dump())
         response = await send_email(
             email_to=data.email,
             subject="Your Verification Code",
@@ -160,11 +158,11 @@ class AuthService():
             
 
     async def refresh_token_service(self, session, token_data: TokenRefresh):
-        result = await crud_token.get(session, refresh_token=token_data.refresh_token)
+        result = await token_repo.get(session, filters={"refresh_token": token_data.refresh_token})
         if not result or result.exp < datetime.now() or result.user_id != token_data.user_id:
             raise RefreshTokenExpiredError()  
 
-        user = await crud_user.get(session, id=token_data.user_id)
+        user = await user_repo.get(session, filters={"id": result.user_id})
         if  not user.is_active:
             raise UserAccountInactiveError() 
 
@@ -177,6 +175,6 @@ class AuthService():
         if not is_valid_password(data.current_password, current_user.password):
             raise InvalidCredentialsError()  
 
-        await crud_user.update(session, id=current_user.id, obj_in={"hashed_password": get_password_hash(data.new_password)})
+        await user_repo.update(session, filters={"id": current_user.id}, update_data={"hashed_password": get_password_hash(data.new_password)})
 
         return {"message": "Password changed successfully"} 

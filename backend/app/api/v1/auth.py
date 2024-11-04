@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
 from schemas.tokens import TokenLogin
@@ -50,7 +50,7 @@ async def refresh_token(
 async def read_users_me(
     session: SessionDep,
     current_user: User = Depends(RoleChecker(["admin", "user"]))):
-    result = current_user.dict()
+    result = current_user.model_dump()
     return result
 
 @router.put("/update-password", response_model=Message)

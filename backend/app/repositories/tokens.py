@@ -1,6 +1,7 @@
-from repositories.base import CRUDBase
-from models.token import Token
-from schemas.tokens import TokenInDB, TokenUpdate
 
-CRUDToken= CRUDBase[Token,TokenInDB, TokenUpdate]
-crud_token = CRUDToken(Token)
+
+from repositories.base import BaseRepository
+from models.token import Token 
+from schemas.tokens import Token as TokenSchema
+
+token_repo = BaseRepository(Token,TokenSchema )

@@ -11,7 +11,7 @@ from redis.asyncio.connection import ConnectionPool
 
 import logging
 
-from api.router import api_router
+from api.routers import api_router
 from core.config import settings
 from core.redis import get_redis_client
 

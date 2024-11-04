@@ -4,7 +4,7 @@ from .common.mail import send_email, render_email_template
 from core.security import create_verify_code, get_password_hash
 from core.redis import get_redis_client
 
-from repositories.users import crud_user
+from repositories.users import user_repo
 
 
 
@@ -27,7 +27,7 @@ class VerifyService():
         """
         Send activation code to user's email. Store the activation code in Redis.
         """
-        user = await crud_user.get( session,return_columns=["id", "full_name", "is_active"], email=data.email)
+        user = await  user_repo.get( session,return_columns=["id", "full_name", "is_active"], email=data.email)
         if user is None:
             raise UserNotFoundError()
         if user.is_active:
@@ -50,7 +50,7 @@ class VerifyService():
         return a message indicating the code has already been sent.
         """
        
-        user = await crud_user.get(session,return_columns=["id", "full_name"], email=data.email)
+        user = await  user_repo.get(session,return_columns=["id", "full_name"], email=data.email)
         if user is None:
             raise UserNotFoundError()
         existing_code = await self.redis_client.get(f"recovery_code:{user.id}")
@@ -78,7 +78,7 @@ class VerifyService():
         """
         Confirm the activation code from Redis.
         """
-        user = await crud_user.get(session,return_columns=["id"], email=data.email)
+        user = await  user_repo.get(session,return_columns=["id"], email=data.email)
         print(user)
         if user is None:
             raise UserNotFoundError()
@@ -104,7 +104,7 @@ class VerifyService():
         Service to confirm the activation code and activate the user account.
         """
         await self.confirm_active_code(session, data)
-        await crud_user.update(session,email=data.email, obj_in={"is_active": True})
+        await  user_repo.update(session,email=data.email, obj_in={"is_active": True})
         return {"message": "User activated successfully."}
     
     async def confirm_recovery_code(self, session, data: VerifyCodeComfirm):
@@ -112,7 +112,7 @@ class VerifyService():
         Confirm the recovery code. Raises appropriate errors if the code is invalid,
         expired, or already used.
         """
-        user = await crud_user.get(session,return_columns=["email", "id"], email=data.email)
+        user = await  user_repo.get(session,return_columns=["email", "id"], email=data.email)
         if user is None:
             raise UserNotFoundError()
 
@@ -137,6 +137,6 @@ class VerifyService():
         Service to confirm the recovery code and change the user's password.
         """
         await self.confirm_recovery_code(session, data)
-        await crud_user.update(session, email=data.email, obj_in={"hashed_password": get_password_hash(data.new_password)})
+        await  user_repo.update(session, email=data.email, obj_in={"hashed_password": get_password_hash(data.new_password)})
     
         return {"message": "Password changed successfully."}
