@@ -28,38 +28,48 @@ from .db.database import Base, async_engine as engine
 from .utils import cache, queue, rate_limit
 from ..models import *
 
+from logging import getLogger
+logger = getLogger(__name__)
+
 # -------------- database --------------
 async def create_tables() -> None:
+    logger.info(f'Creating tables')
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
 
 # -------------- cache --------------
 async def create_redis_cache_pool() -> None:
+    logger.info(f'Creating redis cache pool with url: {settings.REDIS_CACHE_URL}')
     cache.pool = redis.ConnectionPool.from_url(settings.REDIS_CACHE_URL)
     cache.client = redis.Redis.from_pool(cache.pool)  # type: ignore
 
 
 async def close_redis_cache_pool() -> None:
+    logger.info(f'Closing redis cache pool')
     await cache.client.aclose()  # type: ignore
 
 
 # -------------- queue --------------
 async def create_redis_queue_pool() -> None:
+    logger.info(f'Creating redis queue pool')
     queue.pool = await create_pool(RedisSettings(host=settings.REDIS_QUEUE_HOST, port=settings.REDIS_QUEUE_PORT))
 
 
 async def close_redis_queue_pool() -> None:
+    logger.info(f'Closing redis queue pool')
     await queue.pool.aclose()  # type: ignore
 
 
 # -------------- rate limit --------------
 async def create_redis_rate_limit_pool() -> None:
+    logger.info(f'Creating redis rate limit pool with url: {settings.REDIS_RATE_LIMIT_URL}')
     rate_limit.pool = redis.ConnectionPool.from_url(settings.REDIS_RATE_LIMIT_URL)
     rate_limit.client = redis.Redis.from_pool(rate_limit.pool)  # type: ignore
 
 
 async def close_redis_rate_limit_pool() -> None:
+    logger.info(f'Closing redis rate limit pool')
     await rate_limit.client.aclose()  # type: ignore
 
 
@@ -209,5 +219,5 @@ def create_application(
                 return out
 
             application.include_router(docs_router)
-
+        logger.info(f'Environment: {settings.ENVIRONMENT}')
         return application
