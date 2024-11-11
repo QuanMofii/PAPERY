@@ -54,6 +54,18 @@ services:
       - redis-data:/data
     expose:
       - "6379"
+#-------- uncomment to run mysql instead of postgres  --------    
+  # db:
+  #   image: mysql:8.0.38
+  #   env_file:
+  #     - ./src/.env
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql
+  #   # -------- replace with comment to run migrations with docker --------
+  #   expose:
+  #     - "3306"
+  #   # ports:
+  #   #   - "3307:3306"
 
   #-------- uncomment to run with pgadmin --------
   # pgadmin:

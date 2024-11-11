@@ -23,85 +23,60 @@
   <!-- <a href="https://www.linkedin.com/company/papery-ai"><img src="https://img.shields.io/badge/Follow%20on%20LinkedIn-0077B5?logo=linkedin"/></a> -->
 </p>
 
+
+## I. About
 PAPERY is an open-source project aimed at researching and analyzing scientific papers. It allows users to input research data and papers, from which it generates and runs code to produce results.
 
-### Features
+## II. Demo
+
+![PAPERY Demo](docs/images/papery_demo.gif)
+
+## III. Features
+- Inteligently search for a research paper by keyword on the internet
 - Interactive chatbot for querying research papers
 - Dynamic code generation and execution based on research inputs
 - Comprehensive data analysis and visualization tools
 
-### Demo
+## IV. Installation
 
-![PAPERY Demo](docs/images/papery_demo.gif)
-
-## System Requirements
-
-Ensure your system meets the following requirements:
-
-- Python 3.12
-- Node.js
-- npm (Node Package Manager)
-
-## Download
-
-Clone the repository to your machine:
+Run the following command on your local environment:
 
 ```bash
 git clone https://github.com/Toricat/PAPERY.git
 cd papery
 ```
+## V. Backend Development
 
-## Quickstart
+Backend docs: [backend/README.md](./backend/README.md).
 
-Follow these steps to install docker and run this project on your docker container:
+## VI. Frontend Development
 
-### Docker Compose setup (Recommended)
+Frontend docs: [frontend/README.md](./frontend/README.md).
 
-1. Make sure you have 🔗 [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running on your machine
-2. Make sure you don't have postgres running locally (Run `docker ps` to check)
-3. Clone the repository and navigate to the root directory
+## VII. AI Development
 
-## Full Setup - Prerequisites 
+AI docs: [AI/README.md](./AI/README.md).
 
-Follow these steps to install and run this project on your machine:
+## VIII. Deployment
 
-### Set up the Python and Node.js environment:
+Deployment docs: [deployment.md](./deployment.md).
 
-- For Windows users:
+## IX. Project structure
 
-    ```bash
-    scripts\setup.bat
-    ```
-
-- For Mac/Linux users:
-
-    ```bash
-    sh scripts/setup.sh
-    ```
-### Run web application:
-- For Windows users:
-
-    ```bash
-    scripts\run.bat
-    ```
-
-- For Mac/Linux users:
-
-    ```bash
-    sh scripts/run.sh
-    ```
-## Usage
-
-- 
-
-## Contributing
+## X. Contributing
 
 Contributions are welcome from the community. If you would like to contribute to the project, please refer to the `CONTRIBUTING.md` file for more information.
 
-## License
+## XI. References
+
+- [FastAPI-boilerplate](https://github.com/igorbenav/FastAPI-boilerplate)
+- [Repository layer](https://github.com/igorbenav/fastcrud)
+- [Translation architecture](https://github.com/discus0434/pdf-translator)
+
+##  XII. License
 
 The MIT License (MIT)
 
-## Star History
+## XIII. Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Toricat/PAPERY&type=Date)](https://star-history.com/#Toricat/PAPERY&Date)
