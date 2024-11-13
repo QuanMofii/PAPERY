@@ -7,6 +7,11 @@ license = "MIT"
 readme = "README.md"
 packages = [{ include = "src" }]
 
+[[tool.poetry.source]]
+name = "pytorch-gpu"
+url = "https://download.pytorch.org/whl/cu124"
+priority = "explicit"
+
 [virtualenvs]
 in-project = true
 
@@ -38,6 +43,9 @@ fastcrud = "^0.15.1"
 faker = "^30.8.2"
 psycopg2-binary = "^2.9.9"
 pytest-mock = "^3.14.0"
+torch = {version = "^2.5.1+cu124", source = "pytorch-gpu"}
+torchvision = {version = "^0.20.1+cu124", source = "pytorch-gpu"}
+torchaudio = {version = "^2.5.1+cu124", source = "pytorch-gpu"}
 
 
 [build-system]

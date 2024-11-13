@@ -71,7 +71,6 @@ Contributions are welcome from the community. If you would like to contribute to
 
 - [FastAPI-boilerplate](https://github.com/igorbenav/FastAPI-boilerplate)
 - [Repository layer](https://github.com/igorbenav/fastcrud)
-- [Translation architecture](https://github.com/discus0434/pdf-translator)
 
 ##  XII. License
 
