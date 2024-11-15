@@ -1,12 +1,10 @@
-version: '3.8'
-
 services:
   web:
     build:
       context: .
       dockerfile: Dockerfile
     # -------- replace with comment to run with gunicorn --------
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    # command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     # command: gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000
     env_file:
       - ./src/.env
@@ -36,17 +34,21 @@ services:
       - ./src/app:/code/app
       - ./src/.env:/code/.env
 
-  db:
-    image: postgres:13
-    env_file:
-      - ./src/.env
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    # -------- replace with comment to run migrations with docker --------
-    expose:
-      - "5432"
-    # ports:
-    #  - 5432:5432
+  # db:
+  #   image: postgres:13
+  #   env_file:
+  #     - ./src/.env
+  #   environment:
+  #     POSTGRES_USER: ${DATABASE_USER}
+  #     POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+  #     POSTGRES_DB: ${DATABASE_NAME}
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   # -------- replace with comment to run migrations with docker --------
+  #   expose:
+  #     - "5432"
+  #   # ports:
+  #   #  - 5432:5432
 
   redis:
     image: redis:alpine
@@ -54,18 +56,23 @@ services:
       - redis-data:/data
     expose:
       - "6379"
+    ports:
+      - "6379:6379"
 #-------- uncomment to run mysql instead of postgres  --------    
-  # db:
-  #   image: mysql:8.0.38
-  #   env_file:
-  #     - ./src/.env
-  #   volumes:
-  #     - mysql_data:/var/lib/mysql
-  #   # -------- replace with comment to run migrations with docker --------
-  #   expose:
-  #     - "3306"
-  #   # ports:
-  #   #   - "3307:3306"
+  db:
+    image: mysql:8.0.38
+    env_file:
+      - ./src/.env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}  
+      MYSQL_DATABASE: ${DATABASE_NAME} 
+    volumes:
+      - mysql_data:/var/lib/mysql
+    # -------- replace with comment to run migrations with docker --------
+    expose:
+      - "3306"
+    ports:
+      - "3307:3306"
 
   #-------- uncomment to run with pgadmin --------
   # pgadmin:
@@ -134,6 +141,7 @@ services:
   #     - ./src:/code/src
 
 volumes:
-  postgres-data:
+  # postgres-data:
+  mysql_data:
   redis-data:
   #pgadmin-data:

@@ -3,9 +3,9 @@ from typing import Any
 from arq.jobs import Job as ArqJob
 from fastapi import APIRouter, Depends
 
-from ...api.dependencies import rate_limiter
-from ...core.utils import queue
-from ...schemas.job import Job
+from api.dependencies import rate_limiter
+from core.utils import queue
+from schemas.job import Job
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 

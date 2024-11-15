@@ -1,0 +1,7 @@
+{
+    "python.poetryPath": "poetry",
+    "python.analysis.extraPaths": ["./backend/src/app"],
+    "python.envFile": "${workspaceFolder}/backend/src/.env",
+    "python.defaultInterpreterPath": ".venv\\Scripts\\python.exe"
+    
+}

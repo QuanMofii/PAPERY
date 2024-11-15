@@ -6,10 +6,10 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..crud.crud_users import crud_users
-from .config import settings
-from .db.crud_token_blacklist import crud_token_blacklist
-from .schemas import TokenBlacklistCreate, TokenData
+from crud.crud_users import crud_users
+from core.config import settings
+from core.db.crud_token_blacklist import crud_token_blacklist
+from core.schemas import TokenBlacklistCreate, TokenData
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM

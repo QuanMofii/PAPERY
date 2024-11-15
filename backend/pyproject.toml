@@ -5,7 +5,7 @@ description = "PAPERY is an open-source project aimed at researching and analyzi
 authors = ["Toricat <haminhquan12c7@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{ include = "src" }]
+packages = [{ include = "app", from = "src" }]
 
 [[tool.poetry.source]]
 name = "pytorch-gpu"
@@ -16,7 +16,7 @@ priority = "explicit"
 in-project = true
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.11.9"
 python-dotenv = "^1.0.0"
 pydantic = { extras = ["email"], version = "^2.6.1" }
 fastapi = "^0.115.4"
@@ -43,9 +43,8 @@ fastcrud = "^0.15.1"
 faker = "^30.8.2"
 psycopg2-binary = "^2.9.9"
 pytest-mock = "^3.14.0"
-torch = {version = "^2.5.1+cu124", source = "pytorch-gpu"}
-torchvision = {version = "^0.20.1+cu124", source = "pytorch-gpu"}
-torchaudio = {version = "^2.5.1+cu124", source = "pytorch-gpu"}
+aiomysql = "^0.2.0"
+
 
 
 [build-system]

@@ -11,12 +11,12 @@ from fastapi import APIRouter, Depends, FastAPI
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 
-from ..api.dependencies import get_current_superuser
-from ..middleware.client_cache_middleware import ClientCacheMiddleware
-from .config import (
+from api.dependencies import get_current_superuser
+from middleware.client_cache_middleware import ClientCacheMiddleware
+from core.config import (
     AppSettings,
     ClientSideCacheSettings,
-    DatabaseSettings,
+    BaseSettings,
     EnvironmentOption,
     EnvironmentSettings,
     RedisCacheSettings,
@@ -24,9 +24,9 @@ from .config import (
     RedisRateLimiterSettings,
     settings,
 )
-from .db.database import Base, async_engine as engine
-from .utils import cache, queue, rate_limit
-from ..models import *
+from core.db.database import Base, async_engine as engine
+from core.utils import cache, queue, rate_limit
+from models import *
 
 from logging import getLogger
 logger = getLogger(__name__)
@@ -81,7 +81,7 @@ async def set_threadpool_tokens(number_of_tokens: int = 100) -> None:
 
 def lifespan_factory(
     settings: (
-        DatabaseSettings
+        BaseSettings
         | RedisCacheSettings
         | AppSettings
         | ClientSideCacheSettings
@@ -97,7 +97,7 @@ def lifespan_factory(
     async def lifespan(app: FastAPI) -> AsyncGenerator:
         await set_threadpool_tokens()
 
-        if isinstance(settings, DatabaseSettings) and create_tables_on_start:
+        if isinstance(settings, BaseSettings) and create_tables_on_start:
             await create_tables()
 
         if isinstance(settings, RedisCacheSettings):
@@ -127,7 +127,7 @@ def lifespan_factory(
 def create_application(
     router: APIRouter,
     settings: (
-        DatabaseSettings
+        BaseSettings
         | RedisCacheSettings
         | AppSettings
         | ClientSideCacheSettings

@@ -3,7 +3,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, Field
 
-from ..core.schemas import TimestampSchema
+from core.schemas import TimestampSchema
 
 
 class TierBase(BaseModel):

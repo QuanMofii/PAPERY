@@ -4,14 +4,14 @@ from fastapi import APIRouter, Depends, Request
 from fastcrud.paginated import PaginatedListResponse, compute_offset, paginated_response
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ...api.dependencies import get_current_superuser, get_current_user
-from ...core.db.database import async_get_db
-from ...core.exceptions.http_exceptions import ForbiddenException, NotFoundException
-from ...core.utils.cache import cache
-from ...crud.crud_posts import crud_posts
-from ...crud.crud_users import crud_users
-from ...schemas.post import PostCreate, PostCreateInternal, PostRead, PostUpdate
-from ...schemas.user import UserRead
+from api.dependencies import get_current_superuser, get_current_user
+from core.db.database import async_get_db
+from core.exceptions.http_exceptions import ForbiddenException, NotFoundException
+from core.utils.cache import cache
+from crud.crud_posts import crud_posts
+from crud.crud_users import crud_users
+from schemas.post import PostCreate, PostCreateInternal, PostRead, PostUpdate
+from schemas.user import UserRead
 
 router = APIRouter(tags=["posts"])
 
