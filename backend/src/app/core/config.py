@@ -3,6 +3,8 @@ import os
 import secrets
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import model_validator
+
 current_file_dir = os.path.dirname(os.path.realpath(__file__))
 env_path = os.path.join(current_file_dir, "..", "..", ".env")
 class BaseConfig(BaseSettings):
@@ -59,11 +61,9 @@ class DatabaseSettings(BaseConfig):
     @property
     def database_url(self) -> str:
         if self.DATABASE_TYPE == DatabaseType.POSTGRES:
-            return f"{self.POSTGRES_PREFIX}{self.DATABASE_USER}:{self.DATABASE_PASSWORD}" \
-                   f"@{self.DATABASE_SERVER}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
+            return f"{self.POSTGRES_PREFIX}{self.DATABASE_USER}:{self.DATABASE_PASSWORD}@{self.DATABASE_SERVER}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
         elif self.DATABASE_TYPE == DatabaseType.MYSQL:
-            return f"{self.MYSQL_PREFIX}{self.DATABASE_USER}:{self.DATABASE_PASSWORD}" \
-                   f"@{self.DATABASE_SERVER}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
+            return f"{self.MYSQL_PREFIX}{self.DATABASE_USER}:{self.DATABASE_PASSWORD}@{self.DATABASE_SERVER}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
         elif self.DATABASE_TYPE == DatabaseType.SQLITE:
             return f"{self.SQLITE_PREFIX}{self.SQLITE_DB}"
         raise ValueError("Unsupported DATABASE_TYPE")
@@ -83,9 +83,6 @@ class RedisCacheSettings(BaseConfig):
     REDIS_CACHE_PORT: int = 6379
     REDIS_CACHE_URL: str = f"redis://{REDIS_CACHE_HOST}:{REDIS_CACHE_PORT}"
 
-    # def __post_init__(self):
-    #     self.REDIS_CACHE_URL = f"redis://{self.REDIS_CACHE_HOST}:{self.REDIS_CACHE_PORT}"
-
 
 class ClientSideCacheSettings(BaseConfig):
     CLIENT_CACHE_MAX_AGE: int = 60
@@ -101,9 +98,6 @@ class RedisRateLimiterSettings(BaseConfig):
     REDIS_RATE_LIMIT_PORT: int = 6379
     REDIS_RATE_LIMIT_URL: str = f"redis://{REDIS_RATE_LIMIT_HOST}:{REDIS_RATE_LIMIT_PORT}"
 
-    # def __post_init__(self):
-    #     self.REDIS_RATE_LIMIT_URL = f"redis://{self.REDIS_RATE_LIMIT_HOST}:{self.REDIS_RATE_LIMIT_PORT}"
-
 
 class DefaultRateLimitSettings(BaseConfig):
     DEFAULT_RATE_LIMIT_LIMIT: int = 10
@@ -117,6 +111,7 @@ class EnvironmentOption(str,Enum):
 
 class EnvironmentSettings(BaseConfig):
     ENVIRONMENT: EnvironmentOption = EnvironmentOption.LOCAL
+   
 
 
 

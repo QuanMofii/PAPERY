@@ -54,8 +54,8 @@ services:
     image: redis:alpine
     volumes:
       - redis-data:/data
-    expose:
-      - "6379"
+    # expose:
+    #   - "6379"
     ports:
       - "6379:6379"
 #-------- uncomment to run mysql instead of postgres  --------    
@@ -69,8 +69,8 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     # -------- replace with comment to run migrations with docker --------
-    expose:
-      - "3306"
+    # expose:
+    #   - "3306"
     ports:
       - "3307:3306"
 
