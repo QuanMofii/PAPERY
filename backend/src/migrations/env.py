@@ -14,7 +14,7 @@ config = context.config
 
 config.set_main_option(
     "sqlalchemy.url",
-    f"{settings.POSTGRES_ASYNC_PREFIX}{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@localhost/{settings.POSTGRES_DB}",
+    f"mysql+aiomysql://root:mysecretpassword@localhost:3308/mydatabase",
 )
 
 # Interpret the config file for Python logging.
@@ -27,6 +27,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = Base.metadata
+print(target_metadata)
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

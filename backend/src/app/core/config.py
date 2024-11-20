@@ -30,6 +30,10 @@ class AppSettings(BaseConfig):
     CONTACT_NAME: str | None = None
     CONTACT_EMAIL: str | None = None
 
+    BACKEND_HOST: str = "localhost"
+    BACKEND_PORT: int = 8000
+    API_VERSION: str = "v1"
+    RELOAD: bool = False
 
 class CryptSettings(BaseConfig):
     SECRET_KEY: str = secrets.token_urlsafe(32)
@@ -112,8 +116,6 @@ class EnvironmentOption(str,Enum):
 class EnvironmentSettings(BaseConfig):
     ENVIRONMENT: EnvironmentOption = EnvironmentOption.LOCAL
    
-
-
 
 class Settings(
     AppSettings,

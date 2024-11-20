@@ -1,4 +1,4 @@
-# --------- requirements ---------
+# --------- requirements and migration stage---------
 
 FROM python:3.11 as requirements-stage
 
@@ -10,7 +10,10 @@ COPY ./pyproject.toml ./poetry.lock* /tmp/
 
 RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
 
+COPY ./src/migrations /tmp/migrations
+COPY ./src/alembic.ini /tmp/alembic.ini
 
+RUN alembic upgrade head
 # --------- final image build ---------
 FROM python:3.11
 
