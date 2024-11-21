@@ -37,7 +37,6 @@ async def create_tables() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-
 # -------------- cache --------------
 async def create_redis_cache_pool() -> None:
     logger.info(f'Creating redis cache pool with url: {settings.REDIS_CACHE_URL}')

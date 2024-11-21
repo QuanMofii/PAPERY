@@ -15,9 +15,9 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(30))
     username: Mapped[str] = mapped_column(String(20), unique=True, index=True)
     email: Mapped[str] = mapped_column(String(50), unique=True, index=True)
-    hashed_password: Mapped[str] = mapped_column(String)
+    hashed_password: Mapped[str] = mapped_column(String(255)) 
 
-    profile_image_url: Mapped[str] = mapped_column(String, default="https://profileimageurl.com")
+    profile_image_url: Mapped[str] = mapped_column(String(2083), default="https://profileimageurl.com")
     uuid: Mapped[uuid_pkg.UUID] = mapped_column(default_factory=uuid_pkg.uuid4, primary_key=True, unique=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default_factory=lambda: datetime.now(UTC))
     updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)

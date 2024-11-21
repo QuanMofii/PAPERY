@@ -16,9 +16,9 @@ from core.security import (
     create_refresh_token,
     verify_token,
 )
-
+from core.logger import logging
+logger = logging.getLogger(__name__)
 router = APIRouter(tags=["login"])
-
 
 @router.post("/login", response_model=Token)
 async def login_for_access_token(
