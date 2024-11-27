@@ -1,0 +1,57 @@
+@import "tailwindcss/tailwind.css";
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+
+@layer base {
+html,
+  body  {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: -0.02em;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    color: #000000;
+   
+  }
+
+  *::-webkit-scrollbar-track {
+    border-radius: 5px;
+    background-color: #F5F5F5;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 9px;
+    background-color: #F5F5F5;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.356);
+    background-color: #727272;
+  }
+  body > div {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+
+@layer components {
+  
+}
+
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
