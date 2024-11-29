@@ -21,21 +21,20 @@ const LoginForm: React.FC = () => {
             setErrors(errorMessages);
         } else {
             setErrors({});
-
             console.log('Form submitted:', { email, password });
-            
+            //TODO
             router.push('/dashboard');
         }
 
     };
 
     const handleGoogleLogin = () => {
-        // Thêm logic đăng nhập với Google ở đây
-        console.log("Đăng nhập bằng Google");
+        //TODO
+        console.log("sign in with Google");
     };
 
     return (
-        <form onSubmit={handleSubmit} noValidate className="text-left bg-white p-6 rounded-lg shadow-md  mx-auto">
+        <form onSubmit={handleSubmit} noValidate >
             <div className="mb-2">
                 <label htmlFor="email" className="text-gray-700 font-semibold">Email:</label>
                 <input

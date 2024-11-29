@@ -4,6 +4,5 @@ const DashboardPage = () => {
         Dashboard
     </div> );
 }
- 
 export default DashboardPage;
 

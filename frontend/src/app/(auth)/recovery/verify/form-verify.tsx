@@ -1,9 +1,11 @@
 "use client";
 import React, { useState } from 'react';
 import { VerifySchema } from '@/helpers/schemas/authschemas';
-import { useRouter } from 'next/navigation';
+import { useRouter ,useSearchParams,} from 'next/navigation';
 
 const VerifyForm: React.FC = () => {
+    const searchParams = useSearchParams();
+    const email = searchParams.get('email') || ''; 
     const [verify, setverify] = useState<string>('');
     const [errors, setErrors] = useState<{ verify?: string; }>({});
     const router = useRouter();
@@ -22,14 +24,12 @@ const VerifyForm: React.FC = () => {
             setErrors(errorMessages);
         } else {
             setErrors({});
-            router.push('/verify/reset');
+            //TODO
+            router.push(`/recovery/reset?email=${encodeURIComponent(email)}&code=${encodeURIComponent(verify)}`);
         }
-
-
     };
-
     return (
-        <form onSubmit={handleSubmit} noValidate className="text-left bg-white p-6 rounded-lg shadow-md  mx-auto">
+        <form onSubmit={handleSubmit} noValidate>
             <div className="mb-4">
                 <label htmlFor="verify" className="text-gray-700 font-semibold">Verify code:</label>
                 <input

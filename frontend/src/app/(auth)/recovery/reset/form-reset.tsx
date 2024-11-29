@@ -1,9 +1,12 @@
 "use client";
 import React, { useState } from 'react';
 import { ResetSchema } from '@/helpers/schemas/authschemas';
-import { useRouter } from 'next/navigation';
+import { useRouter,useSearchParams } from 'next/navigation';
 
 const ResetForm: React.FC = () => {
+    const searchParams = useSearchParams();
+    const email = searchParams.get('email') || ''; 
+    const code = searchParams.get('code') || '';
     const [password, setPassword] = useState<string>('');
     const [confirmpassword, setConfirmpassword] = useState<string>('');
     const [errors, setErrors] = useState<{name?: string; email?: string; password?: string ;confirmpassword?: string}>({});
@@ -21,14 +24,13 @@ const ResetForm: React.FC = () => {
             setErrors(errorMessages);
         } else {
             setErrors({});
+            //TODO
             router.push('/login');
         }
-
-
     };
 
     return (
-        <form onSubmit={handleSubmit} noValidate className="text-left bg-white p-6 rounded-lg shadow-md  mx-auto">
+        <form onSubmit={handleSubmit} noValidate>
             <div className="mb-2">
                 <label htmlFor="password" className="text-gray-700 font-semibold">New Password:</label>
                 <input
@@ -44,7 +46,7 @@ const ResetForm: React.FC = () => {
             <div className="mb-4">
                 <label htmlFor="confirmpassword" className="text-gray-700 font-semibold">Confirm new password:</label>
                 <input
-                    type="confirmpassword"
+                    type="password"
                     id="confirmpassword"
                     value={confirmpassword}
                     placeholder='Enter your confirm password'

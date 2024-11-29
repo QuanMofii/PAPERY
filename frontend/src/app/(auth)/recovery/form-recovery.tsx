@@ -19,14 +19,14 @@ const RecoveryForm: React.FC = () => {
             setErrors(errorMessages);
         } else {
             setErrors({});
-            router.push('/verify');
+            router.push(`/recovery/verify?email=${encodeURIComponent(email)}`);
         }
 
 
     };
-    const handleGetBack = () => {
-        router.push('/recovery');
-    }
+    // const handleGetBack = () => {
+    //     router.push('/recovery');
+    // }
 
     return (
         <form onSubmit={handleSubmit} noValidate className="text-left bg-white p-6 rounded-lg shadow-md  mx-auto">
@@ -51,14 +51,14 @@ const RecoveryForm: React.FC = () => {
                 </button>
             </div>
 
-            <div className="flex justify-center items-center mb-2">
+            {/* <div className="flex justify-center items-center mb-2">
                 <button
                     type="button"
                     onClick={handleGetBack}
                     className="w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-600 transition duration-200">
                     Not you?
                 </button>
-            </div>
+            </div> */}
         </form>
     );
 };
