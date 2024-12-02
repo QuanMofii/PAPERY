@@ -3,7 +3,7 @@ import os
 import secrets
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import model_validator
+# from pydantic import model_validator
 
 current_file_dir = os.path.dirname(os.path.realpath(__file__))
 env_path = os.path.join(current_file_dir, "..", "..", ".env")

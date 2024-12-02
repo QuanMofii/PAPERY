@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react';
-import { VerifySchema } from '@/helpers/schemas/authschemas';
+import { VerifySchema } from '@/helpers/schemas/auth.chemas';
 import { useRouter ,useSearchParams,} from 'next/navigation';
 
 const VerifyForm: React.FC = () => {

@@ -12,19 +12,16 @@ logger = logging.getLogger(__name__)
 
 async def create_superuser(db: AsyncSession) -> None:
     try:
-        # Kiểm tra nếu email đã tồn tại
         email_exists = await crud_users.exists(db=db, email=settings.ADMIN_EMAIL)
         if email_exists:
             logger.info(f"Admin user with email '{settings.ADMIN_EMAIL}' already exists.")
             return
 
-        # Kiểm tra nếu username đã tồn tại
         username_exists = await crud_users.exists(db=db, username=settings.ADMIN_USERNAME)
         if username_exists:
             logger.info(f"Admin user with username '{settings.ADMIN_USERNAME}' already exists.")
             return
 
-        # Chuẩn bị dữ liệu tạo superuser
         hashed_password = get_password_hash(settings.ADMIN_PASSWORD)
         superuser_data = UserCreateInternal(
             name=settings.ADMIN_NAME,
@@ -34,7 +31,6 @@ async def create_superuser(db: AsyncSession) -> None:
             is_superuser=True,
         )
 
-        # Tạo superuser
         created_user: UserRead = await crud_users.create(db=db, object=superuser_data)
         logger.info(f"Superuser '{created_user.username}' created successfully.")
 
@@ -42,7 +38,6 @@ async def create_superuser(db: AsyncSession) -> None:
         logger.error(f"Failed to create superuser: {e}")
 
 async def main():
-    # Kết nối và chạy hàm tạo superuser
     async with local_session() as session:
         await create_superuser(db=session)
 

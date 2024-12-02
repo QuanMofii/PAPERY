@@ -1,8 +1,10 @@
 "use client";
 import React, { useState } from 'react';
-import { RecoverySchema } from '@/helpers/schemas/authschemas';
+import { RecoverySchema } from '@/helpers/schemas/auth.chemas';
 import { useRouter } from 'next/navigation';
-const RecoveryForm: React.FC = () => {
+import Link from 'next/link';
+
+const RecoveryForm = () => {
     const [email, setEmail] = useState<string>('');
     const [errors, setErrors] = useState<{ email?: string;}>({});
     const router = useRouter();
@@ -29,7 +31,7 @@ const RecoveryForm: React.FC = () => {
     // }
 
     return (
-        <form onSubmit={handleSubmit} noValidate className="text-left bg-white p-6 rounded-lg shadow-md  mx-auto">
+        <form onSubmit={handleSubmit} noValidate>
             <div className="mb-4">
                 <label htmlFor="email" className="text-gray-700 font-semibold">Email:</label>
                 <input
@@ -59,6 +61,10 @@ const RecoveryForm: React.FC = () => {
                     Not you?
                 </button>
             </div> */}
+            <div className="text-center ">
+                <span className="text-gray-600">Already have an account?</span>
+                <Link href="/login" className="text-blue-500 hover:underline ml-1">Login</Link>
+            </div>
         </form>
     );
 };

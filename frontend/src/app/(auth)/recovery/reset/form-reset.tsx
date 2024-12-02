@@ -1,9 +1,9 @@
 "use client";
 import React, { useState } from 'react';
-import { ResetSchema } from '@/helpers/schemas/authschemas';
+import { ResetSchema } from '@/helpers/schemas/auth.chemas';
 import { useRouter,useSearchParams } from 'next/navigation';
 
-const ResetForm: React.FC = () => {
+const ResetForm = () => {
     const searchParams = useSearchParams();
     const email = searchParams.get('email') || ''; 
     const code = searchParams.get('code') || '';

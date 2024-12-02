@@ -1,10 +1,12 @@
 import asyncio
 import logging
-
-import uvloop
+import platform 
 from arq.worker import Worker
 
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
+if platform.system() != "Windows":
+    import uvloop
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 

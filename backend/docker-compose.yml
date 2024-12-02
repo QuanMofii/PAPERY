@@ -31,9 +31,10 @@ services:
     #   - "8000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/health-check/"]
-      interval: 10s
+      interval: 1s
       timeout: 5s
       retries: 5
+      start_period: 2min
     
 
   worker:
@@ -51,9 +52,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      server:
+        condition: service_healthy
     volumes:
       - ./src/app:/code/app
       - ./src/.env:/code/.env
+      - ./src/migrations:/code/migrations
 
   db:
     image: mysql:8.0.38
@@ -133,42 +137,6 @@ services:
   #     - ./default.conf:/etc/nginx/conf.d/default.conf
   #   depends_on:
   #     - server
-
-  # -------- uncomment to create first superuser --------
-  create_superuser:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    env_file:
-      - ./src/.env
-      - ./src/.env.docker
-    environment:
-      PYTHONPATH: /code/app
-    depends_on:
-      - db
-      - server
-    command: python -m src.scripts.create_first_superuser
-    volumes:
-      - ./src:/code/src
-
-  # -------- uncomment to create first tier --------
-  # create_tier:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   env_file:
-  #     - ./src/.env
-  #     - ./src/.env.docker
-  #   environment:
-  #     PYTHONPATH: /code/app
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  #     server:
-  #       condition: service_healthy
-  #   command: python -m src.scripts.create_first_tier
-  #   volumes:
-  #     - ./src:/code/src
   
   #-------- uncomment to run tests --------
   # pytest:

@@ -36,6 +36,7 @@ async def create_tables() -> None:
     logger.info(f'Creating tables')
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+print(Base.metadata.tables)
 
 # -------------- cache --------------
 async def create_redis_cache_pool() -> None:

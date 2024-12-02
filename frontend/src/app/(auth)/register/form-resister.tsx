@@ -1,10 +1,10 @@
 "use client";
 import React, { useState } from 'react';
-import { registerSchema } from '@/helpers/schemas/authschemas';
+import { registerSchema } from '@/helpers/schemas/auth.chemas';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link'
 
-const RegisterForm: React.FC = () => {
+const RegisterForm = () => {
     const router = useRouter();
     const [name, setName] = useState<string>('');
     const [email, setEmail] = useState<string>('');

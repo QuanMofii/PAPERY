@@ -1,9 +1,9 @@
 "use client";
 import React, { useState } from 'react';
-import { VerifySchema } from '@/helpers/schemas/authschemas';
+import { VerifySchema } from '@/helpers/schemas/auth.chemas';
 import { useRouter } from 'next/navigation';
 
-const VerifyForm: React.FC = () => {
+const VerifyForm = () => {
     const [verify, setverify] = useState<string>('');
     const [errors, setErrors] = useState<{ verify?: string; }>({});
     const router = useRouter();
