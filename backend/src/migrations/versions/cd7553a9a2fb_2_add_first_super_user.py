@@ -1,7 +1,7 @@
 """Add first super user initialization
 
 Revision ID: cd7553a9a2fb
-Revises: b1453e238de0
+Revises: c7de3d77bdaf
 Create Date: 2024-12-02 10:27:06.391950
 
 """
@@ -16,7 +16,7 @@ import uuid as uuid_pkg
 
 # revision identifiers, used by Alembic.
 revision: str = 'cd7553a9a2fb'
-down_revision: Union[str, None] = 'b1453e238de0'
+down_revision: Union[str, None] = 'c7de3d77bdaf'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

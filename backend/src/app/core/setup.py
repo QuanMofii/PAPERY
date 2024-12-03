@@ -25,8 +25,8 @@ from core.config import (
     settings,
 )
 from core.db.database import Base, async_engine as engine
-from core.utils import cache, queue, rate_limit
-from models import *
+from core.utils import cache, queue, rate_limit 
+# from models import user,post,rate_limit,tier
 
 from logging import getLogger
 logger = getLogger(__name__)
@@ -36,7 +36,6 @@ async def create_tables() -> None:
     logger.info(f'Creating tables')
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-print(Base.metadata.tables)
 
 # -------------- cache --------------
 async def create_redis_cache_pool() -> None:
