@@ -23,7 +23,7 @@ services:
       - db
       - redis
     volumes:
-      - ./src/app:/code/app
+      # - ./src/app:/code/app
       - ./src/.env:/code/.env
       - ./src/migrations:/code/migrations
     ports:
@@ -60,8 +60,7 @@ services:
       - redis
       - server
     volumes:
-      - ./src/app:/code/app
-      - ./src/.env:/code/.env
+      - ./src/app/core/worker:/code/worker
       - ./src/migrations:/code/migrations
 
   db:

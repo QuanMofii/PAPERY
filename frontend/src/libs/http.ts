@@ -1,8 +1,8 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ensureValidToken } from '@/libs/token';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || '';
-const API_VERSION = process.env.NEXT_PUBLIC_BACKEND_API_VERSION || '';
+const BASE_URL = process.env.BACKEND_API_URL || '';
+const API_VERSION = process.env.BACKEND_API_VERSION || '';
 
 const axiosInstance = axios.create({
   baseURL: `${BASE_URL}/api/${API_VERSION}`,

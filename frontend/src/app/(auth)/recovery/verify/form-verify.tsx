@@ -1,7 +1,7 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { VerifySchema } from '@/helpers/schemas/auth.chemas';
-import { useRouter ,useSearchParams,} from 'next/navigation';
+import { useRouter , useSearchParams,} from 'next/navigation';
 
 const VerifyForm: React.FC = () => {
     const searchParams = useSearchParams();
@@ -56,4 +56,9 @@ const VerifyForm: React.FC = () => {
     );
 };
 
-export default VerifyForm;
+const SuspendedVerifyForm = () => (
+    <Suspense fallback={<div className="h-full w-full flex items-center justify-center">Loading...</div>}>
+        <VerifyForm/>
+    </Suspense>
+);
+export default SuspendedVerifyForm;

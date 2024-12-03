@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState,Suspense } from 'react';
 import { ResetSchema } from '@/helpers/schemas/auth.chemas';
 import { useRouter,useSearchParams } from 'next/navigation';
 
@@ -67,4 +67,10 @@ const ResetForm = () => {
     );
 };
 
-export default ResetForm;
+
+const SuspendedResetForm = () => (
+    <Suspense fallback={<div className="h-full w-full flex items-center justify-center">Loading...</div>}>
+        <ResetForm/>
+    </Suspense>
+);
+export default SuspendedResetForm;

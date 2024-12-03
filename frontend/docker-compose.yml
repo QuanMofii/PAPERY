@@ -1,0 +1,16 @@
+services:
+  client:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT}:${PORT}"
+    env_file:
+      - .env.production  
+    environment:
+      - NODE_ENV=production
+    # volumes:
+    #   - ./public/uploads:/app/public/uploads
+    # command: "npm run start" 
+   

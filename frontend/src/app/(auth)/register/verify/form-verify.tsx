@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { VerifySchema } from '@/helpers/schemas/auth.chemas';
 import { useRouter } from 'next/navigation';
 
@@ -54,4 +54,10 @@ const VerifyForm = () => {
     );
 };
 
-export default VerifyForm;
+
+const SuspendedVerifyForm = () => (
+    <Suspense fallback={<div className="h-full w-full flex items-center justify-center">Loading...</div>}>
+        < VerifyForm/>
+    </Suspense>
+);
+export default SuspendedVerifyForm;
