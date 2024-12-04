@@ -12,5 +12,5 @@ services:
       - NODE_ENV=production
     # volumes:
     #   - ./public/uploads:/app/public/uploads
-    # command: "npm run start" 
+    # command: "npm run server" 
    

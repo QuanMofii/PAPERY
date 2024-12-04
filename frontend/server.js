@@ -1,96 +1,41 @@
-// // server.js
-// import { createServer } from 'http';
-// import { parse } from "url";
-// import next from "next";
-
-
-
-// const dev = process.env.NODE_ENV !== 'production';
-// console.log("here", process.env.NEXT_PUBLIC_FRONTEND_URL)
-// const hostname = (process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost");
-// console.log(hostname)
-// const port = parseInt(process.env.NEXT_PUBLIC_FRONTEND_PORT || "3000", 10);
-// const app = next({ dev , hostname, port });
-// const handle = app.getRequestHandler();
-
-// app.prepare().then(() => {
-//   createServer((req, res) => {
-//     const parsedUrl = parse(req.url, true);
-//     handle(req, res, parsedUrl);
-//   }).listen(port);
-
-//   console.log(
-//     `> Server listening at ${hostname}:${port} as ${
-//       dev ? "development" : process.env.NODE_ENV
-//     }`,
-//   );
-// });
-
 import { createServer } from 'http';
 import { parse } from 'url';
 import next from 'next';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 const dev = process.env.NODE_ENV !== 'production';
-const hostname = process.env.HOST || '127.0.0.1';
-const port = parseInt(process.env.PORT, 10) || 3000;
-console.log( "node env",process.env.NODE_ENV)
-console.log( "port",process.env.PORT)
-console.log( "host",process.env.HOST)
+const host = process.env.HOST || '127.0.0.1';
+const port = parseInt(process.env.PORT || '3000', 10);
 
+// Load required server files dynamically
+const requiredServerFilesPath = path.join(process.cwd(), '.next/required-server-files.json');
 
+fs.readFile(requiredServerFilesPath, 'utf-8')
+  .then(async (data) => {
+    const { config } = JSON.parse(data);
+    process.env.__NEXT_PRIVATE_STANDALONE_CONFIG = JSON.stringify(config);
 
-console.log(`Listening on ${hostname}:${port}`);
+    const app = next({ dev });
+    await app.prepare();
 
-// app.prepare().then(() => {
-//   createServer(async (req, res) => {
-//     // const { pathname, query } = parsedUrl;
-//     // if (pathname === '/health') {
-//     //   res.statusCode = 200;
-//     //   res.end('OK');
-//     //   return;
-//     // }
-//     try {
-//       const parsedUrl = parse(req.url, true);
-//       await handle(req, res, parsedUrl);
-//     } catch (err) {
-//       console.error('Error occurred handling', req.url, err);
-//       res.statusCode = 500;
-//       res.end('internal server error');
-//     }
-//   }).listen(port, (err) => {
-//     if (err) throw err;
-//     console.log(`> Ready on http://${host}:${port}`);
-    
-//   });
-// });
+    const handle = app.getRequestHandler();
 
-// process.on('SIGTERM', () => {
-//   console.log('SIGTERM signal received: closing HTTP server');
-//   app.close(() => {
-//     console.log('HTTP server closed');
-//     process.exit(0);
-//   });
-// });
-
-
-
-const app = next({ dev, hostname, port });
-const handle = app.getRequestHandler();
-
-app.prepare().then(() => {
-  createServer(async (req, res) => {
-    try {
-      const parsedUrl = parse(req.url, true);
-      await handle(req, res, parsedUrl);
-    } catch (err) {
-      console.error('Error occurred handling', req.url, err);
-      res.statusCode = 500;
-      res.end('internal server error');
-    }
-  }).listen(port, (err) => {
-    if (err) throw err;
-    console.log(`> Ready on  http://${process.env.NEXT_PUBLIC_FRONTEND_URL}`);
-    console.log(`> Backend URL: ${process.env.NEXT_PUBLIC_BACKEND_URL}`);
-    console.log(`> API Version: ${process.env.NEXT_PUBLIC_API_VERSION}`);
+    createServer(async (req, res) => {
+      try {
+        const parsedUrl = parse(req.url, true);
+        await handle(req, res, parsedUrl);
+      } catch (err) {
+        console.error('Error occurred handling', req.url, err);
+        res.statusCode = 500;
+        res.end('internal server error');
+      }
+    }).listen(port, (err) => {
+      if (err) throw err;
+      console.log(`> Server frontend ready on http://${host}:${port}`);
+    });
+  })
+  .catch((error) => {
+    console.error("Failed to load required-server-files.json:", error);
+    process.exit(1);
   });
-});
