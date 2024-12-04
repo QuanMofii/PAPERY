@@ -16,12 +16,12 @@ services:
     # -------- replace with comment to run with gunicorn --------
     # command: gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker -b ${BACKEND_HOST}:${BACKEND_PORT}
     depends_on:
-      # db:
-      #   condition: service_healthy
-      # redis:
-      #   condition: service_healthy
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      # - db
+      # - redis
     volumes:
       # - ./src/app:/code/app
       - ./src/.env:/code/.env
@@ -50,15 +50,15 @@ services:
     environment:
       PYTHONPATH: /code/app
     depends_on:
-      # db:
-      #   condition: service_healthy
-      # redis:
-      #   condition: service_healthy
-      # server:
-      #   condition: service_healthy
-      - db
-      - redis
-      - server
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      server:
+        condition: service_healthy
+      # - db
+      # - redis
+      # - server
     volumes:
       - ./src/app/core/worker:/code/worker
       - ./src/migrations:/code/migrations
@@ -80,11 +80,11 @@ services:
     #   - "3306"
     ports:
       - "3308:3306"
-    # healthcheck:
-    #   test: ["CMD", "mysqladmin" ,"ping", "-h", "127.0.0.1", "-u${MYSQL_USER}", "-p${MYSQL_ROOT_PASSWORD}"]
-    #   interval: 1m
-    #   timeout: 10s
-    #   retries: 10
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "127.0.0.1", "-u${MYSQL_USER}", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 1m
+      timeout: 10s
+      retries: 10
 
   redis:
     image: redis:alpine
@@ -94,12 +94,12 @@ services:
     #   - "6379"
     ports:
       - "6379:6379"
-    # healthcheck:
-    #   test: ["CMD", "redis-cli", "ping"]
-    #   interval: 1m
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 5s
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 5s
     
 #-------- uncomment to run postgres instead of mysql --------    
   # db:

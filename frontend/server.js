@@ -32,6 +32,7 @@ fs.readFile(requiredServerFilesPath, 'utf-8')
       }
     }).listen(port, (err) => {
       if (err) throw err;
+      console.log(`> Enviroment: ${process.env.NODE_ENV}`);
       console.log(`> Server frontend ready on http://${host}:${port}`);
     });
   })
