@@ -8,13 +8,10 @@ services:
       - ./src/.env
       - ./src/.env.docker
     environment:
-      BACKEND_HOST: ${BACKEND_HOST}
-      BACKEND_PORT: ${BACKEND_PORT}
-      RELOAD: ${RELOAD}
       PYTHONPATH: /code/app
-    # command:  sh -c "uvicorn app.main:app --host ${BACKEND_HOST} --port ${BACKEND_PORT} ${RELOAD:+--reload}"
+    # command:  sh -c "uvicorn app.main:app --host 127.0.0.1 --port 8000 reload:true"
     # -------- replace with comment to run with gunicorn --------
-    # command: gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker -b ${BACKEND_HOST}:${BACKEND_PORT}
+    # command: gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker -b 127.0.0.1:8000
     depends_on:
       # db:
       #   condition: service_healthy
@@ -27,7 +24,7 @@ services:
       - ./src/.env:/code/.env
       - ./src/migrations:/code/migrations
     ports:
-      - "${BACKEND_PORT}:8000"
+      - "8000:8000"
     # -------- replace with comment if you are using nginx --------
     # expose:
     #   - "8000"
@@ -67,12 +64,12 @@ services:
   db:
     image: mysql:8.0.38
     env_file:
-      - ./src/.env
+      # - ./src/.env
       - ./src/.env.docker
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}  
-      MYSQL_DATABASE: ${DATABASE_NAME} 
-      # MYSQL_USER: ${DATABASE_USER}
+    # environment:
+      # MYSQL_DATABASE: mydatabase
+      # MYSQL_ROOT_PASSWORD: mysecretpassword  
+      # MYSQL_USER: root
     command: --default-authentication-plugin=caching_sha2_password
     volumes:
       - mysql_data:/var/lib/mysql
@@ -82,7 +79,7 @@ services:
     ports:
       - "3308:3306"
     # healthcheck:
-    #   test: ["CMD", "mysqladmin" ,"ping", "-h", "127.0.0.1", "-u${MYSQL_USER}", "-p${MYSQL_ROOT_PASSWORD}"]
+    #   test: ["CMD", "mysqladmin" ,"ping", "-h", "127.0.0.1", "-u", "root", "-p", "mysecretpassword"]
     #   interval: 10m
     #   timeout: 10s
     #   retries: 10
@@ -106,12 +103,11 @@ services:
   # db:
     #   image: postgres:13
     #   env_file:
-    #     - ./src/.env
     #     - ./src/.env.docker
     #   environment:
-    #     POSTGRES_USER: ${DATABASE_USER}
-    #     POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-    #     POSTGRES_DB: ${DATABASE_NAME}
+    #     POSTGRES_USER: root
+    #     POSTGRES_PASSWORD: mysecretpassword
+    #     POSTGRES_DB: mydatabase
     #   volumes:
     #     - postgres-data:/var/lib/postgresql/data
     #   # -------- replace with comment to run migrations with docker --------
