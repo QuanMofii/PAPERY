@@ -34,3 +34,4 @@ poetry env list
 echo Run application...
 poetry run python src/app/main.py
 
+cd %ROOT_DIR%

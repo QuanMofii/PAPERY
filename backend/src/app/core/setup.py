@@ -13,6 +13,7 @@ from fastapi.openapi.utils import get_openapi
 
 from api.dependencies import get_current_superuser
 from middleware.client_cache_middleware import ClientCacheMiddleware
+from middleware.error_middleware import AppErrorHandlerMiddleware, DBErrorHandlerMiddleware, InternalServerErrorHandlerMiddleware, ValidationErrorHandlerMiddleware
 from core.config import (
     AppSettings,
     ClientSideCacheSettings,
@@ -27,6 +28,7 @@ from core.config import (
 from core.db.database import Base, async_engine as engine
 from core.utils import cache, queue, rate_limit 
 # from models import user,post,rate_limit,tier
+
 
 from logging import getLogger
 logger = getLogger(__name__)
@@ -197,6 +199,12 @@ def create_application(
 
     if isinstance(settings, ClientSideCacheSettings):
         application.add_middleware(ClientCacheMiddleware, max_age=settings.CLIENT_CACHE_MAX_AGE)
+    if isinstance(settings, AppErrorHandlerMiddleware):
+         application.add_middleware(ValidationErrorHandlerMiddleware)
+    if isinstance(settings, DBErrorHandlerMiddleware):
+        application.add_middleware(DBErrorHandlerMiddleware)
+    if isinstance(settings, InternalServerErrorHandlerMiddleware):
+        application.add_middleware(InternalServerErrorHandlerMiddleware)
 
     if isinstance(settings, EnvironmentSettings):
         if settings.ENVIRONMENT != EnvironmentOption.PRODUCTION:

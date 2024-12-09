@@ -16,6 +16,7 @@
   },
   "type": "module",
   "dependencies": {
+    "@hookform/resolvers": "^3.9.1",
     "arctic": "^1.9.2",
     "axios": "^1.7.4",
     "cookies-next": "^5.0.2",
@@ -23,6 +24,7 @@
     "next": "^15.0.3",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "react-hook-form": "^7.53.2",
     "zod": "^3.23.8"
   },
   "devDependencies": {

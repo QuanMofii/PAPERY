@@ -28,9 +28,9 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 COPY ./src/app /code/app
 COPY ./src/migrations /code/migrations
 COPY ./src/alembic.ini /code/alembic.ini
-COPY ./docker-entrypoint.server.sh /code/docker-entrypoint.server.sh
+COPY ./docker-entrypoint.server.sh /usr/local/bin/docker-entrypoint.server.sh
 
-ENTRYPOINT ["/code/docker-entrypoint.server.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.server.sh"]
 
 CMD ["sh", "-c", " uvicorn main:app --host ${BACKEND_HOST} --port ${BACKEND_PORT} ${RELOAD:+--reload}"]
 # -------- replace with comment to run with gunicorn --------

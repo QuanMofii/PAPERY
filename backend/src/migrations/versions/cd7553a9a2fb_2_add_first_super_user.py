@@ -45,7 +45,7 @@ def upgrade() -> None:
         return
 
     # Create super user
-    hashed_password = get_password_hash("password")
+    hashed_password = get_password_hash("Str1ngst!")
     op.execute(
         user_table.insert().values(
             name="Admin User",

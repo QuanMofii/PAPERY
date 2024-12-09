@@ -1,72 +1,118 @@
 "use client";
-import React, { useState } from 'react';
-import { RecoverySchema } from '@/helpers/schemas/auth.chemas';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+
+import React, { useEffect, useState } from "react";
+import { RecoveryReq, RecoveryReqType } from "@/schemas/auth.schemas";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 const RecoveryForm = () => {
-    const [email, setEmail] = useState<string>('');
-    const [errors, setErrors] = useState<{ email?: string;}>({});
-    const router = useRouter();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isLoading, setIsLoading] = useState(false);
+  const defaultEmail = searchParams.get("email") || "";
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+  // Sử dụng react-hook-form với zod
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<RecoveryReqType>({
+    resolver: zodResolver(RecoveryReq),
+    defaultValues: {
+      email: defaultEmail,
+    },
+  });
 
-        const result = RecoverySchema.safeParse({ email });
+  // Set email mặc định nếu có từ URL
+  useEffect(() => {
+    if (defaultEmail) {
+      setValue("email", defaultEmail);
+    }
+  }, [defaultEmail, setValue]);
 
-        if (!result.success) {
-            const errorMessages = result.error.errors.reduce(
-                (acc, { path, message }) => ({ ...acc, [path[0]]: message }),{}
-            );
-            setErrors(errorMessages);
-        } else {
-            setErrors({});
-            router.push(`/recovery/verify?email=${encodeURIComponent(email)}`);
-        }
+  const onSubmit = async (data: RecoveryReqType) => {
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      console.log("Recovery Email Submitted:", data);
+      // TODO: Gửi email để phục hồi tài khoản
+      
+    router.push(`/recovery/verify?email=${encodeURIComponent(data.email)}`);
+     
+    } catch (error) {
+      console.error("Recovery Error:", error);
+      // TODO: Xử lý lỗi từ backend (nếu có)
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  return (
+    <>
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center ">
+          <div className="text-center">
+            <p className="text-white mt-2">Processing...</p>
+          </div>
+        </div>
+      )}
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
+        className={`${isLoading ? "pointer-events-none opacity-50" : ""}`}
+      >
+        {/* Email Input */}
+        <div className="mb-4">
+          <label htmlFor="email" className="text-gray-700 font-semibold">
+            Email:
+          </label>
+          <input
+            type="email"
+            id="email"
+            placeholder="Enter your email"
+            {...register("email")}
+            className={`w-full p-2 border ${
+              errors.email ? "border-red-500" : "border-gray-300"
+            } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+          />
+          {errors.email && (
+            <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+          )}
+        </div>
 
-    };
-    // const handleGetBack = () => {
-    //     router.push('/recovery');
-    // }
+        {/* Submit Button */}
+        <div className="flex justify-between items-center mb-2">
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition duration-200 ${
+              isLoading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+          >
+            Recovery Password
+          </button>
+        </div>
 
-    return (
-        <form onSubmit={handleSubmit} noValidate>
-            <div className="mb-4">
-                <label htmlFor="email" className="text-gray-700 font-semibold">Email:</label>
-                <input
-                    type="email"
-                    id="email"
-                    value={email}
-                    placeholder='Enter your email'
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {errors.email && <p className='text-red-500 text-sm mt-1'>{errors.email}</p>}
-            </div>
- 
-            <div className="flex justify-between items-center mb-2">
-                <button
-                    type="submit"
-                    className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition duration-200">
-                    Recovery password
-                </button>
-            </div>
-
-            {/* <div className="flex justify-center items-center mb-2">
-                <button
-                    type="button"
-                    onClick={handleGetBack}
-                    className="w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-600 transition duration-200">
-                    Not you?
-                </button>
-            </div> */}
-            <div className="text-center ">
-                <span className="text-gray-600">Already have an account?</span>
-                <Link href="/login" className="text-blue-500 hover:underline ml-1">Login</Link>
-            </div>
-        </form>
-    );
+        {/* Links */}
+        <div className="text-center">
+          <span className="text-gray-600">Already have an account?</span>
+          <Link href="/login" className="text-blue-500 hover:underline ml-1">
+            Login
+          </Link>
+        </div>
+        <div className="text-center">
+          <span className="text-gray-600">Don&apos;t have an account yet?</span>
+          <Link href="/register" className="text-blue-500 hover:underline ml-1">
+            Register
+          </Link>
+        </div>
+      </form>
+    </>
+  );
 };
 
 export default RecoveryForm;
