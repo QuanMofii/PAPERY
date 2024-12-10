@@ -4,23 +4,11 @@ import secrets
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 # from pydantic import model_validator
-
-current_file_dir = os.path.dirname(os.path.realpath(__file__))
-env_path = os.path.join(current_file_dir, "..", "..", ".env")
 class BaseConfig(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=env_path, env_ignore_empty=True, extra="ignore"
+        env_file="../.env.local", env_ignore_empty=True, extra="ignore"
     )
-    
     ENVIRONMENT: str
-    @property
-    def env_file(self) -> str:
-        env_files = {
-            "local": ".env.local",
-            "staging": ".env.staging",
-            "production": ".env.production",
-        }
-        return env_files.get(self.ENVIRONMENT, ".env.local")
 
 class AppSettings(BaseConfig):
     APP_NAME: str = "FastAPI app"
@@ -53,11 +41,10 @@ class DatabaseSettings(BaseConfig):
     DATABASE_TYPE: DatabaseType = DatabaseType.POSTGRES
     DATABASE_USER: str | None = None
     DATABASE_PASSWORD: str | None = None
-    DATABASE_SERVER: str = "localhost"
+    DATABASE_SERVER: str  | None = None
     DATABASE_PORT: int | None = None
     DATABASE_NAME: str | None = None
     SQLITE_DB: str = "./sql_app.db"
-
     POSTGRES_PREFIX: str = "postgresql+asyncpg://"
     MYSQL_PREFIX: str = "mysql+aiomysql://"
     SQLITE_PREFIX: str = "sqlite+aiosqlite:///"
@@ -67,7 +54,8 @@ class DatabaseSettings(BaseConfig):
         if self.DATABASE_TYPE == DatabaseType.POSTGRES:
             return f"{self.POSTGRES_PREFIX}{self.DATABASE_USER}:{self.DATABASE_PASSWORD}@{self.DATABASE_SERVER}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
         elif self.DATABASE_TYPE == DatabaseType.MYSQL:
-            return f"{self.MYSQL_PREFIX}{self.DATABASE_USER}:{self.DATABASE_PASSWORD}@{self.DATABASE_SERVER}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
+           return f"{self.MYSQL_PREFIX}{self.DATABASE_USER}:{self.DATABASE_PASSWORD}@{self.DATABASE_SERVER}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
+        
         elif self.DATABASE_TYPE == DatabaseType.SQLITE:
             return f"{self.SQLITE_PREFIX}{self.SQLITE_DB}"
         raise ValueError("Unsupported DATABASE_TYPE")
@@ -132,3 +120,4 @@ class Settings(
     pass
 
 settings = Settings()
+print("settings",settings)
