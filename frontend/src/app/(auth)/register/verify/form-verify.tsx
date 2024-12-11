@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { VerifyReq, VerifyReqType } from "@/schemas/auth.schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -120,4 +120,9 @@ const VerifyForm = () => {
   );
 };
 
-export default VerifyForm;
+const SuspendedVerifyForm  = () => (
+  <Suspense fallback={<div className="h-full w-full flex items-center justify-center">Loading...</div>}>
+      <VerifyForm/>
+  </Suspense>
+);
+export default SuspendedVerifyForm ;

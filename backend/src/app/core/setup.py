@@ -5,17 +5,22 @@ from typing import Any
 import anyio
 import fastapi
 import redis.asyncio as redis
+
 from arq import create_pool
 from arq.connections import RedisSettings
+
 from fastapi import APIRouter, Depends, FastAPI
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
+from fastapi.middleware.cors import CORSMiddleware
 
 from api.dependencies import get_current_superuser
 from middleware.client_cache_middleware import ClientCacheMiddleware
 from middleware.error_middleware import AppErrorHandlerMiddleware, DBErrorHandlerMiddleware, InternalServerErrorHandlerMiddleware, ValidationErrorHandlerMiddleware
+
 from core.config import (
     AppSettings,
+    CORSMiddlewareSettings,
     ClientSideCacheSettings,
     BaseSettings,
     EnvironmentOption,
@@ -25,6 +30,7 @@ from core.config import (
     RedisRateLimiterSettings,
     settings,
 )
+
 from core.db.database import Base, async_engine as engine
 from core.utils import cache, queue, rate_limit 
 # from models import user,post,rate_limit,tier
@@ -83,9 +89,10 @@ async def set_threadpool_tokens(number_of_tokens: int = 100) -> None:
 def lifespan_factory(
     settings: (
         BaseSettings
-        | RedisCacheSettings
         | AppSettings
+        | CORSMiddlewareSettings
         | ClientSideCacheSettings
+        | RedisCacheSettings
         | RedisQueueSettings
         | RedisRateLimiterSettings
         | EnvironmentSettings
@@ -129,9 +136,10 @@ def create_application(
     router: APIRouter,
     settings: (
         BaseSettings
-        | RedisCacheSettings
         | AppSettings
+        | CORSMiddlewareSettings
         | ClientSideCacheSettings
+        | RedisCacheSettings
         | RedisQueueSettings
         | RedisRateLimiterSettings
         | EnvironmentSettings
@@ -180,21 +188,24 @@ def create_application(
     based on the environment settings.
     """
     # --- before creating application ---
-    if isinstance(settings, AppSettings):
-        to_update = {
-            "title": settings.APP_NAME,
-            "description": settings.APP_DESCRIPTION,
-            "contact": {"name": settings.CONTACT_NAME, "email": settings.CONTACT_EMAIL},
-            "license_info": {"name": settings.LICENSE_NAME},
-        }
-        kwargs.update(to_update)
-
-    if isinstance(settings, EnvironmentSettings):
-        kwargs.update({"docs_url": None, "redoc_url": None, "openapi_url": None})
 
     lifespan = lifespan_factory(settings, create_tables_on_start=create_tables_on_start)
+    
 
-    application = FastAPI(lifespan=lifespan, **kwargs)
+    application = FastAPI(title=settings.APP_NAME,
+                            description=settings.APP_DESCRIPTION,
+                            contact={"name": settings.CONTACT_NAME, "email": settings.CONTACT_EMAIL},
+                            license_info={"name": settings.LICENSE_NAME},
+                            terms_of_service=settings.TERMS_OF_SERVICE,
+                            lifespan=lifespan,
+                           **kwargs)
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.ALLOWED_ORIGINS, 
+        allow_credentials=True, 
+        allow_methods=["*"],  
+        allow_headers=["*"],  
+    )
     application.include_router(router)
 
     if isinstance(settings, ClientSideCacheSettings):

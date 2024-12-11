@@ -36,7 +36,7 @@ export const setRefreshToken = (token: string) => {
   }
 
   const maxAge = decoded.exp - Math.floor(Date.now() / 1000); 
-  setCookie('refreshToken', token, {
+  setCookie('refresh_token', token, {
     maxAge,
     path: '/',
     httpOnly: true,
@@ -46,14 +46,13 @@ export const setRefreshToken = (token: string) => {
 };
 
 export const removeAllTokens = () => {
-  deleteCookie('accessToken', { path: '/' });
-  deleteCookie('refreshToken', { path: '/' });
+  deleteCookie('access_token', { path: '/' });
+  deleteCookie('refresh_token', { path: '/' });
 };
 export const refreshAccessToken = async (): Promise<string | null> => {
-  const refreshToken = getCookie('refreshToken') as string | undefined;
+  const refreshToken = getCookie('refresh_token') as string | undefined;
 
   if (!refreshToken) {
-    console.error('No refresh token found in cookies');
     removeAllTokens();
     return null;
   }

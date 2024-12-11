@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
 from api.v1 import login, logout, posts, rate_limits, tasks, tiers, users,utils
-
-router = APIRouter(prefix="/api")
+from core.config import settings
+router = APIRouter(prefix=f"/api/v{settings.API_VERSION}")
 router.include_router(login.router, tags=["login"])
 router.include_router(logout.router, tags=["logout"])
 router.include_router(users.router, tags=["users"])

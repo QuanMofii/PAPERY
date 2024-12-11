@@ -9,6 +9,7 @@ services:
       - ./src/.env.docker
     environment:
       PYTHONPATH: /code/app
+      ENVIRONMENT: development
     # command:  sh -c "uvicorn app.main:app --host 0.0.0.0 --port 8000 reload:true"
     # -------- replace with comment to run with gunicorn --------
     # command: gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000
@@ -66,10 +67,11 @@ services:
     env_file:
       # - ./src/.env
       - ./src/.env.docker
+ 
     # environment:
-      # MYSQL_DATABASE: mydatabase
-      # MYSQL_ROOT_PASSWORD: mysecretpassword  
-      # MYSQL_USER: root
+    #   MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}  
+    #   MYSQL_DATABASE: ${DATABASE_NAME} 
+    #   MYSQL_USER: ${DATABASE_USER}
     command: --default-authentication-plugin=caching_sha2_password
     volumes:
       - mysql_data:/var/lib/mysql
@@ -77,7 +79,7 @@ services:
     # expose:
     #   - "3306"
     ports:
-      - "3308:3308"
+      - "3308:3306"
     # healthcheck:
     #   test: ["CMD", "mysqladmin" ,"ping", "-h", "127.0.0.1", "-u", "root", "-p", "mysecretpassword"]
     #   interval: 10m

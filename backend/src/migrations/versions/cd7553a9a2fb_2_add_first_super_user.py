@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import get_password_hash 
 import uuid as uuid_pkg
+from app.core.config import settings 
 
 # revision identifiers, used by Alembic.
 revision: str = 'cd7553a9a2fb'
@@ -45,13 +46,12 @@ def upgrade() -> None:
         return
 
     # Create super user
-    hashed_password = get_password_hash("Str1ngst!")
     op.execute(
         user_table.insert().values(
-            name="Admin User",
-            username="admin",
-            email="admin@example.com",
-            hashed_password=hashed_password,
+            name=settings.ADMIN_NAME,
+            username=settings.ADMIN_NAME,
+            email=settings.ADMIN_EMAIL,
+            hashed_password=get_password_hash(settings.ADMIN_PASSWORD),
             is_superuser=True,
             uuid=str(uuid_pkg.uuid4()),
             is_deleted=False,
@@ -62,5 +62,5 @@ def upgrade() -> None:
 def downgrade() -> None:
     # Delete super user
     op.execute(
-        user_table.delete().where(user_table.c.username == "admin")
+        user_table.delete().where(user_table.c.username == settings.ADMIN_NAME)
     )

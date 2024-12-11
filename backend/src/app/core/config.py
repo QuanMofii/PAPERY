@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 # from pydantic import model_validator
 class BaseConfig(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file="../.env.local", env_ignore_empty=True, extra="ignore"
+        env_file="../.env", env_ignore_empty=True, extra="ignore"
     )
     ENVIRONMENT: str
 
@@ -15,6 +15,7 @@ class AppSettings(BaseConfig):
     APP_DESCRIPTION: str | None = None
     APP_VERSION: str | None = None
     LICENSE_NAME: str | None = None
+    TERMS_OF_SERVICE: str | None = None
     CONTACT_NAME: str | None = None
     CONTACT_EMAIL: str | None = None
 
@@ -22,6 +23,12 @@ class AppSettings(BaseConfig):
     BACKEND_PORT: int = 8000
     API_VERSION: str = "v1"
     RELOAD: bool = False
+
+class CORSMiddlewareSettings(BaseConfig):
+    ALLOWED_ORIGINS: list[str] = ["*"]
+    ALLOWED_METHODS: list[str] = ["*"]
+    ALLOWED_HEADERS: list[str] = ["*"]
+    ALLOW_CREDENTIALS: bool = True
 
 class CryptSettings(BaseConfig):
     SECRET_KEY: str = secrets.token_urlsafe(32)
@@ -107,6 +114,7 @@ class EnvironmentSettings(BaseConfig):
 
 class Settings(
     AppSettings,
+    CORSMiddlewareSettings,
     CryptSettings,
     DatabaseSettings,
     FirstUserSettings,
@@ -120,4 +128,4 @@ class Settings(
     pass
 
 settings = Settings()
-print("settings",settings)
+

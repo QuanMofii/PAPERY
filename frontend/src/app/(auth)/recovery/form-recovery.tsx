@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { RecoveryReq, RecoveryReqType } from "@/schemas/auth.schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -115,4 +114,9 @@ const RecoveryForm = () => {
   );
 };
 
-export default RecoveryForm;
+const SuspendedRecoveryForm  = () => (
+  <Suspense fallback={<div className="h-full w-full flex items-center justify-center">Loading...</div>}>
+      <RecoveryForm/>
+  </Suspense>
+);
+export default SuspendedRecoveryForm ;

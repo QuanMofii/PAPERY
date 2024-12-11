@@ -1,11 +1,15 @@
 "use client";
-
 import React, { useState } from "react";
+
+import {http, HttpError} from "@/libs/http"
 import { LoginReq, LoginReqType } from "@/schemas/auth.schemas";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+
 
 const LoginForm = () => {
   const router = useRouter();
@@ -24,12 +28,25 @@ const LoginForm = () => {
     setIsLoading(true);
     try {
       console.log("Form submitted:", data);
-      // TODO: Gửi dữ liệu đến backend
+      const formData = new URLSearchParams();
+      formData.append('username', data.email);
+      formData.append('password', data.password);
+
+      const response = await http.post('/login', formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded', 
+        },
+        withCredentials: true, 
+      });
       
-      router.push("/dashboard"); // Chuyển hướng người dùng đến dashboard
-    } catch (error) {
-      console.error("Error during login request:", error);
-      alert("An unexpected error occurred. Please try again later.");
+      router.push("/dashboard"); 
+    } catch (error: any) {
+      if (error instanceof HttpError) {
+        const errorMessage = error.message;
+        alert(`Error: ${errorMessage} (Status: ${error.status})`);
+      } else {
+        alert("Unexpected error occurred. Please try later.");
+      }
     } finally {
       setIsLoading(false);
     }

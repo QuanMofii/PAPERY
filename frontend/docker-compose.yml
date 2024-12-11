@@ -1,5 +1,5 @@
 services:
-  client:
+  server:
     restart: unless-stopped
     build:
       context: .
@@ -9,7 +9,7 @@ services:
     env_file:
       - .env.production  
     environment:
-      - NODE_ENV=production
+      - NEXT_PUBLIC_NODE_ENV=production
     # volumes:
     #   - ./public/uploads:/app/public/uploads
     # command: "npm run server" 

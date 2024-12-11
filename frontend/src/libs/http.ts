@@ -4,7 +4,7 @@ import axios, {
   AxiosError 
 } from 'axios';
 
-// Kiểu dữ liệu cho lỗi chi tiết
+console.log("process.env.NEXT_PUBLIC_BACKEND_API_URL",process.env.NEXT_PUBLIC_BACKEND_API_URL);
 export interface APIError {
   message: string;
   status: number;
@@ -14,7 +14,6 @@ export interface APIError {
   path?: string;
 }
 
-// Enum để xác định loại API
 export enum APIType {
   BACKEND = 'BACKEND',
   FRONTEND = 'FRONTEND',
@@ -22,33 +21,32 @@ export enum APIType {
 }
 
 export interface HttpConfig {
-  type?: APIType;          // Loại API
-  customURL?: string;      // URL tùy chỉnh (nếu cần)
-  apiVersion?: string;     // Phiên bản API
-  getToken?: () => Promise<string | undefined>;  // Hàm lấy token tùy chỉnh
-  defaultHeaders?: Record<string, string>;  // Headers mặc định
+  type?: APIType;        
+  customURL?: string;      
+  apiVersion?: string;    
+  getToken?: () => Promise<string | undefined>;  
+  defaultHeaders?: Record<string, string>;  
 }
 
-// Lớp để xử lý và chuẩn hóa lỗi
+
 class HttpError extends Error implements APIError {
   status: number;
-  code?: string;
-  details?: any;
+  message: string;
+  data?: any;
   timestamp?: string;
   path?: string;
 
   constructor(error: AxiosError | Error) {
     let message = 'Unknown Error';
     let status = 500;
-    let code = 'UNKNOWN_ERROR';
-    let details = {};
+    let data = {};
     let path = '';
 
     if (axios.isAxiosError(error)) {
-      message = error.response?.data?.message || error.message;
+      message = error.response?.data?.message || error.response?.data?.detail || error.message;
       status = error.response?.status || 500;
-      code = error.response?.data?.code || 'AXIOS_ERROR';
-      details = error.response?.data?.details || {};
+
+      data = error.response?.data || {}; 
       path = error.config?.url || '';
     } else {
       message = error.message;
@@ -59,21 +57,20 @@ class HttpError extends Error implements APIError {
     this.name = 'HttpError';
     this.message = message;
     this.status = status;
-    this.code = code;
-    this.details = details;
+    this.data = data;
     this.timestamp = new Date().toISOString();
     this.path = path;
   }
 }
 
-// Hàm lấy URL dựa trên cấu hình
+
 const getAPIURL = (config: HttpConfig = {}): string => {
-  // Nếu có URL tùy chỉnh, ưu tiên sử dụng
+
   if (config.customURL) return config.customURL;
 
-  // Xác định URL dựa trên loại API
   switch (config.type) {
     case APIType.BACKEND:
+      console.log("process.env.NEXT_PUBLIC_BACKEND_API_URL",process.env.NEXT_PUBLIC_BACKEND_API_URL);
       return (
         process.env.BACKEND_API_URL || 
         process.env.NEXT_PUBLIC_BACKEND_API_URL || 
@@ -91,17 +88,17 @@ const getAPIURL = (config: HttpConfig = {}): string => {
   }
 };
 
-// Hàm tạo HTTP client
+
 const createHttpClient = () => {
-  // Wrapper chung cho các request
+
   const request = async (
     method: string, 
     url: string, 
-    data?: any, 
     config: HttpConfig & AxiosRequestConfig = {}
   ) => {
-    // Phân tách cấu hình HTTP và Axios
+
     const { 
+      data,
       type = APIType.BACKEND, 
       customURL, 
       apiVersion, 
@@ -110,30 +107,25 @@ const createHttpClient = () => {
       ...axiosConfig 
     } = config;
 
-    // Xác định URL
+
     const BASE_URL = getAPIURL({ type, customURL });
     const API_VERSION = apiVersion || 
       process.env.API_VERSION || 
       process.env.NEXT_PUBLIC_API_VERSION || 
       'v1';
 
-    // Phân giải URL
     const resolveURL = (inputURL: string): string => {
-      // Nếu URL đã là URL đầy đủ, không cần thay đổi
       if (/^https?:\/\//i.test(inputURL)) return inputURL;
 
-      // Nếu URL bắt đầu bằng '/', ghép với base URL
       if (inputURL.startsWith('/')) {
         return type !== APIType.EXTERNAL 
           ? `${BASE_URL}/api/${API_VERSION}${inputURL}` 
           : inputURL;
       }
-
-      // Trường hợp còn lại, giữ nguyên URL
+      console.log("inputURL",inputURL);
       return inputURL;
     };
 
-    // Hàm lấy token mặc định
     const tokenGetter = getToken || (async () => {
       return typeof window !== 'undefined' 
         ? localStorage.getItem('accessToken') || undefined
@@ -141,10 +133,9 @@ const createHttpClient = () => {
     });
 
     try {
-      // Lấy token
+
       const token = await tokenGetter();
 
-      // Tạo headers
       const headers = {
         'Ngrok-Skip-Browser-Warning': 'true',
         'Content-Type': 'application/json',
@@ -153,7 +144,6 @@ const createHttpClient = () => {
         ...axiosConfig.headers
       };
 
-      // Thực hiện request
       const response = await axios({
         ...axiosConfig,
         method,
@@ -168,25 +158,23 @@ const createHttpClient = () => {
     }
   };
 
-  // Trả về các phương thức HTTP
   return {
-    get: (url: string, config: HttpConfig & AxiosRequestConfig = {}) => 
-      request('GET', url, undefined, config),
+    get: (url: string,data: any, config: HttpConfig & AxiosRequestConfig = {}) => 
+      request('GET', url, { ...config, data }),
     
     post: (url: string, data: any, config: HttpConfig & AxiosRequestConfig = {}) => 
-      request('POST', url, data, config),
+      request('POST', url, { ...config, data }),
     
     put: (url: string, data: any, config: HttpConfig & AxiosRequestConfig = {}) => 
-      request('PUT', url, data, config),
+      request('PUT', url, { ...config, data }),
     
     patch: (url: string, data: any, config: HttpConfig & AxiosRequestConfig = {}) => 
-      request('PATCH', url, data, config),
+      request('PATCH', url, { ...config, data }),
     
-    delete: (url: string, config: HttpConfig & AxiosRequestConfig = {}) => 
-      request('DELETE', url, undefined, config)
+    delete: (url: string, data: any, config: HttpConfig & AxiosRequestConfig = {}) => 
+      request('DELETE', url,{ ...config, data })
   };
 };
 
-// Tạo HTTP client
 export const http = createHttpClient();
 export { HttpError };

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,Suspense  } from "react";
 import { VerifyReq, VerifyReqType } from "@/schemas/auth.schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -39,9 +39,7 @@ const VerifyForm = () => {
     try {
       console.log("Verify Data Submitted:", data);
       // TODO: Thực hiện xác thực mã xác minh với backend
-      setTimeout(() => {
-        router.push(`/recovery/reset?email=${encodeURIComponent(data.email)}&code=${encodeURIComponent(data.code)}`);
-      }, 2000);
+      router.push(`/recovery/reset?email=${encodeURIComponent(data.email)}&code=${encodeURIComponent(data.code)}`);
     } catch (error) {
       console.error("Verification Error:", error);
       // TODO: Xử lý lỗi từ backend nếu có
@@ -106,4 +104,10 @@ const VerifyForm = () => {
   );
 };
 
-export default VerifyForm;
+const SuspendedVerifyForm  = () => (
+  <Suspense fallback={<div className="h-full w-full flex items-center justify-center">Loading...</div>}>
+      <VerifyForm/>
+  </Suspense>
+);
+export default SuspendedVerifyForm ;
+

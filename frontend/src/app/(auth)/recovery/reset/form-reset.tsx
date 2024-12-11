@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { ResetReq, ResetReqType } from "@/schemas/auth.schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -44,7 +43,7 @@ const ResetForm = () => {
     try {
       console.log("Reset Password Data Submitted:", data);
       // TODO: Gửi dữ liệu reset lên backend (email, code, password, confirmpassword)
-      setTimeout(() => router.push("/login"), 2000); // Chuyển hướng đến login sau khi reset thành công
+      router.push("/login") 
     } catch (error) {
       console.error("Reset Error:", error);
       // TODO: Xử lý lỗi từ backend (nếu có)
@@ -139,4 +138,9 @@ const ResetForm = () => {
   );
 };
 
-export default ResetForm;
+const SuspendedResetForm = () => (
+  <Suspense fallback={<div className="h-full w-full flex items-center justify-center">Loading...</div>}>
+      <ResetForm/>
+  </Suspense>
+);
+export default SuspendedResetForm;
