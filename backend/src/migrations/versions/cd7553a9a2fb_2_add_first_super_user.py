@@ -1,7 +1,7 @@
 """Add first super user initialization
 
 Revision ID: cd7553a9a2fb
-Revises: c7de3d77bdaf
+Revises: 0a376c8e4964
 Create Date: 2024-12-02 10:27:06.391950
 
 """
@@ -17,7 +17,7 @@ from app.core.config import settings
 
 # revision identifiers, used by Alembic.
 revision: str = 'cd7553a9a2fb'
-down_revision: Union[str, None] = 'c7de3d77bdaf'
+down_revision: Union[str, None] = '0a376c8e4964'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

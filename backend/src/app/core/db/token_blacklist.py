@@ -3,10 +3,11 @@ from datetime import datetime
 from sqlalchemy import DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from .database import Base
+from core.db.database import Base
+from core.db.models import TimestampMixin, SoftDeleteMixin
 
 
-class TokenBlacklist(Base):
+class TokenBlacklist(Base,TimestampMixin, SoftDeleteMixin):
     __tablename__ = "token_blacklist"
 
     id: Mapped[int] = mapped_column("id", autoincrement=True, nullable=False, unique=True, primary_key=True, init=False)

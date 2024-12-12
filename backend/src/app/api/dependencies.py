@@ -26,7 +26,7 @@ async def get_current_user(
 ) -> dict[str, Any] | None:
     token_data = await verify_token(token, db)
     if token_data is None:
-        raise UnauthorizedException("User not authenticated.")
+        raise UnauthorizedException("Invalid token or expired.")
 
     if "@" in token_data.username_or_email:
         user: dict | None = await crud_users.get(db=db, email=token_data.username_or_email, is_deleted=False)
@@ -70,7 +70,6 @@ async def get_current_superuser(current_user: Annotated[dict, Depends(get_curren
         raise ForbiddenException("You do not have enough privileges.")
 
     return current_user
-
 
 async def rate_limiter(
     request: Request, db: Annotated[AsyncSession, Depends(async_get_db)], user: User | None = Depends(get_optional_user)

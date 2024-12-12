@@ -87,6 +87,12 @@ async def verify_token(token: str, db: AsyncSession) -> TokenData | None:
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        exp = payload.get("exp")
+        print("exp payload",exp)
+        print("exp now", datetime.now(UTC))
+        if exp is None or datetime.now(UTC) > datetime.fromtimestamp(exp):
+            return None  
+        
         username_or_email: str = payload.get("sub")
         if username_or_email is None:
             return None

@@ -15,7 +15,6 @@ fs.readFile(requiredServerFilesPath, 'utf-8')
   .then(async (data) => {
     const { config, env } = JSON.parse(data);
 
-    // Nạp biến từ .next/required-server-files.json
     Object.assign(process.env, env);
     process.env.__NEXT_PRIVATE_STANDALONE_CONFIG = JSON.stringify(config);
 
