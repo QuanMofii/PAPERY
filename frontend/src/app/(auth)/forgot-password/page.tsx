@@ -1,5 +1,5 @@
 import React from 'react';
-import RecoveryForm from '@/app/(auth)/recovery/form-recovery';
+import RecoveryForm from '@/app/(auth)/forgot-password/form-recovery';
 
 const RecoveryPage = () => {
     return (

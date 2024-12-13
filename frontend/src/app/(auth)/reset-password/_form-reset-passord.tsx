@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 
-const ResetForm = () => {
+const ResetPasswordForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -138,9 +138,9 @@ const ResetForm = () => {
   );
 };
 
-const SuspendedResetForm = () => (
+const SuspendedResetPasswordForm = () => (
   <Suspense fallback={<div className="h-full w-full flex items-center justify-center">Loading...</div>}>
-      <ResetForm/>
+      <ResetPasswordForm/>
   </Suspense>
 );
-export default SuspendedResetForm;
+export default SuspendedResetPasswordForm;

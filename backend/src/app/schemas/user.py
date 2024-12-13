@@ -31,13 +31,13 @@ class UserRead(BaseModel):
 
 class UserCreate(UserBase):
     model_config = ConfigDict(extra="forbid")
-    profile_image_url: str
+    profile_image_url: Annotated[str, Field(default="https://www.profileimageurl.com")]
     password: Annotated[str, Field(pattern=r"^.{8,}|[0-9]+|[A-Z]+|[a-z]+|[^a-zA-Z0-9]+$", examples=["Str1ngst!"])]
 
 
 class UserCreateInternal(UserBase):
     hashed_password: str
-    profile_image_url: str
+    profile_image_url: Annotated[str, Field(default="https://www.profileimageurl.com")]
 
 
 class UserUpdate(BaseModel):

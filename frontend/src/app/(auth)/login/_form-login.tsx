@@ -10,8 +10,10 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 const LoginForm = () => {
+  const { t } = useTranslation();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -67,7 +69,8 @@ const LoginForm = () => {
           </div>
         </div>
       )}
-
+      <h1>{t('welcome_message')}</h1>
+      <LanguageSwitcher />
       <form
         onSubmit={handleSubmit(onSubmit)}
         noValidate

@@ -8,6 +8,7 @@ const AUTH_ONLY_ROUTES = ['/login', '/register',];
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('refresh_token')
+  
   if (AUTH_ONLY_ROUTES.some((route) => pathname.startsWith(route))) {
     if (token) {
       const dashboardUrl = new URL('/dashboard', request.url);

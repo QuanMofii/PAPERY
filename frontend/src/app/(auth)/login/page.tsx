@@ -1,4 +1,4 @@
-import LoginForm from '@/app/(auth)/login/form-login';
+import LoginForm from '@/app/(auth)/login/_form-login';
 import React from 'react';
 
 

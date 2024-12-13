@@ -1,5 +1,5 @@
 import React from 'react';
-import VerifyForm from '@/app/(auth)/register/verify/form-verify';
+import VerifyForm from '@/app/(auth)/confirm-account/form-verify';
 
 const VerifyPage = () => {
     return (
