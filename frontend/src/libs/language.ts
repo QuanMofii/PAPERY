@@ -1,18 +1,19 @@
-export let cachedLanguage: string | undefined;
+"use server";
+import { cookies, headers } from 'next/headers';
 
-export const getUserLanguage = (): string => {
-  // Trả về ngôn ngữ được cache trước đó nếu có
-  if (cachedLanguage) return cachedLanguage;
+export const getUserLanguage = async (): Promise<string> => {
+  const cookieStore = cookies(); 
+  const cookieLang = (await cookieStore).get('i18next')?.value; 
+  
+  if (cookieLang) {
+    console.log('Cookie ngôn ngữ:', cookieLang);
+    return cookieLang; 
+  }
 
-  const savedLanguage = localStorage.getItem('i18nextLng');
-    if (savedLanguage) return savedLanguage;
-        
-    const browserLanguage = navigator.language.split('-')[0];
-    return browserLanguage || 'en'; 
+  const acceptLanguageHeader = (await headers()).get('accept-language');
+  const browserLang = acceptLanguageHeader?.split(',')[0]?.split('-')[0]; 
+  
+  return browserLang || 'en'; 
 };
 
-export const setUserLanguage = (newLanguage: string) => {
-    cachedLanguage = newLanguage;
-    localStorage.setItem('i18nextLng', newLanguage);
-    document.cookie = `i18nextLng=${newLanguage}; path=/; max-age=${60 * 60 * 24 * 365}`;
-};
+

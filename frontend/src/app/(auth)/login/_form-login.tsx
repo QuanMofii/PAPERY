@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from "react";
 
 import {http, HttpError} from "@/libs/http"
@@ -10,13 +11,14 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { useTranslation } from 'react-i18next';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
+import {useTranslations} from 'next-intl';
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+// import LanguageSwitcher from '@/components/LanguageSwitcher';
 const LoginForm = () => {
-  const { t } = useTranslation();
+  const  t  = useTranslations();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-
+  
   const {
     register,
     handleSubmit,

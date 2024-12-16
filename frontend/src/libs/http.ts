@@ -94,7 +94,7 @@ const createHttpClient = () => {
       const headers = {
         'Ngrok-Skip-Browser-Warning': 'true',
         'Content-Type': 'application/json',
-        'X-Language': getUserLanguage(), 
+        'X-Language': await getUserLanguage(), 
         ...(token && { 'Authorization': `Bearer ${token}` }),
         ...defaultHeaders,
         ...axiosConfig.headers
