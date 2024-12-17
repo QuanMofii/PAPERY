@@ -1,45 +1,36 @@
-'use client'; // Đây là Client Component
+'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React from 'react';
+import {locales} from '@/libs/i18n';
+import { useTranslation } from 'react-i18next';
 
 const LanguageSwitcher = () => {
-  const [currentLang, setCurrentLang] = useState<string>('en'); // Mặc định là 'en'
-  const router = useRouter();
-
-  // 🟢 Đồng bộ ngôn ngữ từ cookie khi component mount
-  useEffect(() => {
-    const getLanguageFromCookie = () => {
-      const cookieLang = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('i18next='))
-        ?.split('=')[1];
-      return cookieLang || 'en'; // Mặc định là 'en' nếu không tìm thấy ngôn ngữ trong cookie
-    };
-
-    const lang = getLanguageFromCookie();
-    setCurrentLang(lang); // Đồng bộ ngôn ngữ với state
-  }, []);
-
+  const { i18n } = useTranslation();
+  console.log("i18n.language",i18n.language);
+  const currentLanguage =  locales[i18n.language as keyof typeof locales];
+  console.log("currentLanguage",currentLanguage);
   const handleChangeLanguage = (lang: string) => {
-    document.cookie = `i18next=${lang}; path=/; max-age=31536000`; // Lưu cookie ngôn ngữ trong 1 năm
-    setCurrentLang(lang); // Cập nhật state của ngôn ngữ hiện tại
-    router.refresh(); // Làm mới trang để tải ngôn ngữ mới
-  };
+    i18n.changeLanguage(lang);
+    }
+
 
   return (
     <div className="language-switcher">
+      <div className=" "></div>
       <button 
         onClick={() => handleChangeLanguage('en')} 
-        className={`mr-2 ${currentLang === 'en' ? 'font-bold' : ''}`}
       >
         English
       </button>
       <button 
         onClick={() => handleChangeLanguage('vi')} 
-        className={`${currentLang === 'vi' ? 'font-bold' : ''}`}
       >
         Tiếng Việt
+      </button>
+      <button 
+        onClick={() => handleChangeLanguage('jp')} 
+      >
+        日本語
       </button>
     </div>
   );

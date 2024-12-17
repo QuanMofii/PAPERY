@@ -3,6 +3,7 @@ import React from 'react';
 
 
 const LoginPage = () => {
+    console.log("LoginPage");
     return (
         <div className="h-full w-full flex items-center justify-center bg-gray-100">
             <div className="h-full w-full flex flex-col items-center justify-center">

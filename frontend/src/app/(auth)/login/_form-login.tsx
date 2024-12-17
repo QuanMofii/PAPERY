@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState ,Suspense } from "react";
 
 import {http, HttpError} from "@/libs/http"
 import { LoginReq, LoginReqType } from "@/schemas/auth.schemas";
@@ -11,11 +11,12 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import {useTranslations} from 'next-intl';
-import LanguageSwitcher from "@/components/LanguageSwitcher";
-// import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+
 const LoginForm = () => {
-  const  t  = useTranslations();
+  console.log("LoginPage1");
+  const { t } = useTranslation();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   
@@ -72,7 +73,7 @@ const LoginForm = () => {
         </div>
       )}
       <h1>{t('welcome_message')}</h1>
-      <LanguageSwitcher />
+      <LanguageSwitcher  />
       <form
         onSubmit={handleSubmit(onSubmit)}
         noValidate
@@ -162,4 +163,11 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+
+
+  const SuspendedLoginForm = () => (
+    <Suspense fallback={<div className="h-full w-full flex items-center justify-center">Loading...</div>}>
+        <LoginForm/>
+    </Suspense>
+  );
+  export default SuspendedLoginForm;

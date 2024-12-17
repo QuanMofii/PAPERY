@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { removeAllTokens } from '@/libs/token';
 
-const PUBLIC_ROUTES = [ '/login', '/register', '/about', '/static', '/_next', '/favicon.ico'];
+const PUBLIC_ROUTES = [ '/login', '/register', '/about', '/static', '/_next', '/favicon.ico','locales/','locales/.*', '.*\\..*'];
 const PROTECTED_ROUTES = ['/dashboard', '/onboarding'];
 const AUTH_ONLY_ROUTES = ['/login', '/register',];
 export default async function middleware(request: NextRequest) {
@@ -34,6 +34,6 @@ export default async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\..*).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|locales/.*|.*\\..*).*)',
   ],
 }

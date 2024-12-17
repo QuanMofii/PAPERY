@@ -1,0 +1,10 @@
+{
+    "welcome_message": "Welcome to our app!",
+    "login": "Login",
+    "register": "Register",
+    "language": "Language",
+    "english": "English",
+    "vietnamese": "Vietnamese",
+    "logout": "Logout"
+  }
+  
