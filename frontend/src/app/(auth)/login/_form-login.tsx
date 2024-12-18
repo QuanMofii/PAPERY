@@ -13,10 +13,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import i18nServer from '@/libs/i18n-server';
 
+import Cookies from "js-cookie";
 const LoginForm = () => {
   console.log("LoginPage1");
-  const { t } = useTranslation();
+  const language = Cookies.get('i18next');
+  const { t,i18n } = useTranslation();
+  console.log("i18n.language login form",i18n.language);
+  console.log("language login form",language);
+  const welcomeMessage = i18nServer.t('welcome_message'); 
+  console.log("welcomeMessage",welcomeMessage);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   

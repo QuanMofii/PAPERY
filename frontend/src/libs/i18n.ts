@@ -114,21 +114,19 @@ export const resources = {
   },
 };
 
-const getLanguageFromCookie = () => {
-  const cookieLang = document.cookie.split(';').find((cookie) => cookie.startsWith('i18next='))?.split('=')[1];
-  return cookieLang || 'en';
-};
+import LanguageDetector from 'i18next-browser-languagedetector';
 
 i18n
   .use(initReactI18next) 
-
+  .use(LanguageDetector)
   .init({
     resources,
-    lng : getLanguageFromCookie(),
+    // lng: lang,
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false 
     }
+    
   });
 
   export default i18n;
