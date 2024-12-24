@@ -1,5 +1,8 @@
 {
     "welcome_message": "Welcome to our app!",
+    "translation" : {
+      "welcome_message": "Xin chào"
+    },
     "login": "Login",
     "register": "Register",
     "language": "Language",

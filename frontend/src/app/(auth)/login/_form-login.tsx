@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState ,Suspense } from "react";
+import React, { useState, Suspense} from "react";
 
 import {http, HttpError} from "@/libs/http"
 import { LoginReq, LoginReqType } from "@/schemas/auth.schemas";
@@ -11,22 +11,15 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { useTranslation } from 'react-i18next';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
-import i18nServer from '@/libs/i18n-server';
+import LanguageSwitcher from '@/components/language-switcher';
+import { useLanguage } from "@/context/LanguageContext";
 
-import Cookies from "js-cookie";
+
+
 const LoginForm = () => {
-  console.log("LoginPage1");
-  const language = Cookies.get('i18next');
-  const { t,i18n } = useTranslation();
-  console.log("i18n.language login form",i18n.language);
-  console.log("language login form",language);
-  const welcomeMessage = i18nServer.t('welcome_message'); 
-  console.log("welcomeMessage",welcomeMessage);
+  const { t } = useLanguage(); 
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  
   const {
     register,
     handleSubmit,
@@ -80,7 +73,7 @@ const LoginForm = () => {
         </div>
       )}
       <h1>{t('welcome_message')}</h1>
-      <LanguageSwitcher  />
+      <LanguageSwitcher/>
       <form
         onSubmit={handleSubmit(onSubmit)}
         noValidate
@@ -155,7 +148,7 @@ const LoginForm = () => {
 
         {/* Links */}
         <div className="text-center">
-          <Link href="/recovery" className="text-blue-500 hover:underline">
+          <Link href="/forgot-password" className="text-blue-500 hover:underline">
             Forgot Password?
           </Link>
         </div>
@@ -178,3 +171,5 @@ const LoginForm = () => {
     </Suspense>
   );
   export default SuspendedLoginForm;
+  // export default React.memo(LoginForm);
+

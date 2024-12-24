@@ -168,7 +168,7 @@ const RegisterForm = () => {
 
         {/* Links */}
         <div className="text-center">
-          <Link href="/recovery" className="text-blue-500 hover:underline">
+          <Link href="/forgot-password" className="text-blue-500 hover:underline">
             Forgot Password?
           </Link>
         </div>

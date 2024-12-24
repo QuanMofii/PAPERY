@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 
-const VerifyForm = () => {
+const ConfirmEmailForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const defaultEmail = searchParams.get("email") || "";
@@ -27,7 +27,6 @@ const VerifyForm = () => {
     },
   });
 
-  // Set email và mã verify mặc định từ URL
   useEffect(() => {
     if (defaultEmail) setValue("email", defaultEmail);
     if (defaultCode) setValue("code", defaultCode);
@@ -39,7 +38,7 @@ const VerifyForm = () => {
     try {
       console.log("Verify Data Submitted:", data);
       // TODO: Thực hiện xác thực mã xác minh với backend
-      router.push(`/recovery/reset?email=${encodeURIComponent(data.email)}&code=${encodeURIComponent(data.code)}`);
+      router.push(`/reset-password?email=${encodeURIComponent(data.email)}&code=${encodeURIComponent(data.code)}`);
     } catch (error) {
       console.error("Verification Error:", error);
       // TODO: Xử lý lỗi từ backend nếu có
@@ -104,10 +103,10 @@ const VerifyForm = () => {
   );
 };
 
-const SuspendedVerifyForm  = () => (
+const SuspendedConfirmEmailForm  = () => (
   <Suspense fallback={<div className="h-full w-full flex items-center justify-center">Loading...</div>}>
-      <VerifyForm/>
+      <ConfirmEmailForm/>
   </Suspense>
 );
-export default SuspendedVerifyForm ;
+export default SuspendedConfirmEmailForm ;
 

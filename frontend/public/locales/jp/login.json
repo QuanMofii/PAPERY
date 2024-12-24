@@ -1,5 +1,8 @@
 {
     "welcome_message": "Chào mừng bạn đến với ứng dụng của chúng tôi!",
+    "translation" : {
+      "welcome_message": "Xin chào"
+    },
     "login": "Đăng nhập",
     "register": "Đăng ký",
     "language": "Ngôn ngữ",

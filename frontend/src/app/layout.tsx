@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "@/styles/globals.css"; 
-// import { useTranslation } from 'react-i18next';
-import i18nServer from '../libs/i18n-server';
-
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -19,18 +16,18 @@ export const metadata: Metadata = {
 
 import { cookies } from 'next/headers';
 
+import { LanguageProvider} from "@/context/LanguageContext";
+import { preloadTranslation } from "@/libs/preload";
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const lang = (await cookies()).get('i18next')?.value || 'en';
-  console.log("lang",lang);
-
-  // i18n.changeLanguage(lang);
-  await i18nServer.changeLanguage(lang); 
-  const welcomeMessage = i18nServer.t('welcome_message'); 
+  const { translations } = await preloadTranslation(lang, "translation"); 
   return (
     <html lang={lang} suppressHydrationWarning>
-    <body className={inter.className|| ""}>
-    <h1>{welcomeMessage}</h1>
-        {children}
+      <body className={inter.className|| ""}>
+    <LanguageProvider initialTranslations={translations} initialLang={lang}>
+      {children}
+    </LanguageProvider>
       </body>
     </html>
   );

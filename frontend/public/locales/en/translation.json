@@ -1,10 +1,15 @@
 {
     "welcome_message": "Welcome to our app!",
-    "login": "Login",
+    "translation" : {
+      "welcome_message": "Xin chào"
+    },
     "register": "Register",
     "language": "Language",
     "english": "English",
     "vietnamese": "Vietnamese",
-    "logout": "Logout"
+    "logout": "Logout",
+    "login": {
+      "welcome_message": "Welcome to the login page"
+    }
   }
   
