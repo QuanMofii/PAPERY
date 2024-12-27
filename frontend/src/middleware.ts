@@ -18,30 +18,38 @@ export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('refresh_token');
 
+  let response;
+
   // Check public routes
   if (PUBLIC_ROUTES.some((route) => pathname.startsWith(route))) {
-    return nextIntlMiddleware(request); 
-  }
-
+    response = nextIntlMiddleware(request);
+  } 
   // Check auth-only routes
-  if (AUTH_ONLY_ROUTES.some((route) => pathname.startsWith(route))) {
+  else if (AUTH_ONLY_ROUTES.some((route) => pathname.startsWith(route))) {
     if (token) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
-    return nextIntlMiddleware(request);
-  }
-
+    response = nextIntlMiddleware(request);
+  } 
   // Check protected routes
-  if (PROTECTED_ROUTES.some((route) => pathname.startsWith(route))) {
+  else if (PROTECTED_ROUTES.some((route) => pathname.startsWith(route))) {
     if (!token) {
       removeAllTokens();
       return NextResponse.redirect(new URL('/login', request.url));
     }
+    response = nextIntlMiddleware(request);
+  } 
+  // Default: apply nextIntlMiddleware
+  else {
+    response = nextIntlMiddleware(request);
   }
 
-  // Default: apply nextIntlMiddleware
-  return nextIntlMiddleware(request);
+  // Thêm pathname vào header
+  response.headers.set('x-page-pathname', pathname);
+
+  return response;
 }
+
 
 export const config = {
   matcher: [

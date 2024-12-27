@@ -13,15 +13,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useTranslations } from 'next-intl';
 
-
- 
-
-
-
-
 const LoginForm = () => {
   const t = useTranslations();
-
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const {

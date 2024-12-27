@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 const RegisterForm = () => {
-  console.log("RegisterForm");
+
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 

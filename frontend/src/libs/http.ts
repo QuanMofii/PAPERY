@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { HttpError } from './error';
-import { getUserLanguage } from './next-intl/language'
+import { getLocale } from 'next-intl/server';
 console.log("process.env.NEXT_PUBLIC_BACKEND_API_URL",process.env.NEXT_PUBLIC_BACKEND_API_URL);
 
 
@@ -90,11 +90,11 @@ const createHttpClient = () => {
     try {
 
       const token = await tokenGetter();
-
+      const language = await getLocale();
       const headers = {
         'Ngrok-Skip-Browser-Warning': 'true',
         'Content-Type': 'application/json',
-        'X-Language': await getUserLanguage(), 
+        'X-Language': language, 
         ...(token && { 'Authorization': `Bearer ${token}` }),
         ...defaultHeaders,
         ...axiosConfig.headers

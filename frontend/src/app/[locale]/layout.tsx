@@ -17,14 +17,13 @@ const inter = Inter({
 
 export async function generateMetadata({params}: {params: {locale: LocaleSType}}) {
   const { locale } = await params;
-  const t = await getTranslations({locale, namespace: 'langdingPage'});
+  const t = await getTranslations({locale});
  
   return {
     title: t('metadata.title'),
     description: t('metadata.description'),
   };
 }
-
 
 export async function RootLayout({
   children,
@@ -38,7 +37,6 @@ export async function RootLayout({
     notFound();
   }
   const messages = await getMessages();
-
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={inter.className || ""}>

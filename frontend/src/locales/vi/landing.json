@@ -1,9 +1,10 @@
 {
-    "common": {
+    
       "metadata": {
-        "title": "Dự án Frontend NextJS ",
+        "title": "Dự án Frontend NextJS - Trang Chủ",
         "description": "Dự án Frontend NextJS"
       },
       "welcome_message": "Chào mừng bạn đến với ứng dụng của chúng tôi! "
-    }
+    
   }
+  
