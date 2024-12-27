@@ -1,1 +1,1 @@
-export const language = 'never';
+

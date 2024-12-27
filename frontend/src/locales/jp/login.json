@@ -8,6 +8,12 @@
     "language": "Ngôn ngữ",
     "english": "Tiếng Anh",
     "vietnamese": "Tiếng Việt",
-    "logout": "Đăng xuất"
+    "logout": "Đăng xuất",
+    "langdingPage": {
+      "metadata": {
+        "title": "test",
+        "description": "test"
+      }
+    }
   }
   

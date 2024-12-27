@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { removeAllTokens } from '@/libs/token';
 import createMiddleware from 'next-intl/middleware';
+import { Locales , DefaultLocale , LocalePrefix} from './constants/language';
 
 
 const PUBLIC_ROUTES = ['/login', '/register', '/about', '/static', '/_next', '/favicon.ico'];
@@ -8,9 +9,9 @@ const PROTECTED_ROUTES = ['/dashboard', '/onboarding'];
 const AUTH_ONLY_ROUTES = ['/login', '/register'];
 
 const nextIntlMiddleware = createMiddleware({
-  locales: ['en', 'vi', 'jp'],
-  defaultLocale: 'en',
-  localePrefix: 'never',
+  locales: Locales || ["en", "vi"],
+  defaultLocale: DefaultLocale || "en",
+  localePrefix: LocalePrefix || "never",
 });
 
 export default async function middleware(request: NextRequest) {
