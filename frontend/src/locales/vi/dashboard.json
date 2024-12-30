@@ -1,9 +1,9 @@
 {
-    "dashboard": {
+   
       "metadata": {
         "title": "Dự án Frontend NextJS - Trang Điều Khiển",
         "description": "Dự án Frontend NextJS"
       },
       "welcome_message": "Chào mừng bạn đến với ứng dụng của chúng tôi! "
-    }
+    
   }

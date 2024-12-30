@@ -1,10 +1,7 @@
 {
-    "register": {
-      "metadata": {
+    "metadata": {
         "title": "Dự án Frontend NextJS - Trang Đăng Kí",
         "description": "Dự án Frontend NextJS"
-      },
-      "welcome_message": "Chào mừng bạn đến với ứng dụng của chúng tôi! "
-    }
-  }
-  
+    },
+    "welcome_message": "Chào mừng bạn đến với ứng dụng của chúng tôi! "
+}
