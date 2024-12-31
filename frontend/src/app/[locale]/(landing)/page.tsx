@@ -12,7 +12,7 @@ const LandingPage = () => {
         <div className="h-full w-full flex flex-col items-center justify-center">
             <p className="">LandingPage</p>
             <button type="button" onClick={() => handledashboardBtn()}>
-                Dashboard
+                Go to Dashboard
             </button>
         </div>
     );

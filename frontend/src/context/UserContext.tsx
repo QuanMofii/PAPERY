@@ -1,53 +1,33 @@
-// "use client";
+"use client";
+import React, { createContext, useContext, useState } from "react";
 
-// import React, { createContext, useContext, useState } from "react";
-// import i18next from "@/libs/next-intl/i18n";
-// import Cookies from "js-cookie";
+interface User {
+  name: string;
+  email: string;
+  avatar: string;
+}
 
-// type LanguageContextType = {
-//   language: string;
-//   t: (key: string, options?: any) => string;
-//   changeLanguage: (lang: string) => Promise<void>;
-// };
+interface UserContextType {
+  user: User | null;
+  setUser: (user: User | null) => void;
+}
 
-// const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const UserContext = createContext<UserContextType | undefined>(undefined);
 
-// export const LanguageProvider = ({
-//   children,
-//   initialTranslations,
-//   initialLang,
-// }: {
-//   children: React.ReactNode;
-//   initialTranslations: Record<string, string>;
-//   initialLang: string;
-// }) => {
-//   const [language, setLanguage] = useState(initialLang);
-//   const [translations, setTranslations] = useState(initialTranslations);
+export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
 
-//   // Add initial translations and set initial language
-//   i18next.addResourceBundle(initialLang, "translation", initialTranslations, true, true);
+  return (
+    <UserContext.Provider value={{ user, setUser }}>
+      {children}
+    </UserContext.Provider>
+  );
+};
 
-//   const t = (key: string, options?: any) =>
-//     translations[key] || key;
-//   const changeLanguage = async (lang: string) => {
-//     if (lang === language) return;
-//     await i18next.changeLanguage(lang);
-//     const newTranslations = i18next.getDataByLanguage(lang)?.translation || {}; 
-//     setTranslations(newTranslations); 
-//     setLanguage(lang);
-//   };
-
-//   return (
-//     <LanguageContext.Provider value={{ language, t, changeLanguage }}>
-//       {children}
-//     </LanguageContext.Provider>
-//   );
-// };
-
-// export const useLanguage = () => {
-//   const context = useContext(LanguageContext);
-//   if (!context) {
-//     throw new Error("useLanguage must be used within a LanguageProvider");
-//   }
-//   return context;
-// };
+export const useUser = () => {
+  const context = useContext(UserContext);
+  if (!context) {
+    throw new Error("useUser must be used within a UserProvider");
+  }
+  return context;
+};

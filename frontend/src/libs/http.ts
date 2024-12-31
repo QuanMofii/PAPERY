@@ -1,7 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { HttpError } from './error';
-import { getLocale } from 'next-intl/server';
-console.log("process.env.NEXT_PUBLIC_BACKEND_API_URL",process.env.NEXT_PUBLIC_BACKEND_API_URL);
+// import { useLocale } from 'next-intl';
 
 
 export enum APIType {
@@ -90,7 +89,8 @@ const createHttpClient = () => {
     try {
 
       const token = await tokenGetter();
-      const language = await getLocale();
+      // const language = useLocale();
+      const language = 'en';
       const headers = {
         'Ngrok-Skip-Browser-Warning': 'true',
         'Content-Type': 'application/json',

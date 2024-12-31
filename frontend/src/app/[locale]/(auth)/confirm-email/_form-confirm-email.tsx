@@ -33,7 +33,13 @@ const ConfirmEmailForm = () => {
   }, [defaultEmail, defaultCode, setValue]);
 
   const onSubmit = async (data: VerifyReqType) => {
+
     if (isLoading) return;
+
+    if (!data.email || !data.code) {
+      alert(" Please fill in all fields."); 
+      return;
+    }
     setIsLoading(true);
     try {
       console.log("Verify Data Submitted:", data);

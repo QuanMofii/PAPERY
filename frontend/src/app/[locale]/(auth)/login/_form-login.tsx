@@ -26,7 +26,7 @@ const LoginForm = () => {
   });
 
   const onSubmit = async (data: LoginReqType) => {
-    if (isLoading) return;
+  if (isLoading) return;
     setIsLoading(true);
     try {
       console.log("Form submitted:", data);

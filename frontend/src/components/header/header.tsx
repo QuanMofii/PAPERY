@@ -1,23 +1,34 @@
-import LanguageSwitcher from '@/components/header/language-switcher';
+"use server";
 
-export function Header() {
+// import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import LanguageSwitcher from "@/components/header/language-switcher";
+import { Link } from "@/libs/next-intl/routing";
+import MenuSetting from "@/components/header/menu-setting";
+import Navigation from "@/components/header/navigation";
+
+export async function Header() {
+  console.log("Header rendered");
   return (
-    <header className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+    <header className="w-full bg-white shadow-md z-50 fixed">
       <div className="container mx-auto flex justify-between items-center h-16 px-4">
-        {/* Logo */}
+        {/* Logo and Company Name */}
         <div className="flex items-center">
-          {/* <img
-            src="/logo.png" 
-            alt="Logo"
-            className="h-8 w-auto"
-          /> */}
-          <span className="ml-2 text-lg font-semibold text-gray-800">
+
+          <Link href="/" className="ml-3 text-lg font-semibold text-gray-800 hover:text-blue-600">
             Company Name
-          </span>
+          </Link>
         </div>
 
-        {/* Language Switcher */}
-        <div className="flex items-center">
+        {/* Navigation */}
+        <div className="">
+         <Navigation />
+        </div>
+        <div className="flex items-center space-x-2 ">
+          {/* Menu Setting */}
+          <MenuSetting />
+          {/* Language Switcher */}
           <LanguageSwitcher />
         </div>
       </div>
