@@ -22,7 +22,7 @@ const LoginForm = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<LoginReqType>({
-    resolver: zodResolver(LoginReq),
+    resolver: zodResolver(LoginReq(t )),
   });
 
   const onSubmit = async (data: LoginReqType) => {
@@ -69,7 +69,7 @@ const LoginForm = () => {
           </div>
         </div>
       )}
-      <h1>{t('welcome_message')}</h1>
+  
       {/* <LanguageSwitcher/> */}
       <form
         onSubmit={handleSubmit(onSubmit)}
@@ -79,12 +79,12 @@ const LoginForm = () => {
         {/* Email Input */}
         <div className="mb-2">
           <label htmlFor="email" className="text-gray-700 font-semibold">
-            Email:
+          {t('form.email')}:
           </label>
           <input
             type="email"
             id="email"
-            placeholder="Enter your email"
+            placeholder={t('form.email_placeholder')}
             {...register("email")}
             className={`w-full p-2 border ${
               errors.email ? "border-red-500" : "border-gray-300"

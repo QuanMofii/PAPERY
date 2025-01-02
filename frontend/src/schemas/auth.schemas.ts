@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
 // Request Schemas
-export const LoginReq = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters long"),
+export const LoginReq = (t: (key: string) => string) => z.object({
+  email: z.string().email(t("errors.email_invalid")),
+  password: z.string().min(6, t("errors.password_short")),
 });
 
 export const RegisterReq = z.object({
@@ -57,7 +57,7 @@ export const MeRes = z.object({
 });
 
 // Request Types 
-export type LoginReqType = z.infer<typeof LoginReq>;
+export type LoginReqType = z.infer<ReturnType<typeof LoginReq>>;
 export type RegisterReqType = z.infer<typeof RegisterReq>;
 export type RecoveryReqType = z.infer<typeof RecoveryReq>;
 export type VerifyReqType = z.infer<typeof VerifyReq>;
