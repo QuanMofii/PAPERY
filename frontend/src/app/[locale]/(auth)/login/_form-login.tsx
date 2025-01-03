@@ -11,11 +11,12 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { useTranslations } from 'next-intl';
+// import { useTranslations } from 'next-intl';
+import {useTranslation} from '@/libs/i18n/client';
 
 const LoginForm = () => {
-  const t = useTranslations();
-  console.log("t ne",t);
+  const{t}  = useTranslation("login");
+  
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const {

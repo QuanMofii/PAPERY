@@ -8,8 +8,8 @@ import { LocaleSType } from "@/constants/language";
 import { notFound } from 'next/navigation';
 import { routing } from '@/libs/next-intl/routing';
 import Header from "@/components/header/header";
-import { promise } from "zod";
-import { headers } from "next/headers";
+import { LocaleProvider } from "@/context/LanguageContext";
+
 
 const inter = Inter({
   subsets: ["latin"],
@@ -34,24 +34,25 @@ export default async function RootLayout({
   children: React.ReactNode;
   params: Promise<{ locale: string ,title:string}>;
 }) {
-  const { locale,title } = await params;
-  console.log("locale",locale);
-  console.log("title",title);
+  const { locale} = await params;
+  // const locale = getLocale();
   if (!routing.locales.includes(locale as LocaleSType)) {
     notFound();
   }
-  const pathname = (await headers()).get('x-pathname') || '/';
+ 
   const messages = await getMessages();
-  console.log("messages", messages);
+
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={inter.className || ""}>
+      <LocaleProvider value={"vi"}>
         <NextIntlClientProvider messages={messages} key={locale}>
           <UserProvider>
             <Header />
             {children}
           </UserProvider>
         </NextIntlClientProvider>
+        </LocaleProvider>
       </body>
     </html>
   );
