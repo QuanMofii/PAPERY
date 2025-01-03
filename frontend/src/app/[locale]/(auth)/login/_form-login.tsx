@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense} from "react";
+import React, { useState, Suspense, useMemo } from "react";
 
 import {http, HttpError} from "@/libs/http"
 import { LoginReq, LoginReqType } from "@/schemas/auth.schemas";
@@ -15,6 +15,7 @@ import { useTranslations } from 'next-intl';
 
 const LoginForm = () => {
   const t = useTranslations();
+  console.log("t ne",t);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const {
@@ -22,7 +23,7 @@ const LoginForm = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<LoginReqType>({
-    resolver: zodResolver(LoginReq(t )),
+    resolver: zodResolver(LoginReq(t)),
   });
 
   const onSubmit = async (data: LoginReqType) => {

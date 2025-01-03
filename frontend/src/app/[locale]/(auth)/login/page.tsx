@@ -3,7 +3,6 @@ import { getTranslations } from 'next-intl/server';
 
 const LoginPage = async () => {
     const t = await getTranslations();
-
     return (
         <div className="h-full w-full flex items-center justify-center bg-gray-100">
 

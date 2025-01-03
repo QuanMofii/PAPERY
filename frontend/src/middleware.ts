@@ -46,6 +46,7 @@ export default async function middleware(request: NextRequest) {
 
   // Thêm pathname vào header
   response.headers.set('x-page-pathname', pathname);
+  
 
   return response;
 }

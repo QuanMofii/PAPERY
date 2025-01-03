@@ -13,12 +13,11 @@
             "password_placeholder": "Nhập mật của bạn",
             "submit": "Đăng nhập"
     },
-    "errors": {
+    "validation": {
               "email_invalid": "Địa chỉ email không hợp lệ",
               "password_min_length": "Mật khẩu phải có ít nhất 6 ký tự",
-              "name_min_length": "Tên phải có ít nhất 2 ký tự",
-              "passwords_not_match": "Mật khẩu không khớp",
-              "password_short": "Mật khẻ phải có ít nhất 6 ký tự"
+              "passwords_not_match": "Mật khẩu không khớp"
+      
     }
   
 }
