@@ -12,10 +12,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 // import { useTranslations } from 'next-intl';
-import {useTranslation} from '@/libs/i18n/client';
-
-const LoginForm = () => {
-  const{t}  = useTranslation("login");
+// import {useTranslation} from '@/libs/i18n/client';
+type Props = {
+  t: Record<string, any>;
+}
+const LoginForm = ({t}: Props) => {
+  // const{t}  = useTranslation("login");
   
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -81,12 +83,12 @@ const LoginForm = () => {
         {/* Email Input */}
         <div className="mb-2">
           <label htmlFor="email" className="text-gray-700 font-semibold">
-          {t('form.email')}:
+          {t.form.email}:
           </label>
           <input
             type="email"
             id="email"
-            placeholder={t('form.email_placeholder')}
+            placeholder={t.form.email_placeholder}
             {...register("email")}
             className={`w-full p-2 border ${
               errors.email ? "border-red-500" : "border-gray-300"
@@ -162,11 +164,9 @@ const LoginForm = () => {
   );
 };
 
-
-LoginForm.getNamespaces = () => ["common", "login"]; 
-const SuspendedLoginForm = () => (
+const SuspendedLoginForm = ({t}: Props)=> (
     <Suspense fallback={<div className="h-full w-full flex items-center justify-center">Loading...</div>}>
-        <LoginForm/>
+        <LoginForm t={t}/>
     </Suspense>
   );
 export default SuspendedLoginForm;

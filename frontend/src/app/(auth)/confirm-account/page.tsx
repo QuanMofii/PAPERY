@@ -1,5 +1,5 @@
 import React from 'react';
-import ConfirmAccountForm from '@/app/[locale]/(auth)/confirm-account/_form-confirm-account';
+import ConfirmAccountForm from '@/app/(auth)/confirm-account/_form-confirm-account';
 
 const  ConfirmAccountPage = () => {
     return (

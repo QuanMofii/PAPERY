@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
 // Request Schemas
-export const LoginReq = (t: (key: string) => string) => z.object({
-  email: z.string().email(t("validation.email_invalid")),
-  password: z.string().min(6, t("validation.password_min_length")),
+export const LoginReq = (t: Record<string, any>) => z.object({
+  email: z.string().email(t.validation.email_invalid),
+  password: z.string().min(6, t.validation.password_min_length),
 });
 
 export const RegisterReq = (t: (key: string) => string) => z.object({

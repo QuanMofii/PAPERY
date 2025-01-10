@@ -4,7 +4,8 @@
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import LanguageSwitcher from "@/components/header/language-switcher";
-import { Link } from "@/libs/next-intl/routing";
+// import { Link } from "@/libs/next-intl/routing";
+import Link from "next/link";
 import MenuSetting from "@/components/header/menu-setting";
 import Navigation from "@/components/header/navigation";
 
