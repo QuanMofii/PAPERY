@@ -6,8 +6,8 @@ export async function detectLanguage(supportedLngs: readonly string[], defaultLn
   const cookieStore = cookies();
 
 
-  let detectedLng = (await cookieStore).get('i18next')?.value;
-
+  let detectedLng = (await cookieStore).get('lng')?.value;
+  console.log('detectedLng', detectedLng);
   if (!detectedLng) {
     const acceptLanguageHeader = (await requestHeaders).get('accept-language');
 
@@ -28,7 +28,7 @@ export async function detectLanguage(supportedLngs: readonly string[], defaultLn
 }
 export async function setLanguage(lang: string) {
   const cookieStore = cookies();
-  (await cookieStore).set('i18next', lang, {
+  (await cookieStore).set('lng', lang, {
     path: '/',
     sameSite: 'strict',
   });

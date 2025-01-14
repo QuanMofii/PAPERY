@@ -1,62 +1,30 @@
-"use client";
+'use client';
 
-import React, { createContext, useContext, useEffect, useState } from "react";
-import {initI18next} from "@/libs/i18n/i18n";
-import Cookies from "js-cookie";
+import React, { createContext, ReactNode, useContext, useEffect } from 'react';
+import i18next from '@/libs/i18n/client';
 import { usePathname } from 'next/navigation';
-type LanguageContextType = {
+import {useTranslation as useTransAlias} from 'react-i18next';
+type TranslationContextType = {
+  t: typeof i18next.t;
   language: string;
-  t: (key: string, options?: any) => string;
-  changeLanguage: (lang: string) => Promise<void>;
 };
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const TranslationContext = createContext<TranslationContextType | undefined>(undefined);
 
-export const LanguageProvider = ({
+export const TranslationProvider = ({
   children,
-  initialLang,
 }: {
-  children: React.ReactNode;
-  initialLang: string;
+  children: ReactNode;
 }) => {
-  const [language, setLanguage] = useState(initialLang);
-  const [translations, setTranslations] = useState<Record<string, string>>({});
   const pathname = usePathname();
-  
-  useEffect(() => {
-    const namespace = pathname.replace("/", "") || "default";
-    console.log("Current namespace:", namespace);
-    initI18next.loadNamespaces(namespace);
-    const newTranslations =  initI18next.getResourceBundle(language, namespace);
-    console.log("New translations:", newTranslations);
-  if (newTranslations) {
-    // Thêm bản dịch mới vào i18next
-    initI18next.addResourceBundle(language, namespace, newTranslations, true, true);
-  }}, [pathname]);
+  const language = i18next.language;
+  console.log('language', language);
 
-  
-
-  const t = (key: string, options?: any) =>
-    translations[key] || key;
-  const changeLanguage = async (lang: string) => {
-    if (lang === language) return;
-    await  initI18next.changeLanguage(lang);
-    const newTranslations =  initI18next.getDataByLanguage(lang)?.translation || {}; 
-    setTranslations(newTranslations); 
-    setLanguage(lang);
-  };
-
+  const namespace = pathname.split('/').filter(Boolean).pop() || 'common';
+  const useTranslation = useTransAlias(namespace);
   return (
-    <LanguageContext.Provider value={{ language, t, changeLanguage }}>
+    <TranslationContext.Provider value={{ t: i18next.t.bind(i18next), language }}>
       {children}
-    </LanguageContext.Provider>
+    </TranslationContext.Provider>
   );
-};
-
-export const useLanguage = () => {
-  const context = useContext(LanguageContext);
-  if (!context) {
-    throw new Error("useLanguage must be used within a LanguageProvider");
-  }
-  return context;
 };

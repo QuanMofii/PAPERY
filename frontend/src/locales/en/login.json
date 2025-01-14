@@ -1,0 +1,23 @@
+{
+
+    "metadata": {
+      "title": "Dự án Frontend NextJS - Trang Đăng Nhập",
+      "description": "Dự án Frontend NextJS"
+    },
+    "page":{"title": "Login",
+            "welcome_message": "Chào mừng bạn đến với ứng dụng của chúng tôi! "
+    },
+    "form":{"email": "Email",
+            "email_placeholder": "Your email", 
+            "password": "Mật khẩu", 
+            "password_placeholder": "Nhập mật của bạn",
+            "submit": "Đăng nhập"
+    },
+    "validation": {
+              "email_invalid": "Địa chỉ email không hợp lệ",
+              "password_min_length": "Mật khẩu phải có ít nhất 6 ký tự",
+              "passwords_not_match": "Mật khẩu không khớp"
+      
+    }
+  
+}

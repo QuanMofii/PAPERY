@@ -2,15 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import { UserProvider } from "@/context/UserContext";
-// import { NextIntlClientProvider } from 'next-intl';
-// import { getMessages, getTranslations } from 'next-intl/server';
-// import { LocaleSType } from "@/constants/language";
-// import { notFound } from 'next/navigation';
-// import { routing } from '@/libs/next-intl/routing';
-import Header from "@/components/header/header";
-import { cookies } from "next/headers";
-// import { LocaleProvider } from "@/context/LanguageContext";
-
+import {  TranslationProvider } from "@/context/LanguageContext";
+import { getTranslations  } from "@/libs/i18n/server";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -18,36 +11,30 @@ const inter = Inter({
   display: "swap",
 });
 
-// export async function generateMetadata({ params }: { params: Promise<{ locale: LocaleSType }> }): Promise<Metadata> {
-//   const { locale } = await params;
-//   const t = await getTranslations({ locale });
+export async function generateMetadata(): Promise<Metadata> {
+  const {t} = await getTranslations(["landing"]);
 
-//   return {
-//     title: t('metadata.title'),
-//     description: t('metadata.description'),
-//   };
-// }
+  return {
+    title: t('metadata.title'),
+    description: t('metadata.description'),
+  };
+}
 
 export default async function RootLayout({
   children,
-  // params,
 }: {
   children: React.ReactNode;
-  // params: Promise<{ locale: string ,title:string}>;
 }) {
-  const lang = (await cookies()).get('i18next')?.value || 'en';
 
   return (
-    <html lang={lang} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className || ""}>
-      {/* <LocaleProvider value={"vi"}> */}
-        <LanguageProvider  initialLang={lang}>
-          <UserProvider>
-            <Header />
-            {children}
-          </UserProvider>
-        {/* </NextIntlClientProvider> */}
-        </LanguageProvider>
+     
+      <TranslationProvider>
+        <UserProvider>
+          {children}
+        </UserProvider>
+      </TranslationProvider>
       </body>
     </html>
   );
