@@ -3,7 +3,7 @@ import SuspendedLoginForm from '@/app/(auth)/login/_form-login';
 import { getTranslations } from '@/libs/i18n/server';
 const LoginPage = async () => {
     const {t} = await getTranslations(['login']);
-    console.log("toiday");
+
     return (
         <div className="h-full w-full flex items-center justify-center bg-gray-100">
             <div className="h-full w-full flex flex-col items-center justify-center">

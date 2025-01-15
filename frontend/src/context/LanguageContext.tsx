@@ -1,29 +1,38 @@
 'use client';
 
-import React, { createContext, ReactNode, useContext, useEffect } from 'react';
-import i18next from '@/libs/i18n/client';
+import React, { createContext, ReactNode, useContext, useEffect, useMemo } from 'react';
+import initI18nClient from '@/libs/i18n/client';
 import { usePathname } from 'next/navigation';
-import {useTranslation as useTransAlias} from 'react-i18next';
+import {useTranslation } from 'react-i18next';
+import { createInstance } from 'i18next';
 type TranslationContextType = {
-  t: typeof i18next.t;
-  language: string;
+
 };
 
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined);
+const useNamespace = () => {
+  const pathname = usePathname();
+  return useMemo(() => {
+    console.log('useNamespace', pathname);
+    const segments = pathname.split('/').filter(Boolean);
+    return segments.length > 0 ? segments[segments.length - 1] : 'common';
+  }, [pathname]);
+};
 
+let count = 1;
+const i18nInstance = initI18nClient();
+console.log('TranslationProvider instance load')
 export const TranslationProvider = ({
   children,
 }: {
   children: ReactNode;
 }) => {
-  const pathname = usePathname();
-  const language = i18next.language;
-  console.log('language', language);
-
-  const namespace = pathname.split('/').filter(Boolean).pop() || 'common';
-  const useTranslation = useTransAlias(namespace);
+  console.log('TranslationProvider', count++);
+  const namespace = useNamespace();
+  
+  const { t } = useTranslation(namespace);
   return (
-    <TranslationContext.Provider value={{ t: i18next.t.bind(i18next), language }}>
+    <TranslationContext.Provider value={{}}>
       {children}
     </TranslationContext.Provider>
   );

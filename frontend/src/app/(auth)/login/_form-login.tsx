@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 
 const LoginForm = () => {
   const {t} = useTranslation("login");
-
+  console.log("render");
   
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);

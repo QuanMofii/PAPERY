@@ -1,15 +1,13 @@
 "use server";
 import { cookies, headers } from 'next/headers';
-
+import { LNG } from '@/constants/language';
 export async function detectLanguage(supportedLngs: readonly string[], defaultLng = 'en'): Promise<string> {
-  const requestHeaders = headers();
-  const cookieStore = cookies();
 
-
-  let detectedLng = (await cookieStore).get('lng')?.value;
-  console.log('detectedLng', detectedLng);
+  let detectedLng = (await cookies()).get(LNG)?.value;
+  
   if (!detectedLng) {
-    const acceptLanguageHeader = (await requestHeaders).get('accept-language');
+
+    const acceptLanguageHeader = (await  headers()).get('accept-language');
 
     if (acceptLanguageHeader) {
       const languages = acceptLanguageHeader
@@ -25,11 +23,4 @@ export async function detectLanguage(supportedLngs: readonly string[], defaultLn
   }
 
   return  detectedLng || defaultLng; ;
-}
-export async function setLanguage(lang: string) {
-  const cookieStore = cookies();
-  (await cookieStore).set('lng', lang, {
-    path: '/',
-    sameSite: 'strict',
-  });
 }

@@ -76,7 +76,7 @@ const createHttpClient = () => {
           ? `${BASE_URL}/api/${API_VERSION}${inputURL}` 
           : inputURL;
       }
-      console.log("inputURL",inputURL);
+
       return inputURL;
     };
 

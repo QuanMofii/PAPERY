@@ -4,7 +4,8 @@ import "@/styles/globals.css";
 import { UserProvider } from "@/context/UserContext";
 import {  TranslationProvider } from "@/context/LanguageContext";
 import { getTranslations  } from "@/libs/i18n/server";
-
+// import i18next from "@/libs/i18n/client";
+import {Header} from "@/components/header/header";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -29,9 +30,10 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className || ""}>
-     
+    
       <TranslationProvider>
         <UserProvider>
+        <Header/>
           {children}
         </UserProvider>
       </TranslationProvider>
