@@ -1,5 +1,5 @@
 import React from 'react';
-import ConfirmEmailForm from '@/app/(auth)/confirm-email/_form-confirm-email';
+import ConfirmEmailForm from './_form-confirm-email';
 
 const ConfirmEmailPage = () => {
     return (

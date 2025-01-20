@@ -1,24 +1,23 @@
-// import {getRequestConfig} from 'next-intl/server';
-// import {routing ,Locale} from './routing';
-// import {getUserLanguage} from '@/libs/next-intl/language';
- 
+import { getRequestConfig } from "next-intl/server";
+import { routing, Locale } from "./routing";
+import { loadMessages } from "@/libs/next-intl/language";
+import { DefaultLocale } from "@/constants/language";
 
- 
+export default getRequestConfig(async ({ requestLocale }) => {
 
-// export default getRequestConfig(async () => {
-//   // This typically corresponds to the `[locale]` segment
-//   const { locale, pathname } = await getUserLanguage();
+  let locale = await requestLocale || DefaultLocale;
 
+  if (!routing.locales.includes(locale as Locale)) {
+    throw new Error(`Invalid locale: ${locale}`);
+  }
 
+  const messages = await loadMessages({
+    locale ,
+    baseDir: "src/locales",
+  });
+  return {
+    locale,
+    messages,
+  };
+});
 
-//   // Ensure that the incoming `locale` is valid
-//   if (!routing.locales.includes(locale as Locale)) {
-//     throw new Error(`Invalid locale: ${locale}`);
-//   }
-
-//   return {
-//     locale,
-//     messages: (await import(`@/locales/${locale}${pathname}.json`)).default,
-    
-//   };
-// });

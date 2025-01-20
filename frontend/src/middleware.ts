@@ -1,39 +1,56 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server';
 import { removeAllTokens } from '@/libs/token';
+import createMiddleware from 'next-intl/middleware';
+import { Locales, DefaultLocale, LocalePrefix } from './constants/language';
 
-const PUBLIC_ROUTES = [ '/login', '/register', '/about', '/static', '/_next', '/favicon.ico','locales/','locales/.*', '.*\\..*'];
+const PUBLIC_ROUTES = ['/login', '/register', '/about', '/static', '/_next', '/favicon.ico'];
 const PROTECTED_ROUTES = ['/dashboard', '/onboarding'];
-const AUTH_ONLY_ROUTES = ['/login', '/register',];
+const AUTH_ONLY_ROUTES = ['/login', '/register'];
+
+const nextIntlMiddleware = createMiddleware({
+  locales: Locales,
+  defaultLocale: DefaultLocale,
+  localePrefix: LocalePrefix,
+});
+
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get('refresh_token')
-  
+  const strippedPathname = pathname.replace(/^\/(vi|en)/, "");
+  const token = request.cookies.get('refresh_token');
+
+  // 1. Kiểm tra Protected Routes
+  if (PROTECTED_ROUTES.some((route) => pathname.startsWith(route))) {
+    if (!token) {
+      // Nếu không có token, chuyển hướng về login
+      removeAllTokens();
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+    // Nếu có token, cho phép truy cập
+    return NextResponse.next();
+  }
+
+  // 2. Kiểm tra Auth-Only Routes
   if (AUTH_ONLY_ROUTES.some((route) => pathname.startsWith(route))) {
     if (token) {
-      const dashboardUrl = new URL('/dashboard', request.url);
-      return NextResponse.redirect(dashboardUrl);
+      // Nếu có token, chuyển hướng đến dashboard
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
+    // Nếu không có token, cho phép truy cập để login/register
     return NextResponse.next();
   }
+
+  // 3. Xử lý Public Routes
   if (PUBLIC_ROUTES.some((route) => pathname.startsWith(route))) {
-    return NextResponse.next();
+    return nextIntlMiddleware(request);
   }
 
-  if (PROTECTED_ROUTES.some((route) => pathname.startsWith(route))) {
-
-    if (!token) {
-      removeAllTokens();
-      const signInUrl = new URL('/login', request.url);
-      return NextResponse.redirect(signInUrl);
-    }
-  }
-
-  return NextResponse.next();
+  // 4. Xử lý các route còn lại bằng nextIntlMiddleware
+  return nextIntlMiddleware(request);
 }
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|locales/.*|.*\\..*).*)',
+    '/(vi|en)/:path*',
+    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\..*).*)',
   ],
-}
+};

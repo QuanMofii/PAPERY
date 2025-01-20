@@ -1,0 +1,13 @@
+{
+
+    "metadata": {
+      "title": "Trang Đăng Kí",
+      "description": "Dự án Frontend NextJS"
+    },
+    "page":{"title": "Đăng kí",
+            "welcome_message": "Chào mừng bạn đến với ứng dụng của chúng tôi! "
+    },
+    "form":{},
+    "errors": {}
+  
+}

@@ -3,16 +3,13 @@
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import Cookies from "js-cookie";
-// import { useLocale } from "next-intl";
-// import { useRouter } from "next/navigation";
-import { Locales } from "@/constants/language";
+import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
+import { Locales } from "@/constants/language";
 
 export function LanguageSwitcher() {
   const router = useRouter();
-  // const currentLocale = useLocale();
-
-  const currentLocale = Cookies.get("NEXT_LOCALE") || Locales[0];
+  const currentLocale = useLocale();
 
   const handleLanguageChange = (locale: string) => {
     if (locale !== currentLocale) {

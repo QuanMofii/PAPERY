@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense, useMemo } from "react";
+import React, { useState, Suspense} from "react";
 
 import {http, HttpError} from "@/libs/http"
 import { LoginReq, LoginReqType } from "@/schemas/auth.schemas";
@@ -11,14 +11,10 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-// import { useTranslation } from '@/libs/i18n/i18n';
-// import { useTranslation } from "@/context/LanguageContext";
-import { useTranslation } from 'react-i18next';
+import { useTranslations } from 'next-intl';
 
 const LoginForm = () => {
-  const {t} = useTranslation("login");
-  console.log("render");
-  
+  const t = useTranslations("auth");
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const {
@@ -33,7 +29,6 @@ const LoginForm = () => {
   if (isLoading) return;
     setIsLoading(true);
     try {
-      console.log("Form submitted:", data);
       const formData = new URLSearchParams();
       formData.append('username', data.email);
       formData.append('password', data.password);
@@ -60,7 +55,6 @@ const LoginForm = () => {
 
   const handleGoogleLogin = () => {
     console.log("Sign in with Google");
-    // TODO: Thực hiện logic đăng nhập bằng Google
   };
 
   return (
@@ -83,12 +77,12 @@ const LoginForm = () => {
         {/* Email Input */}
         <div className="mb-2">
           <label htmlFor="email" className="text-gray-700 font-semibold">
-          {t("form.email")}:
+          {t('form.email')}:
           </label>
           <input
             type="email"
             id="email"
-            placeholder={t("form.email_placeholder")}
+            placeholder={t('form.email_placeholder')}
             {...register("email")}
             className={`w-full p-2 border ${
               errors.email ? "border-red-500" : "border-gray-300"
@@ -104,12 +98,12 @@ const LoginForm = () => {
         {/* Password Input */}
         <div className="mb-4">
           <label htmlFor="password" className="text-gray-700 font-semibold">
-            Password:
+          {t('form.password')}:
           </label>
           <input
             type="password"
             id="password"
-            placeholder="Enter your password"
+            placeholder={t('form.password_placeholder')}
             {...register("password")}
             className={`w-full p-2 border ${
               errors.password ? "border-red-500" : "border-gray-300"
@@ -131,7 +125,7 @@ const LoginForm = () => {
               isLoading ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >
-            {isLoading ? "Logging in..." : "Login"}
+            {isLoading ? t('button.logging_in') : t('button.login')}
           </button>
         </div>
 
@@ -143,20 +137,20 @@ const LoginForm = () => {
             disabled={isLoading}
             className="w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-600 transition duration-200"
           >
-            Signup with Google
+            {t('button.login_with_google')}
           </button>
         </div>
 
         {/* Links */}
         <div className="text-center">
           <Link href="/forgot-password" className="text-blue-500 hover:underline">
-            Forgot Password?
+            {t('button.forgot_password')}
           </Link>
         </div>
         <div className="text-center">
-          <span className="text-gray-600">Don&apos;t have an account yet?</span>
+          <span className="text-gray-600">{t('text.dont_have_account')}</span>
           <Link href="/register" className="text-blue-500 hover:underline ml-1">
-            Register
+          {t('button.register')}
           </Link>
         </div>
       </form>
@@ -164,6 +158,8 @@ const LoginForm = () => {
   );
 };
 
+
+LoginForm.getNamespaces = () => ["common", "login"]; 
 const SuspendedLoginForm = () => (
     <Suspense fallback={<div className="h-full w-full flex items-center justify-center">Loading...</div>}>
         <LoginForm/>

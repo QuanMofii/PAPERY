@@ -1,0 +1,22 @@
+{ "text":{"dont_have_account": "Không có tài khoản? Hãy"},
+  "button":{"forgot_password": "Quên mật khẩu", 
+            "register": "Đăng kí",
+            "registering":"Đang đăng kí...",
+            "login": "Đăng nhập",
+            "logging_in":"Đang đăng nhập...",
+            "login_with_google": "Đăng nhập với Google"},
+  "form":{"email": "Email",
+        "email_placeholder": "Nhập Email của bạn", 
+        "password": "Mật khẩu", 
+        "password_placeholder": "Nhập mật khẩu của bạn",
+        "confirm_password": "Xác nhận mật khẩu",
+        "confirm_password_placeholder": "Nhập lại mật khẩu"
+  },
+  "errors": {
+    "email_invalid": "Địa chỉ email không hợp lệ",
+    "password_min_length": "Mật khẩu phải có ít nhất 6 ký tự",
+    "name_min_length": "Tên phải có ít nhất 2 ký tự",
+    "passwords_not_match": "Mật khẩu không khớp",
+    "password_short": "Mật khẩu phải có ít nhất 6 ký tự"
+  }
+}

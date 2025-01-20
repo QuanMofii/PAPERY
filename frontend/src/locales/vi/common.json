@@ -1,7 +1,7 @@
 {
-      "metadata": {
-        "title": "Dự án Frontend NextJS ",
-        "description": "Dự án Frontend NextJS"
-      },
-      "welcome_message": "Chào mừng bạn đến với ứng dụng của chúng tôi! "
-  }
+    "language":{
+        "vi":"Việt Nam",
+        "en":"English",
+        "jp":"Japanese"
+    }
+}

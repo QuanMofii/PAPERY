@@ -1,6 +1,5 @@
 "use client"
-// import { useRouter } from '@/libs/next-intl/routing'
-import { useRouter } from "next/navigation";
+import { useRouter } from '@/libs/next-intl/routing'
 
 const LandingPage = () => {
     const router = useRouter()

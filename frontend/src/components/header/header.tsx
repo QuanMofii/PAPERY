@@ -4,13 +4,12 @@
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import LanguageSwitcher from "@/components/header/language-switcher";
-// import { Link } from "@/libs/next-intl/routing";
-import Link from "next/link";
+import { Link } from "@/libs/next-intl/routing";
 import MenuSetting from "@/components/header/menu-setting";
 import Navigation from "@/components/header/navigation";
 
 export async function Header() {
-  console.log("Header rendered");
+
   return (
     <header className="w-full bg-white shadow-md z-50 fixed">
       <div className="container mx-auto flex justify-between items-center h-16 px-4">

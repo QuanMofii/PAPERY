@@ -1,6 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { HttpError } from './error';
-// import { useLocale } from 'next-intl';
 
 
 export enum APIType {
@@ -76,7 +75,7 @@ const createHttpClient = () => {
           ? `${BASE_URL}/api/${API_VERSION}${inputURL}` 
           : inputURL;
       }
-
+      console.log("inputURL",inputURL);
       return inputURL;
     };
 
@@ -89,7 +88,6 @@ const createHttpClient = () => {
     try {
 
       const token = await tokenGetter();
-      // const language = useLocale();
       const language = 'en';
       const headers = {
         'Ngrok-Skip-Browser-Warning': 'true',

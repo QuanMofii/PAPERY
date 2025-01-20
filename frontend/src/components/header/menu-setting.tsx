@@ -9,7 +9,6 @@ const MenuSetting = () => {
   const { user, setUser } = useUser();
 
   const handleSignOut = () => {
-    // Xử lý đăng xuất
     setUser(null);
   };
 

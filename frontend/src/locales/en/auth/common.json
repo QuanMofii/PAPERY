@@ -1,0 +1,19 @@
+{ "text":{"don_have_account": "Don&apos;t have an account yet?"},
+  "button":{"forgot_password": "Quên mật khẩu", 
+            "register": "Đăng kí", 
+            "login": "Đăng nhập"},
+  "form":{"email": "Email",
+        "email_placeholder": "Nhập Email của bạn", 
+        "password": "Mật khẩu", 
+        "password_placeholder": "Nhập mật khẩu của bạn",
+        "confirm_password": "Xác nhận mật khẩu",
+        "confirm_password_placeholder": "Nhập lại mật khẩu"
+  },
+  "errors": {
+    "email_invalid": "Địa chỉ email không hợp lệ",
+    "password_min_length": "Mật khẩu phải có ít nhất 6 ký tự",
+    "name_min_length": "Tên phải có ít nhất 2 ký tự",
+    "passwords_not_match": "Mật khẩu không khớp",
+    "password_short": "Mật khẩu phải có ít nhất 6 ký tự"
+  }
+}
