@@ -1,18 +1,16 @@
-# --------- requirements and migration stage---------
-
-FROM python:3.11-slim as requirements-stage
+# --------- requirements ---------
+FROM python:3.11 as requirements-stage
 
 WORKDIR /tmp
 
-RUN pip install poetry
+RUN pip install poetry poetry-plugin-export
 
 COPY ./pyproject.toml ./poetry.lock* /tmp/
 
 RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
 
-
 # --------- final image build ---------
-FROM python:3.11-slim
+FROM python:3.11
 
 WORKDIR /code
 
@@ -20,12 +18,8 @@ COPY --from=requirements-stage /tmp/requirements.txt /code/requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
-# Sao chép mã nguồn cần thiết cho worker
-COPY ./src/app/core/worker /code/core/worker
-COPY ./src/app/core/config.py /code/core/config.py
+# Copy application code
+COPY ./src/app /code/app
 
-# Đặt PYTHONPATH để Python có thể tìm thấy module core
-ENV PYTHONPATH=/code
-
-# Cài đặt tập lệnh để khởi chạy worker
-CMD ["arq", "core.worker.settings.WorkerSettings"]
+# Default command
+CMD ["arq", "app.core.worker.settings.WorkerSettings"] 

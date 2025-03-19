@@ -68,6 +68,8 @@ def upgrade() -> None:
     sa.Column('hashed_password', sa.String(length=255), nullable=False),
     sa.Column('profile_image_url', sa.String(length=2083), server_default='https://profileimageurl.com', nullable=False),
     sa.Column('is_superuser', sa.Boolean(), nullable=False),
+    sa.Column('is_active', sa.Boolean(), server_default='false', nullable=False),
+    sa.Column('last_login', sa.DateTime(), nullable=True),
     sa.Column('tier_id', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('current_timestamp(0)'), nullable=True),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('current_timestamp(0)'), nullable=True),
@@ -80,6 +82,7 @@ def upgrade() -> None:
     sa.UniqueConstraint('uuid')
     )
     op.create_index(op.f('ix_user_email'), 'user', ['email'], unique=True)
+    op.create_index(op.f('ix_user_is_active'), 'user', ['is_active'], unique=False)
     op.create_index(op.f('ix_user_tier_id'), 'user', ['tier_id'], unique=False)
     op.create_index(op.f('ix_user_username'), 'user', ['username'], unique=True)
     op.create_table('post',
@@ -108,6 +111,7 @@ def downgrade() -> None:
     op.drop_table('post')
     op.drop_index(op.f('ix_user_username'), table_name='user')
     op.drop_index(op.f('ix_user_tier_id'), table_name='user')
+    op.drop_index(op.f('ix_user_is_active'), table_name='user')
     op.drop_index(op.f('ix_user_email'), table_name='user')
     op.drop_table('user')
     op.drop_index(op.f('ix_rate_limit_tier_id'), table_name='rate_limit')
@@ -115,4 +119,4 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_token_blacklist_token'), table_name='token_blacklist')
     op.drop_table('token_blacklist')
     op.drop_table('tier')
-    # ### end Alembic commands ###
+    # ### end Alembic commands ### 

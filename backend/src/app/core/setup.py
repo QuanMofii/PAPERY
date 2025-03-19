@@ -5,24 +5,22 @@ from typing import Any
 import anyio
 import fastapi
 import redis.asyncio as redis
-
 from arq import create_pool
 from arq.connections import RedisSettings
-
 from fastapi import APIRouter, Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
-from fastapi.middleware.cors import CORSMiddleware
 
-from api.dependencies import get_current_superuser
-from middleware.client_cache_middleware import ClientCacheMiddleware
-from middleware.error_middleware import AppErrorHandlerMiddleware, DBErrorHandlerMiddleware, InternalServerErrorHandlerMiddleware, ValidationErrorHandlerMiddleware
-
-from core.config import (
+from ..api.dependencies import get_current_superuser
+from ..core.utils.rate_limit import rate_limiter
+from ..api import router as api_router
+from ..middleware.client_cache_middleware import ClientCacheMiddleware
+from ..models import *
+from .config import (
     AppSettings,
-    CORSMiddlewareSettings,
     ClientSideCacheSettings,
-    BaseSettings,
+    DatabaseSettings,
     EnvironmentOption,
     EnvironmentSettings,
     RedisCacheSettings,
@@ -30,54 +28,42 @@ from core.config import (
     RedisRateLimiterSettings,
     settings,
 )
-
-from core.db.database import Base, async_engine as engine
-from core.utils import cache, queue, rate_limit 
-# from models import user,post,rate_limit,tier
-
-
-from logging import getLogger
-logger = getLogger(__name__)
+from .db.database import Base
+from .db.database import async_engine as engine
+from .utils import cache, queue
 
 # -------------- database --------------
 async def create_tables() -> None:
-    logger.info(f'Creating tables')
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
+
 # -------------- cache --------------
 async def create_redis_cache_pool() -> None:
-    logger.info(f'Creating redis cache pool with url: {settings.REDIS_CACHE_URL}')
     cache.pool = redis.ConnectionPool.from_url(settings.REDIS_CACHE_URL)
     cache.client = redis.Redis.from_pool(cache.pool)  # type: ignore
 
 
 async def close_redis_cache_pool() -> None:
-    logger.info(f'Closing redis cache pool')
     await cache.client.aclose()  # type: ignore
 
 
 # -------------- queue --------------
 async def create_redis_queue_pool() -> None:
-    logger.info(f'Creating redis queue pool: {settings.REDIS_QUEUE_HOST}:{settings.REDIS_QUEUE_PORT}')
     queue.pool = await create_pool(RedisSettings(host=settings.REDIS_QUEUE_HOST, port=settings.REDIS_QUEUE_PORT))
 
 
 async def close_redis_queue_pool() -> None:
-    logger.info(f'Closing redis queue pool')
     await queue.pool.aclose()  # type: ignore
 
 
 # -------------- rate limit --------------
 async def create_redis_rate_limit_pool() -> None:
-    logger.info(f'Creating redis rate limit pool with url: {settings.REDIS_RATE_LIMIT_URL}')
-    rate_limit.pool = redis.ConnectionPool.from_url(settings.REDIS_RATE_LIMIT_URL)
-    rate_limit.client = redis.Redis.from_pool(rate_limit.pool)  # type: ignore
+    rate_limiter.initialize(settings.REDIS_RATE_LIMIT_URL)  # type: ignore
 
 
 async def close_redis_rate_limit_pool() -> None:
-    logger.info(f'Closing redis rate limit pool')
-    await rate_limit.client.aclose()  # type: ignore
+    await rate_limiter.client.aclose()  # type: ignore
 
 
 # -------------- application --------------
@@ -88,11 +74,10 @@ async def set_threadpool_tokens(number_of_tokens: int = 100) -> None:
 
 def lifespan_factory(
     settings: (
-        BaseSettings
-        | AppSettings
-        | CORSMiddlewareSettings
-        | ClientSideCacheSettings
+        DatabaseSettings
         | RedisCacheSettings
+        | AppSettings
+        | ClientSideCacheSettings
         | RedisQueueSettings
         | RedisRateLimiterSettings
         | EnvironmentSettings
@@ -103,30 +88,36 @@ def lifespan_factory(
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncGenerator:
+        from asyncio import Event
+
+        initialization_complete = Event()
+        app.state.initialization_complete = initialization_complete
+
         await set_threadpool_tokens()
 
-        if isinstance(settings, BaseSettings) and create_tables_on_start:
-            await create_tables()
+        try:
+            if isinstance(settings, RedisCacheSettings):
+                await create_redis_cache_pool()
 
-        if isinstance(settings, RedisCacheSettings):
-            await create_redis_cache_pool()
+            if isinstance(settings, RedisQueueSettings):
+                await create_redis_queue_pool()
 
-        if isinstance(settings, RedisQueueSettings):
-            await create_redis_queue_pool()
+            if isinstance(settings, RedisRateLimiterSettings):
+                await create_redis_rate_limit_pool()
 
-        if isinstance(settings, RedisRateLimiterSettings):
-            await create_redis_rate_limit_pool()
+            initialization_complete.set()
 
-        yield
+            yield
 
-        if isinstance(settings, RedisCacheSettings):
-            await close_redis_cache_pool()
+        finally:
+            if isinstance(settings, RedisCacheSettings):
+                await close_redis_cache_pool()
 
-        if isinstance(settings, RedisQueueSettings):
-            await close_redis_queue_pool()
+            if isinstance(settings, RedisQueueSettings):
+                await close_redis_queue_pool()
 
-        if isinstance(settings, RedisRateLimiterSettings):
-            await close_redis_rate_limit_pool()
+            if isinstance(settings, RedisRateLimiterSettings):
+                await close_redis_rate_limit_pool()
 
     return lifespan
 
@@ -135,11 +126,10 @@ def lifespan_factory(
 def create_application(
     router: APIRouter,
     settings: (
-        BaseSettings
-        | AppSettings
-        | CORSMiddlewareSettings
-        | ClientSideCacheSettings
+        DatabaseSettings
         | RedisCacheSettings
+        | AppSettings
+        | ClientSideCacheSettings
         | RedisQueueSettings
         | RedisRateLimiterSettings
         | EnvironmentSettings
@@ -188,34 +178,32 @@ def create_application(
     based on the environment settings.
     """
     # --- before creating application ---
-
     lifespan = lifespan_factory(settings, create_tables_on_start=create_tables_on_start)
-    
 
-    application = FastAPI(title=settings.APP_NAME,
-                            description=settings.APP_DESCRIPTION,
-                            contact={"name": settings.CONTACT_NAME, "email": settings.CONTACT_EMAIL},
-                            license_info={"name": settings.LICENSE_NAME},
-                            terms_of_service=settings.TERMS_OF_SERVICE,
-                            lifespan=lifespan,
-                           **kwargs)
+    application = FastAPI(
+        title=settings.APP_NAME,
+        description=settings.APP_DESCRIPTION,
+        contact={"name": settings.CONTACT_NAME, "email": settings.CONTACT_EMAIL},
+        license_info={"name": settings.LICENSE_NAME},
+        terms_of_service=settings.TERMS_OF_SERVICE,
+        lifespan=lifespan,
+        **kwargs
+    )
+    
+    # Add CORS middleware
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.ALLOWED_ORIGINS, 
-        allow_credentials=True, 
-        allow_methods=["*"],  
-        allow_headers=["*"],  
+        allow_origins=settings.CORS_ORIGINS,
+        allow_credentials=settings.CORS_CREDENTIALS,
+        allow_methods=settings.CORS_METHODS,
+        allow_headers=settings.CORS_HEADERS,
     )
+
     application.include_router(router)
+
 
     if isinstance(settings, ClientSideCacheSettings):
         application.add_middleware(ClientCacheMiddleware, max_age=settings.CLIENT_CACHE_MAX_AGE)
-    if isinstance(settings, AppErrorHandlerMiddleware):
-         application.add_middleware(ValidationErrorHandlerMiddleware)
-    if isinstance(settings, DBErrorHandlerMiddleware):
-        application.add_middleware(DBErrorHandlerMiddleware)
-    if isinstance(settings, InternalServerErrorHandlerMiddleware):
-        application.add_middleware(InternalServerErrorHandlerMiddleware)
 
     if isinstance(settings, EnvironmentSettings):
         if settings.ENVIRONMENT != EnvironmentOption.PRODUCTION:
@@ -237,5 +225,5 @@ def create_application(
                 return out
 
             application.include_router(docs_router)
-        logger.info(f'Environment: {settings.ENVIRONMENT}')
+
         return application

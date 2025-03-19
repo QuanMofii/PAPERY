@@ -1,28 +1,22 @@
 import asyncio
+import importlib
+import pkgutil
 from logging.config import fileConfig
 
 from alembic import context
 from app.core.config import settings
-from app.core.setup import Base
+from app.core.db.database import Base
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-import sys
-import os
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../app")))
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-from logging import getLogger
-logger = getLogger(__name__)
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
 config.set_main_option(
     "sqlalchemy.url",
-    f"{settings.database_url}",
+    f"{settings.POSTGRES_ASYNC_PREFIX}{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_SERVER}/{settings.POSTGRES_DB}",
 )
 
 # Interpret the config file for Python logging.
@@ -31,11 +25,15 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
+# Auto-import all models in app.models
+def import_models(package_name):
+    package = importlib.import_module(package_name)
+    for _, module_name, _ in pkgutil.walk_packages(package.__path__, package.__name__ + "."):
+        importlib.import_module(module_name)
+
+# Load all models dynamically
+import_models("app.models")
 target_metadata = Base.metadata
-logger.info(f'Tables currently in database: {Base.metadata.tables.keys()}')
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
