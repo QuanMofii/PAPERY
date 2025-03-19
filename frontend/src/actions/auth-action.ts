@@ -1,7 +1,7 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+
 
 import {
     LoginAPI,
@@ -114,21 +114,18 @@ export async function SocialAuthAction(provider: string) {
     return response;
 }
 
-export async function logout() {
-    try {
-        // Gọi API logout
-        await LogoutAPI();
+export async function logoutAction() {
 
-        // Xóa các cookies liên quan đến authentication
+        const response = await LogoutAPI();
+
         const cookieStore = await cookies();
         cookieStore.delete('accessToken');
         cookieStore.delete('refreshToken');
 
-        return { success: true };
-    } catch {
-        return { success: false };
+
+        return response.success ? { success: true, data: response.data } : { success: false, error: response.error };;
     }
-}
+
 
 export async function refreshTokenAction() {
     const cookieStore = await cookies();

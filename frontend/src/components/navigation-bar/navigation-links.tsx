@@ -9,7 +9,7 @@ const NAVIGATION_LINKS = [
     { href: '/', label: 'Home' },
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/examples', label: 'Examples' },
-    { href: '/test', label: 'test' }
+
 ];
 
 interface NavigationLinksProps {

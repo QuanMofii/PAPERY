@@ -4,7 +4,7 @@ import React, { ReactNode, createContext, useContext, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { logout as logoutAction } from '@/actions/auth-action';
+import {  logoutAction } from '@/actions/auth-action';
 
 export interface User {
     name: string;
