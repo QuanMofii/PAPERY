@@ -48,8 +48,8 @@ export const RefreshTokenAPI = async (refresh_token: string) => {
     );
 };
 
-export const LogoutAPI = async () => {
-    return await http.post('/logout', null, {
+export const LogoutAPI = async (refresh_token: string | undefined) => {
+    return await http.post('/logout', { refresh_token }, {
         withCredentials: true
     });
 };

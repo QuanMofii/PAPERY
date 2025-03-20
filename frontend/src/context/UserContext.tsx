@@ -1,10 +1,12 @@
 'use client';
 
-import React, { ReactNode, createContext, useContext, useState } from 'react';
+import React, { ReactNode, createContext, useContext, useState, useEffect } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import {  logoutAction } from '@/actions/auth-action';
+import { LogoutAPI } from '@/app/api/client/auth-api';
+import { logoutAction } from '@/actions/auth-action';
+import { toast } from 'sonner';
 
 export interface User {
     name: string;
@@ -30,15 +32,21 @@ export const UserProvider: React.FC<{
     const [user, setUser] = useState<User | null>(initialUser);
     const router = useRouter();
 
+    useEffect(() => {
+        if (!initialUser) {
+            logoutAction();
+        }
+    }, [initialUser]);
+
     const logout = async () => {
-        try {
-            const result = await logoutAction();
-            if (result.success) {
-                setUser(null);
-                router.push('/login');
-            }
-        } catch (error) {
-            console.error('Logout failed');
+
+        const result =await logoutAction();
+        if (result.success) {
+            setUser(null);
+            toast.success('Success');
+            router.push('/login');
+        } else {
+            toast.error('Error');
         }
     };
 

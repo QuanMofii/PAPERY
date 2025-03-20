@@ -13,6 +13,7 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/registry/new-york-v4/ui/sidebar';
 
 import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from 'lucide-react';
+import { useUser } from '@/context/UserContext';
 
 export function NavUser({
     user
@@ -24,6 +25,7 @@ export function NavUser({
     };
 }) {
     const { isMobile } = useSidebar();
+    const { logout } = useUser();
 
     return (
         <SidebarMenu>
@@ -84,7 +86,7 @@ export function NavUser({
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={logout}>
                             <LogOut />
                             Log out
                         </DropdownMenuItem>

@@ -115,16 +115,17 @@ export async function SocialAuthAction(provider: string) {
 }
 
 export async function logoutAction() {
-
-        const response = await LogoutAPI();
-
-        const cookieStore = await cookies();
-        cookieStore.delete('accessToken');
-        cookieStore.delete('refreshToken');
-
-
-        return response.success ? { success: true, data: response.data } : { success: false, error: response.error };;
+    const cookieStore = await cookies();
+    const refreshToken = cookieStore.get('refresh_token')?.value;
+    if (!refreshToken) {
+        return { success: false, error: { message: 'No refresh token found' } };
     }
+    const response= await LogoutAPI(refreshToken);
+    cookieStore.delete('access_token');
+    cookieStore.delete('refresh_token');
+
+    return response.success ? { success: true, data: response.data } : { success: false, error: response.error };
+}
 
 
 export async function refreshTokenAction() {

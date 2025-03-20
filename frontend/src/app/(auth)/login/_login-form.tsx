@@ -39,6 +39,10 @@ export function LoginForm({ className, imageUrl, ...props }: React.ComponentProp
         const response = await LoginAction(data);
 
         if (response.success) {
+            toast.success('Success', {
+                description: 'Successfully logged in',
+                duration: 2000
+            });
             window.location.href = '/dashboard';
 
             return;
