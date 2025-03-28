@@ -59,8 +59,6 @@ async def login_for_access_token(
 
     refresh_token = await create_refresh_token(data={"sub": user["username"]})
     max_age = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
-    print(refresh_token)
-    print(access_token)
     # response.set_cookie(
     #     key="refresh_token",
     #     value=refresh_token,

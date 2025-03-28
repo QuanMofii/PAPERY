@@ -3,7 +3,7 @@
 import { cookies } from 'next/headers';
 
 import { UserMeAPI } from '@/app/api/client/user-api';
-import { User } from '@/context/UserContext';
+import { User } from '@/context/user-context';
 
 export async function getCurrentUser(): Promise<User | null> {
     const cookieStore = await cookies();
