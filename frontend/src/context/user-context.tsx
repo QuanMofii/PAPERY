@@ -1,25 +1,17 @@
 'use client';
 
-import React, { ReactNode, createContext, useContext, useState, useEffect } from 'react';
+import React, { ReactNode, createContext, useContext, useState} from 'react';
 
 import { useRouter } from 'next/navigation';
 
 
 import { logoutAction } from '@/actions/auth-action';
 import { toast } from 'sonner';
-
-export interface User {
-    name: string;
-    username: string;
-    email: string;
-    profile_image_url: string;
-    is_superuser: boolean;
-    tier_id: number;
-}
+import { UserType } from '@/schemas/user.schemas';
 
 interface UserContextType {
-    user: User | null;
-    setUser: React.Dispatch<React.SetStateAction<User | null>>;
+    user: UserType | null;
+    setUser: React.Dispatch<React.SetStateAction<UserType | null>>;
     logout: () => Promise<void>;
 }
 
@@ -27,17 +19,13 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{
     children: ReactNode;
-    initialUser: User | null;
+    initialUser: UserType | null;
 }> = ({ children, initialUser }) => {
 
-    const [user, setUser] = useState<User | null>(initialUser);
+    const [user, setUser] = useState<UserType | null>(initialUser);
     const router = useRouter();
 
-    useEffect(() => {
-        if (!initialUser) {
-            logoutAction();
-        }
-    }, [initialUser]);
+
 
     const logout = async () => {
 

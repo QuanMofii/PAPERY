@@ -79,9 +79,11 @@ export function Header() {
                   {t('nav.faq')}
                 </Link>
                 <div className="mt-4">
-                  <Button asChild className="w-full">
-                    <Link href="/dashboard">{t('cta.getStarted')}</Link>
-                  </Button>
+                  <Link href="/dashboard">
+                    <Button asChild className="w-full">
+                      {t('cta.getStarted')}
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </SheetContent>

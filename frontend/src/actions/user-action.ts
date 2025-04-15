@@ -1,23 +1,32 @@
 'use server';
 
 import { cookies } from 'next/headers';
-
 import { UserMeAPI } from '@/app/api/client/user-api';
-import { User } from '@/context/user-context';
+import { AuthStateSchema } from '@/schemas/auth.schemas';
 
-export async function getCurrentUser(): Promise<User | null> {
+export async function getCurrentUser() {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('access_token')?.value;
 
     if (!accessToken) {
-        return null;
+        return {
+            status: 'unauthenticated' as const,
+            user: null
+        };
     }
 
     const response = await UserMeAPI();
 
     if (!response.success) {
-        return null;
+        return {
+            status: 'error' as const,
+            error: response.error?.message || 'Failed to get user info',
+            user: null
+        };
     }
 
-    return response.data;
+    return {
+        status: 'authenticated' as const,
+        user: response.data
+    };
 }

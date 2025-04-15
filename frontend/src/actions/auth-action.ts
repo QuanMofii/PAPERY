@@ -12,7 +12,7 @@ import {
     ResetAPI,
     SocialAuthAPI,
     VerifyAPI
-} from '@/app/api/client/auth-api';
+} from '@/app/api/client/auth.api';
 import { setAccessToken, setRefreshToken } from '@/lib/token';
 import {
     LoginRequest,

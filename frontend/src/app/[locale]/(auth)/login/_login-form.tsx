@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { LoginAction } from '@/actions/auth-action';
-import { SocialAuth } from '@/components/auth/social-auth';
+import { SocialAuth } from '@/app/[locale]/(auth)/components/social-auth';
 import { cn } from '@/registry/new-york-v4/lib/utils';
 import { Button } from '@/registry/new-york-v4/ui/button';
 import { Card, CardContent } from '@/registry/new-york-v4/ui/card';
@@ -38,20 +38,17 @@ export function LoginForm({ className, imageUrl, ...props }: React.ComponentProp
 
         const response = await LoginAction(data);
 
-        if (response.success) {
-            toast.success('Success', {
-                description: 'Successfully logged in',
-                duration: 2000
-            });
-            window.location.href = '/dashboard';
 
-            return;
-        }
-
-        toast.error('Error', {
-            description: response.error?.message,
+        toast[response.success ? 'success' : 'error'](response.success ? 'Success' : 'Error', {
+            description: response.success
+                ? response.data?.message || 'Successfully logged in'
+                : response.error?.message,
             duration: 2000
         });
+
+        if (response.success) {
+            window.location.href = '/dashboard';
+        }
 
         setIsLoading(false);
     };

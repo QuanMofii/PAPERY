@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 
@@ -10,9 +9,9 @@ import {routing} from '@/lib/next-intl/routing';
 import { getCurrentUser } from '@/actions/user-action';
 import { getTheme } from '@/actions/theme-action';
 import '@/app/[locale]/globals.css';
-import { TokenRefresher } from '@/components/token-refresher';
-import { UserProvider } from '@/context/user-context';
 import { Toaster } from '@/registry/new-york-v4/ui/sonner';
+import { AuthProvider } from '@/context/auth-context';
+
 
 const geistSans = localFont({
     src: './fonts/GeistVF.woff',
@@ -41,7 +40,7 @@ export default async function RootLayout({  children,
       notFound();
     }
 
-    const [currentUser, theme] = await Promise.all([
+    const [authState, theme] = await Promise.all([
       getCurrentUser(),
       getTheme()
     ]);
@@ -52,10 +51,9 @@ export default async function RootLayout({  children,
                 className={`${geistSans.variable} ${geistMono.variable} bg-background text-foreground h-full w-full overscroll-none antialiased`}>
                 <NextIntlClientProvider>
                     <ThemeProvider initialTheme={theme}>
-                        <UserProvider initialUser={currentUser}>
+                        <AuthProvider initialAuthState={authState}>
                             {children}
-                            <TokenRefresher />
-                        </UserProvider>
+                        </AuthProvider>
                         <Toaster />
                     </ThemeProvider>
                 </NextIntlClientProvider>

@@ -32,7 +32,7 @@ export function HeroSection() {
 
           <div className="relative">
             <div className="relative bg-card rounded-lg shadow-xl overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-12 bg-muted flex items-center px-4 gap-2">
+              <div className="absolute top-0 left-0 right-0 h-12 bg-gray-300 flex items-center px-4 gap-2">
                 <div className="flex gap-2">
                   <div className="w-3 h-3 rounded-full bg-destructive" />
                   <div className="w-3 h-3 rounded-full bg-yellow-500" />

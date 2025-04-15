@@ -57,6 +57,12 @@ export const LoginResponse = TokenSchema.merge(UserSchema);
 
 export const RegisterResponse = TokenSchema.merge(UserSchema);
 
+export const AuthStateSchema = z.object({
+  user: User.nullable(),
+  status: z.enum(['authenticated', 'unauthenticated', 'error']),
+  error: z.string().optional()
+});
+
 /* 🎯 TypeScript Types */
 export type LoginRequestType = z.infer<typeof LoginRequest>;
 export type RegisterRequestType = z.infer<typeof RegisterRequest>;
@@ -67,3 +73,5 @@ export type ResetRequestType = z.infer<typeof ResetRequest>;
 export type UserType = z.infer<typeof User>;
 export type LoginResponseType = z.infer<typeof LoginResponse>;
 export type RegisterResponseType = z.infer<typeof RegisterResponse>;
+
+export type AuthStateType = z.infer<typeof AuthStateSchema>;

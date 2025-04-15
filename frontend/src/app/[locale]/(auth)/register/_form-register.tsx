@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { RegisterAction } from '@/actions/auth-action';
-import { SocialAuth } from '@/components/auth/social-auth';
+import { SocialAuth } from '@/app/[locale]/(auth)/components/social-auth';
 import { cn } from '@/registry/new-york-v4/lib/utils';
 import { Button } from '@/registry/new-york-v4/ui/button';
 import { Card, CardContent } from '@/registry/new-york-v4/ui/card';

@@ -2,12 +2,12 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import {routing} from '@/lib/next-intl/routing';
-import { RefreshTokenAPI } from '@/app/api/client/auth-api';
+import { RefreshTokenAPI } from '@/app/api/client/auth.api';
 import { decodeToken } from '@/lib/token';
 
 // Định nghĩa các route
 const PUBLIC_ROUTES = ['/login', '/register', '/examples', '/docs', '/static', '/_next', '/favicon.ico'];
-const PROTECTED_ROUTES = ['/dashboard'];
+const PROTECTED_ROUTES = ['/dashboardd'];
 const AUTH_ONLY_ROUTES = ['/login', '/register'];
 const intlMiddleware = createMiddleware(routing);
 
@@ -15,7 +15,6 @@ export default intlMiddleware;
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    console.log('pathname',pathname);
     // Xử lý next-intl middleware trước
     const intlResponse = await intlMiddleware(request);
 
@@ -26,10 +25,8 @@ export async function middleware(request: NextRequest) {
         return match ? pathname.replace(match[0], '/') : pathname;
     };
 
-
-
     const strippedPathname = stripLocalePrefix(pathname);
-    console.log('strippedPathname',strippedPathname);
+
     // Nếu response đã được xử lý bởi next-intl (có redirect hoặc rewrite)
     // if (intlResponse.headers.get('x-middleware-rewrite') || intlResponse.headers.get('x-middleware-redirect')) {
 
@@ -39,8 +36,6 @@ export async function middleware(request: NextRequest) {
 
     // Bỏ qua các route public và static
     if (PUBLIC_ROUTES.some((route) => strippedPathname.startsWith(route)) && !AUTH_ONLY_ROUTES.includes(strippedPathname)) {
-
-
         return intlResponse;
     }
 
