@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect } from 'react';
 import { toast } from 'sonner';
 import { AuthStateType } from '@/schemas/auth.schemas';
 import { UserProvider } from './user-context';
-import { TokenRefresher } from '@/components/token-refresher';
+import { TokenRefresher } from '@/hooks/token-refresher';
 import { logoutAction } from '@/actions/auth-action';
 
 interface AuthContextType {

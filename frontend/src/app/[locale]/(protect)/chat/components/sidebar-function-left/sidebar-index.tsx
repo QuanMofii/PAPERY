@@ -7,7 +7,7 @@ import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from '@/registry/
 
 export function ChatSidebar() {
     return (
-        <Sidebar collapsible="icon" className="border-none  overflow-hidden">
+        <Sidebar collapsible="icon" className="border-none overflow-hidden">
             <SidebarHeader>
                 <ProjectSwitcher/>
             </SidebarHeader>

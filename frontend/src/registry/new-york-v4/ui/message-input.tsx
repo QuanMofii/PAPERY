@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import { ArrowUp, Info, Loader2, Mic, Paperclip, Square, X } from "lucide-react"
 import { omit } from "remeda"
 
-import { cn } from "@/lib/utils"
+import { cn } from '@/registry/new-york-v4/lib/utils';
 import { useAudioRecording } from "@/hooks/use-audio-recording"
 import { useAutosizeTextArea } from "@/hooks/use-autosize-textarea"
 import { AudioVisualizer } from "@/registry/new-york-v4/ui/audio-visualizer"
@@ -123,6 +123,7 @@ export function MessageInput({
         lastModified: Date.now(),
       })
       addFiles([file])
+
       return
     }
 
@@ -149,6 +150,7 @@ export function MessageInput({
           (props.allowAttachments && props.files?.length)
         ) {
           setShowInterruptPrompt(true)
+
           return
         }
       }
@@ -232,6 +234,7 @@ export function MessageInput({
                               (f) => f !== file
                             )
                             if (filtered.length === 0) return null
+
                             return filtered
                           })
                         }}
@@ -348,6 +351,7 @@ function showFileUploadDialog() {
 
       if (files) {
         resolve(Array.from(files))
+        
         return
       }
 

@@ -6,7 +6,7 @@ import { refreshTokenAction } from '@/actions/auth-action';
 
 import jwt, { JwtPayload } from 'jsonwebtoken';
 
-const checkAndRefreshToken = async () => {
+const CheckAndRefreshToken = async () => {
     const accessTokenCookie = document.cookie.split('; ').find((row) => row.startsWith('access_token='));
     if (!accessTokenCookie) return;
 
@@ -35,7 +35,7 @@ export function TokenRefresher() {
 
             try {
                 isRefreshing.current = true;
-                await checkAndRefreshToken();
+                await CheckAndRefreshToken();
             } finally {
                 isRefreshing.current = false;
             }

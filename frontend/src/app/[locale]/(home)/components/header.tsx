@@ -13,6 +13,7 @@ export function Header() {
   const t = useTranslations('homePage.header')
   const [isScrolled, setIsScrolled] = React.useState(false)
 
+
   React.useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10)

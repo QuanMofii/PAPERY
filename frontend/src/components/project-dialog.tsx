@@ -36,7 +36,7 @@ export const ProjectDialogContent = ({
     };
 
     return (
-        
+
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-2xl max-h-[95vh] overflow-y-auto">
             <DialogHeader>

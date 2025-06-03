@@ -11,6 +11,7 @@ export function useAudioRecording({
   transcribeAudio,
   onTranscriptionComplete,
 }: UseAudioRecordingOptions) {
+    
   const [isListening, setIsListening] = useState(false)
   const [isSpeechSupported, setIsSpeechSupported] = useState(!!transcribeAudio)
   const [isRecording, setIsRecording] = useState(false)

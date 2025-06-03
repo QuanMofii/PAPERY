@@ -9,7 +9,7 @@ import {
 } from "react"
 import { ArrowDown, ThumbsDown, ThumbsUp } from "lucide-react"
 
-import { cn } from '@/registry/new-york-v4/lib/utils';
+import { cn } from "@/registry/new-york-v4/lib/utils"
 import { useAutoScroll } from "@/hooks/use-auto-scroll"
 import { Button } from "@/registry/new-york-v4/ui/button"
 import { type Message } from "@/registry/new-york-v4/ui/chat-message"
@@ -315,7 +315,7 @@ export const ChatForm = forwardRef<HTMLFormElement, ChatFormProps>(
     const onSubmit = (event: React.FormEvent) => {
       if (!files) {
         handleSubmit(event)
-
+        
         return
       }
 
@@ -338,6 +338,6 @@ function createFileList(files: File[] | FileList): FileList {
   for (const file of Array.from(files)) {
     dataTransfer.items.add(file)
   }
-  
+
   return dataTransfer.files
 }

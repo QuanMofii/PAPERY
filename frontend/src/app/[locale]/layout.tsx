@@ -11,7 +11,7 @@ import { getTheme } from '@/actions/theme-action';
 import '@/app/[locale]/globals.css';
 import { Toaster } from '@/registry/new-york-v4/ui/sonner';
 import { AuthProvider } from '@/context/auth-context';
-
+import { TokenRefresher } from '@/hooks/token-refresher';
 
 const geistSans = localFont({
     src: './fonts/GeistVF.woff',
@@ -56,6 +56,7 @@ export default async function RootLayout({  children,
                         </AuthProvider>
                         <Toaster />
                     </ThemeProvider>
+                    <TokenRefresher />
                 </NextIntlClientProvider>
             </body>
         </html>
