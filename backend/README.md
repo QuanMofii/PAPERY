@@ -84,7 +84,7 @@ python --version
 Run the following commands in your terminal to clone and access the project:
 
 ```bash
-git clone https://github.com/Toricat/PAPERY.git
+git clone https://github.com/QuanMofii/PAPERY.git
 cd PAPERY
 ```
 
