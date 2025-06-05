@@ -1,25 +1,32 @@
 'use client';
 
-import { FileUploader } from './file-uploader';
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarHeader,
+    SidebarInset,
+    SidebarRailRight,
+    SidebarTriggerRight
+} from '@/registry/new-york-v4/ui/sidebar';
+
+import DocumentSwitcher from './document-switcher';
 import { FileList } from './file-list';
-import { Sidebar, SidebarContent, SidebarHeader, SidebarRail, SidebarInset, SidebarTrigger } from '@/registry/new-york-v4/ui/sidebar';
+import { FileUploader } from './file-uploader';
 
 export function DocumentSidebar() {
     return (
-        <Sidebar collapsible="icon" className="border-none overflow-hidden">
+        <Sidebar side='right' collapsible='icon' className='overflow-hidden border-none'>
             <SidebarHeader>
-                <h2 className="text-lg font-semibold">Tài liệu</h2>
+                <DocumentSwitcher />
             </SidebarHeader>
+            <SidebarInset>
+                <SidebarTriggerRight />
+            </SidebarInset>
             <SidebarContent className='overflow-hidden'>
                 <FileUploader />
                 <FileList />
             </SidebarContent>
-            <SidebarRail />
-            <SidebarInset>
-                <div className="w-full flex items-center justify-end px-2">
-                    <SidebarTrigger />
-                </div>
-            </SidebarInset>
+            <SidebarRailRight />
         </Sidebar>
     );
 }
