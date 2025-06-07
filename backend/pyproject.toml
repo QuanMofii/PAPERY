@@ -1,11 +1,16 @@
-[tool.poetry]
-name = "fastapi-boilerplate"
+[project]
+name = "Papery"
 version = "0.1.0"
-description = "A fully Async FastAPI boilerplate using SQLAlchemy and Pydantic 2"
-authors = ["Igor Magalhaes <igor.magalhaes.r@gmail.com>"]
-license = "MIT"
+description = "A backend chatbot papery"
 readme = "README.md"
-packages = [{ include = "src" }]
+authors = [
+  { name = "QuanMofii", email = "haminhquan12c7@gmail.com" }
+]
+license = "MIT"
+
+
+[tool.poetry]
+packages = [{ include = "src" }]  
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -13,7 +18,7 @@ python-dotenv = "^1.0.0"
 pydantic = { extras = ["email"], version = "^2.6.1" }
 fastapi = "^0.109.1"
 uvicorn = "^0.27.0"
-uvloop = "^0.19.0"
+uvloop = { version = "^0.19.0", markers = "sys_platform != 'win32'" }
 httptools = "^0.6.1"
 uuid = "^1.30"
 alembic = "^1.13.1"

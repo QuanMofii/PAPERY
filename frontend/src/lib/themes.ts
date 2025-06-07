@@ -6,6 +6,16 @@ export type Theme = {
 
 export const themes: Theme[] = [
   {
+    name: "light",
+    label: "Light",
+    primary: "oklch(0.985 0 0)",
+  },
+  {
+    name: "dark",
+    label: "Dark",
+    primary: "oklch(0.205 0 0)",
+  },
+  {
     name: "orange",
     label: "Orange Terracotta",
     primary: "oklch(0.7 0.2 20)",
