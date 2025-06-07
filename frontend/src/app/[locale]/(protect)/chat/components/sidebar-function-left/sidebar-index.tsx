@@ -1,21 +1,22 @@
 'use client';
 
-import { ProjectSwitcher } from './project-switcher';
-import { ChatList } from './chat-list';
+import { Sidebar, SidebarContent, SidebarHeader, SidebarRailLeft } from '@/registry/new-york-v4/ui/sidebar';
+
 import { ChatConfig } from './chat-config';
-import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from '@/registry/new-york-v4/ui/sidebar';
+import { ChatList } from './chat-list';
+import { ProjectSwitcher } from './project-switcher';
 
 export function ChatSidebar() {
     return (
-        <Sidebar collapsible="icon" className="border-none overflow-hidden">
+        <Sidebar collapsible='icon' className='overflow-hidden border-none'>
             <SidebarHeader>
-                <ProjectSwitcher/>
+                <ProjectSwitcher />
             </SidebarHeader>
             <SidebarContent className='overflow-hidden'>
                 <ChatConfig />
                 <ChatList />
             </SidebarContent>
-            <SidebarRail />
+            <SidebarRailLeft />
         </Sidebar>
     );
 }
