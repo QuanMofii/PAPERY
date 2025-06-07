@@ -7,7 +7,8 @@ import { decodeToken } from '@/lib/token';
 
 // Định nghĩa các route
 const PUBLIC_ROUTES = ['/login', '/register', '/examples', '/docs', '/static', '/_next', '/favicon.ico'];
-const PROTECTED_ROUTES = ['/dashboard','chat'];
+// const PROTECTED_ROUTES = ['/dashboard','chat'];
+const PROTECTED_ROUTES = ['/i'];
 const AUTH_ONLY_ROUTES = ['/login', '/register'];
 const intlMiddleware = createMiddleware(routing);
 
