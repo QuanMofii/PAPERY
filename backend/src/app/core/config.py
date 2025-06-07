@@ -4,6 +4,10 @@ from enum import Enum
 from pydantic_settings import BaseSettings
 from starlette.config import Config
 
+import json
+from typing import List, Union
+from pydantic import field_validator
+
 current_file_dir = os.path.dirname(os.path.realpath(__file__))
 env_path = os.path.join(current_file_dir, "..", "..", ".env")
 config = Config(env_path)
@@ -126,6 +130,22 @@ class CorsSettings(BaseSettings):
     CORS_METHODS: list[str] = config("CORS_METHODS", default=["*"])
     CORS_HEADERS: list[str] = config("CORS_HEADERS", default=["*"])
     CORS_CREDENTIALS: bool = config("CORS_CREDENTIALS", cast=bool, default=True)
+
+    @field_validator("CORS_ORIGINS", "CORS_METHODS", "CORS_HEADERS", mode="before")
+    @classmethod
+    def parse_list(cls, v: Union[str, List[str]]) -> List[str]:
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            try:
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    return parsed
+            except json.JSONDecodeError:
+                pass
+            # Fallback: CSV string "a,b"
+            return [i.strip() for i in v.split(",")]
+        raise ValueError("Invalid value for CORS field, must be list or JSON string.")
 
 
 class Settings(
