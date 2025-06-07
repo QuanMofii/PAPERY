@@ -42,7 +42,7 @@ PAPERY is an open-source project aimed at researching and analyzing scientific p
 Run the following command on your local environment:
 
 ```bash
-git clone https://github.com/Toricat/PAPERY.git
+git clone https://github.com/QuanMofii/PAPERY.git
 cd papery
 ```
 ## V. Backend Development
@@ -69,8 +69,9 @@ Contributions are welcome from the community. If you would like to contribute to
 
 ## XI. References
 
-- [FastAPI-boilerplate](https://github.com/igorbenav/FastAPI-boilerplate)
+- [Backend-Python/FastAPI-boilerplate](https://github.com/igorbenav/FastAPI-boilerplate)
 - [Repository layer](https://github.com/igorbenav/fastcrud)
+- [Frontend-Nextjs15/shadcnui-boilerplate](https://github.com/siddharthamaity/nextjs-15-starter-shadcn)
 
 ##  XII. License
 
@@ -78,4 +79,4 @@ The MIT License (MIT)
 
 ## XIII. Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Toricat/PAPERY&type=Date)](https://star-history.com/#Toricat/PAPERY&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=QuanMofii/PAPERY&type=Date)](https://star-history.com/#QuanMofii/PAPERY&Date)
