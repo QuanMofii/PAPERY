@@ -22,7 +22,6 @@ import { toast } from 'sonner';
 
 export function LoginForm({ className, imageUrl, ...props }: React.ComponentProps<'div'> & { imageUrl?: string }) {
     const [isLoading, setIsLoading] = useState(false);
-    const router = useRouter();
 
     const form = useForm<LoginRequestType>({
         resolver: zodResolver(LoginRequest),
