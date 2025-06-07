@@ -11,7 +11,7 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/registry/new-
 
 import { FileText } from 'lucide-react';
 
-export default function DocumentSwitcher() {
+export default function DocumentHeader() {
     return (
         <SidebarMenu>
             <SidebarMenuItem>

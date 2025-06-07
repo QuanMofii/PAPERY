@@ -1,15 +1,25 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { toast } from 'sonner';
-import { SidebarGroup, SidebarGroupLabel, SidebarMenu, useSidebar, SidebarMenuButton, SidebarMenuItem } from '@/registry/new-york-v4/ui/sidebar';
-import { useListChatStore } from '@/store/chat-list.store';
+
 import { DeleteChatAPI, GetAllChatsAPI, UpdateChatAPI } from '@/app/api/client/chat-list.api';
-import { ListChatType, UpdateListChatRequestType } from '@/schemas/chat-list.schemas';
-import { Star, History, ChevronRight } from 'lucide-react';
-import { ChatListItems } from './chat-list-items';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/registry/new-york-v4/ui/collapsible';
+import {
+    SidebarGroup,
+    SidebarGroupLabel,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+    useSidebar
+} from '@/registry/new-york-v4/ui/sidebar';
+import { ListChatType, UpdateListChatRequestType } from '@/schemas/chat-list.schemas';
+import { useListChatStore } from '@/store/chat-list.store';
+
+import { ChatListItems } from './chat-list-items';
+import { ChevronRight, History, Star } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ChatItem {
     id: string;
@@ -21,19 +31,55 @@ interface ChatItem {
 }
 
 const MOCK_CHATS: ChatItem[] = [
-    { id: '1', title: 'Chat 1', updatedAt: '2024-03-20T10:00:00Z', createdAt: '2024-03-20T10:00:00Z', projectId: '1', favorite: true },
-    { id: '2', title: 'Chat 2', updatedAt: '2024-03-20T09:00:00Z', createdAt: '2024-03-20T09:00:00Z', projectId: '1', favorite: false },
-    { id: '3', title: 'Chat 3', updatedAt: '2024-03-19T15:00:00Z', createdAt: '2024-03-19T15:00:00Z', projectId: '1', favorite: true },
-    { id: '4', title: 'Chat 4', updatedAt: '2024-03-19T14:00:00Z', createdAt: '2024-03-19T14:00:00Z', projectId: '1', favorite: false }
+    {
+        id: '1',
+        title: 'Chat 1',
+        updatedAt: '2024-03-20T10:00:00Z',
+        createdAt: '2024-03-20T10:00:00Z',
+        projectId: '1',
+        favorite: true
+    },
+    {
+        id: '2',
+        title: 'Chat 2',
+        updatedAt: '2024-03-20T09:00:00Z',
+        createdAt: '2024-03-20T09:00:00Z',
+        projectId: '1',
+        favorite: false
+    },
+    {
+        id: '3',
+        title: 'Chat 3',
+        updatedAt: '2024-03-19T15:00:00Z',
+        createdAt: '2024-03-19T15:00:00Z',
+        projectId: '1',
+        favorite: true
+    },
+    {
+        id: '4',
+        title: 'Chat 4',
+        updatedAt: '2024-03-19T14:00:00Z',
+        createdAt: '2024-03-19T14:00:00Z',
+        projectId: '1',
+        favorite: false
+    }
 ];
 
 const HISTORY_ITEMS = [
-    { title: 'Favorite' as const, icon: <Star className='h-4 w-4 group-data-[collapsible=icon]:cursor-pointer' />, isActive: true },
-    { title: 'Recent' as const, icon: <History className='h-4 w-4 group-data-[collapsible=icon]:cursor-pointer' />, isActive: true }
+    {
+        title: 'Favorite' as const,
+        icon: <Star className='h-4 w-4 group-data-[collapsible=icon]:cursor-pointer' />,
+        isActive: true
+    },
+    {
+        title: 'Recent' as const,
+        icon: <History className='h-4 w-4 group-data-[collapsible=icon]:cursor-pointer' />,
+        isActive: true
+    }
 ];
 
 export function ChatList() {
-    const { state, setOpen } = useSidebar();
+    const { stateLeft, setOpen } = useSidebar();
     const pathname = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -74,7 +120,6 @@ export function ChatList() {
         }
     }, [projectId, chats.length, setChats]);
 
-
     const handleStartEditing = (chat: ChatItem) => {
         setEditingChatId(chat.id);
         setEditingTitle(chat.title);
@@ -107,7 +152,10 @@ export function ChatList() {
         setOriginalTitle('');
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent, onUpdate: (id: string, updates: UpdateListChatRequestType) => void) => {
+    const handleKeyDown = (
+        e: React.KeyboardEvent,
+        onUpdate: (id: string, updates: UpdateListChatRequestType) => void
+    ) => {
         if (e.key === 'Enter') {
             handleSaveTitle(onUpdate);
         } else if (e.key === 'Escape') {
@@ -162,7 +210,7 @@ export function ChatList() {
     };
 
     const handleHeaderClick = (title: string) => {
-        if (state === 'collapsed') {
+        if (stateLeft === 'collapsed') {
             setOpen(true);
         }
     };
@@ -194,7 +242,7 @@ export function ChatList() {
                                     chats={chats.filter((chat) => {
                                         if (item.title === 'Favorite') return chat.favorite;
                                         if (item.title === 'Recent') return !chat.favorite;
-                                        
+
                                         return true;
                                     })}
                                     activeChatId={chatId}
