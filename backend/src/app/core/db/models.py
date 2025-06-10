@@ -14,7 +14,6 @@ class UUIDMixin:
           init=False 
     )
 
-
 class TimestampMixin:
     created_at: Mapped[datetime] = mapped_column(DateTime,  default=datetime.now(UTC), server_default=text("current_timestamp(0)"),  init=False )
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True, onupdate=datetime.now(UTC), server_default=text("current_timestamp(0)"),  init=False )
