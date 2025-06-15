@@ -13,7 +13,7 @@ class UserBase(BaseModel):
 
 
 class User(TimestampSchema, UserBase, UUIDSchema, PersistentDeletion):
-    profile_image_url: Annotated[str, Field(default="https://www.profileimageurl.com")]
+    profile_image_url: Annotated[str, Field(default=None)]
     hashed_password: str
     is_superuser: bool = False
     is_active: bool = False
