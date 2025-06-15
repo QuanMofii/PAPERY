@@ -27,8 +27,10 @@ type SidebarContext = {
     stateRight: 'expanded' | 'collapsed';
     open: boolean;
     setOpen: (open: boolean) => void;
-    openMobile: boolean;
-    setOpenMobile: (open: boolean) => void;
+    openMobileLeft: boolean;
+    setOpenMobileLeft: (open: boolean) => void;
+    openMobileRight: boolean;
+    setOpenMobileRight: (open: boolean) => void;
     openSidebarRight: boolean;
     setOpenSidebarRight: (open: boolean) => void;
     isMobile: boolean;
@@ -61,11 +63,15 @@ function SidebarProvider({
     onOpenChange?: (open: boolean) => void;
 }) {
     const isMobile = useIsMobile();
-    const [openMobile, setOpenMobile] = React.useState(false);
+
+    const [openMobileLeft, setOpenMobileLeft] = React.useState(false);
+    const [openMobileRight, setOpenMobileRight] = React.useState(false);
 
     // This is the internal state of the sidebar.
     // We use openProp and setOpenProp for control from outside the component.
+    // State sidebar left
     const [_open, _setOpen] = React.useState(defaultOpen);
+    // State sidebar right
     const [openSidebarRight, setOpenSidebarRight] = React.useState(defaultOpen);
     const open = openProp ?? _open;
     const setOpen = React.useCallback(
@@ -85,12 +91,12 @@ function SidebarProvider({
 
     // Helper to toggle the sidebar.
     const toggleSidebarLeft = React.useCallback(() => {
-        return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
-    }, [isMobile, setOpen, setOpenMobile]);
+        return isMobile ? setOpenMobileLeft((open) => !open) : setOpen((open) => !open);
+    }, [isMobile, setOpen, setOpenMobileLeft]);
 
     const toggleSideBarRight = React.useCallback(() => {
-        return setOpenSidebarRight((open) => !open);
-    }, [setOpenSidebarRight]);
+        return isMobile ? setOpenMobileRight((open) => !open) : setOpenSidebarRight((open) => !open);
+    }, [isMobile, setOpenMobileRight, setOpenSidebarRight]);
 
     // Adds a keyboard shortcut to toggle the sidebar.
     React.useEffect(() => {
@@ -117,8 +123,10 @@ function SidebarProvider({
             open,
             setOpen,
             isMobile,
-            openMobile,
-            setOpenMobile,
+            openMobileLeft,
+            setOpenMobileLeft,
+            openMobileRight,
+            setOpenMobileRight,
             openSidebarRight,
             setOpenSidebarRight,
             toggleSidebarLeft,
@@ -130,8 +138,10 @@ function SidebarProvider({
             open,
             setOpen,
             isMobile,
-            openMobile,
-            setOpenMobile,
+            openMobileLeft,
+            setOpenMobileLeft,
+            openMobileRight,
+            setOpenMobileRight,
             openSidebarRight,
             setOpenSidebarRight,
             toggleSideBarRight,
@@ -176,7 +186,8 @@ function Sidebar({
     variant?: 'sidebar' | 'floating' | 'inset';
     collapsible?: 'offcanvas' | 'icon' | 'none';
 }) {
-    const { isMobile, stateLeft, stateRight, openMobile, setOpenMobile } = useSidebar();
+    const { isMobile, stateLeft, stateRight, openMobileLeft, openMobileRight, setOpenMobileRight, setOpenMobileLeft } =
+        useSidebar();
     const state = side === 'left' ? stateLeft : stateRight;
 
     if (collapsible === 'none') {
@@ -192,7 +203,10 @@ function Sidebar({
 
     if (isMobile) {
         return (
-            <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+            <Sheet
+                open={side === 'left' ? openMobileLeft : openMobileRight}
+                onOpenChange={side === 'left' ? setOpenMobileLeft : setOpenMobileRight}
+                {...props}>
                 <SheetHeader className='sr-only'>
                     <SheetTitle>Sidebar</SheetTitle>
                     <SheetDescription>Displays the mobile sidebar.</SheetDescription>
