@@ -15,16 +15,18 @@ class RedisStorage:
     
     def __init__(self):
         self._client: Optional[redis.Redis] = None
+        self._pool: Optional[redis.ConnectionPool] = None
         
     async def init(self) -> None:
         """Khởi tạo Redis client."""
         if not self._client:
             try:
-                self._client = await redis.from_url(
+                self._pool = redis.ConnectionPool.from_url(
                     f"redis://{settings.REDIS_CACHE_HOST}:{settings.REDIS_CACHE_PORT}",
                     encoding="utf-8",
                     decode_responses=True
                 )
+                self._client = redis.Redis(connection_pool=self._pool)
                 # Test connection
                 await self._client.ping()
                 logger.info("Redis storage initialized successfully")
@@ -37,12 +39,24 @@ class RedisStorage:
         if self._client:
             await self._client.close()
             self._client = None
+            if self._pool:
+                await self._pool.disconnect()
+                self._pool = None
             logger.info("Redis storage connection closed")
     
     async def _ensure_connection(self) -> None:
         """Đảm bảo Redis client đã được khởi tạo."""
         if not self._client:
             await self.init()
+            
+    async def health_check(self) -> bool:
+        """Kiểm tra kết nối Redis."""
+        try:
+            await self._ensure_connection()
+            return await self._client.ping()
+        except Exception as e:
+            logger.error(f"Redis health check failed: {str(e)}")
+            return False
     
     async def set(self, key: str, value: str, expire: int | None = None) -> bool:
         """

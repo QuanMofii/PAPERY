@@ -23,8 +23,6 @@ class Project(Base, UUIDMixin, TimestampMixin, SoftDeleteMixin):
     description: Mapped[str] = mapped_column(Text, nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"), index=True, init=False)
     
-    # Optional fields with defaults
-    settings: Mapped[dict] = mapped_column(Text, nullable=True)
     
     # Relationships
     user: Mapped[User] = relationship(back_populates="projects", init=False)

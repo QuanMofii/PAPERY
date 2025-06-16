@@ -1,4 +1,3 @@
-
 const GroupHomeLayout = (props: { children: React.ReactNode }) => {
     return (
         <>

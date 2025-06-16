@@ -13,7 +13,7 @@ class UserBase(BaseModel):
 
 
 class User(TimestampSchema, UserBase, UUIDSchema, PersistentDeletion):
-    profile_image_url: Annotated[str, Field(default=None)]
+    profile_image_url: str | None = None
     hashed_password: str
     is_superuser: bool = False
     is_active: bool = False
@@ -26,7 +26,7 @@ class UserRead(BaseModel):
     name: Annotated[str, Field(min_length=2, max_length=30, examples=["User Example"])]
     username: Annotated[str, Field(min_length=2, max_length=20, pattern=r"^[a-z0-9]+$", examples=["userberg"])]
     email: Annotated[EmailStr, Field(examples=["user@example.com"])]
-    profile_image_url: str
+    profile_image_url: str | None = None
     is_active: bool
     is_superuser: bool
     last_login: datetime | None

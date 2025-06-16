@@ -4,16 +4,12 @@ from typing import Any
 
 import anyio
 import fastapi
-import redis.asyncio as redis
-from arq import create_pool
-from arq.connections import RedisSettings
 from fastapi import APIRouter, Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 
 from ..api.dependencies import get_current_superuser
-from ..core.utils.rate_limit import rate_limiter
 from ..api import router as api_router
 from ..middleware.client_cache_middleware import ClientCacheMiddleware
 from ..models import *
@@ -31,47 +27,44 @@ from .config import (
 
 from .db.database import Base
 from .db.database import async_engine as engine
-from .utils import cache, queue
+from .utils.redis import redis_manager
+from .logger import logging
+
+logger = logging.getLogger(__name__)
 
 # -------------- database --------------
 async def create_tables() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
+# -------------- redis --------------
+async def init_redis() -> None:
+    """Khởi tạo Redis connection."""
+    try:
+        await redis_manager.init()
+    except Exception as e:
+        logger.error(f"Failed to initialize Redis: {str(e)}")
+        raise
 
-# -------------- cache --------------
-async def create_redis_cache_pool() -> None:
-    cache.pool = redis.ConnectionPool.from_url(settings.REDIS_CACHE_URL)
-    cache.client = redis.Redis.from_pool(cache.pool)  # type: ignore
+async def close_redis() -> None:
+    """Đóng kết nối Redis."""
+    try:
+        await redis_manager.close()
+    except Exception as e:
+        logger.error(f"Error closing Redis connection: {str(e)}")
 
-
-async def close_redis_cache_pool() -> None:
-    await cache.client.aclose()  # type: ignore
-
-
-# -------------- queue --------------
-async def create_redis_queue_pool() -> None:
-    queue.pool = await create_pool(RedisSettings(host=settings.REDIS_QUEUE_HOST, port=settings.REDIS_QUEUE_PORT))
-
-
-async def close_redis_queue_pool() -> None:
-    await queue.pool.aclose()  # type: ignore
-
-
-# -------------- rate limit --------------
-async def create_redis_rate_limit_pool() -> None:
-    rate_limiter.initialize(settings.REDIS_RATE_LIMIT_URL)  # type: ignore
-
-
-async def close_redis_rate_limit_pool() -> None:
-    await rate_limiter.client.aclose()  # type: ignore
-
+async def check_redis_health() -> bool:
+    """Kiểm tra sức khỏe của Redis."""
+    try:
+        return await redis_manager.health_check()
+    except Exception as e:
+        logger.error(f"Redis health check failed: {str(e)}")
+        return False
 
 # -------------- application --------------
 async def set_threadpool_tokens(number_of_tokens: int = 100) -> None:
     limiter = anyio.to_thread.current_default_thread_limiter()
     limiter.total_tokens = number_of_tokens
-
 
 def lifespan_factory(
     settings: (
@@ -97,31 +90,20 @@ def lifespan_factory(
         await set_threadpool_tokens()
 
         try:
-            if isinstance(settings, RedisCacheSettings):
-                await create_redis_cache_pool()
-
-            if isinstance(settings, RedisQueueSettings):
-                await create_redis_queue_pool()
-
-            if isinstance(settings, RedisRateLimiterSettings):
-                await create_redis_rate_limit_pool()
+            if isinstance(settings, (RedisCacheSettings, RedisQueueSettings, RedisRateLimiterSettings)):
+                await init_redis()
+                if not await check_redis_health():
+                    logger.error("Redis health check failed")
+                    return
 
             initialization_complete.set()
-
             yield
 
         finally:
-            if isinstance(settings, RedisCacheSettings):
-                await close_redis_cache_pool()
-
-            if isinstance(settings, RedisQueueSettings):
-                await close_redis_queue_pool()
-
-            if isinstance(settings, RedisRateLimiterSettings):
-                await close_redis_rate_limit_pool()
+            if isinstance(settings, (RedisCacheSettings, RedisQueueSettings, RedisRateLimiterSettings)):
+                await close_redis()
 
     return lifespan
-
 
 # -------------- application --------------
 def create_application(

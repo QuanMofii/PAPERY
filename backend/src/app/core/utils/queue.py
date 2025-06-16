@@ -1,10 +1,11 @@
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 import logging
-from arq.connections import ArqRedis, RedisSettings, create_pool
-from arq.worker import Worker, Function
 from datetime import datetime
+from celery import Celery
+from celery.result import AsyncResult
 
 from ..config import settings
+from .redis import redis_manager
 
 logger = logging.getLogger(__name__)
 
@@ -15,32 +16,31 @@ class TaskStatus:
     FAILED = "failed"
 
 class RedisQueue:
-    """Lớp quản lý Redis queue sử dụng arq."""
+    """Lớp quản lý Redis queue sử dụng Celery."""
     
     def __init__(self):
-        self._pool: ArqRedis | None = None
-        self._functions: dict[str, Function] = {}
+        self._celery: Optional[Celery] = None
         
     async def init(self) -> None:
-        """Khởi tạo kết nối Redis pool."""
-        if not self._pool:
+        """Khởi tạo Celery app."""
+        if not self._celery:
             try:
-                redis_settings = RedisSettings(
-                    host=settings.REDIS_QUEUE_HOST,
-                    port=settings.REDIS_QUEUE_PORT
+                self._celery = Celery(
+                    'tasks',
+                    broker=f'redis://{settings.REDIS_QUEUE_HOST}:{settings.REDIS_QUEUE_PORT}/0',
+                    backend=f'redis://{settings.REDIS_QUEUE_HOST}:{settings.REDIS_QUEUE_PORT}/1'
                 )
-                self._pool = await create_pool(redis_settings)
-                logger.info("Redis queue pool initialized successfully")
+                logger.info("Celery app initialized successfully")
             except Exception as e:
-                logger.error(f"Failed to initialize Redis queue pool: {str(e)}")
+                logger.error(f"Failed to initialize Celery app: {str(e)}")
                 raise
     
     async def close(self) -> None:
-        """Đóng kết nối Redis pool."""
-        if self._pool:
-            await self._pool.close()
-            self._pool = None
-            logger.info("Redis queue pool closed")
+        """Đóng kết nối Celery."""
+        if self._celery:
+            self._celery.control.shutdown()
+            self._celery = None
+            logger.info("Celery app closed")
     
     def register_function(self, func: Callable, name: str | None = None) -> None:
         """
@@ -50,53 +50,18 @@ class RedisQueue:
             func: Hàm cần đăng ký
             name: Tên của hàm (mặc định là tên hàm)
         """
+        if not self._celery:
+            raise Exception("Celery app not initialized")
+            
         function_name = name or func.__name__
-        self._functions[function_name] = Function(
-            func,
-            name=function_name,
-            on_success=self._on_success,
-            on_failure=self._on_failure
-        )
+        self._celery.task(name=function_name)(func)
         logger.info(f"Registered function: {function_name}")
-    
-    async def _on_success(self, job_id: str, result: Any) -> None:
-        """Callback khi task hoàn thành thành công."""
-        await self._update_job_status(job_id, TaskStatus.COMPLETED, result=result)
-        logger.info(f"Job {job_id} completed successfully with result: {result}")
-    
-    async def _on_failure(self, job_id: str, error: Exception) -> None:
-        """Callback khi task thất bại."""
-        await self._update_job_status(job_id, TaskStatus.FAILED, error=str(error))
-        logger.error(f"Job {job_id} failed with error: {error}")
-    
-    async def _update_job_status(
-        self,
-        job_id: str,
-        status: str,
-        result: Any = None,
-        error: str | None = None
-    ) -> None:
-        """Cập nhật trạng thái của task."""
-        if not self._pool:
-            await self.init()
-            
-        status_data = {
-            "status": status,
-            "updated_at": datetime.utcnow().isoformat()
-        }
-        
-        if result is not None:
-            status_data["result"] = result
-        if error is not None:
-            status_data["error"] = error
-            
-        await self._pool.set(f"task_status:{job_id}", str(status_data))
     
     async def enqueue(
         self,
         function_name: str,
         *args: Any,
-        _queue_name: str = "default",
+        queue_name: str = "default",
         **kwargs: Any
     ) -> str:
         """
@@ -105,74 +70,68 @@ class RedisQueue:
         Args:
             function_name: Tên hàm đã đăng ký
             *args: Tham số vị trí cho hàm
-            _queue_name: Tên của queue (mặc định là "default")
+            queue_name: Tên của queue (mặc định là "default")
             **kwargs: Tham số từ khóa cho hàm
             
         Returns:
-            str: Job ID của task
+            str: Task ID
         """
-        if not self._pool:
+        if not self._celery:
             await self.init()
             
         try:
-            job = await self._pool.enqueue_job(
+            task = self._celery.send_task(
                 function_name,
-                *args,
-                _queue_name=_queue_name,
-                **kwargs
+                args=args,
+                kwargs=kwargs,
+                queue=queue_name
             )
             
-            # Khởi tạo trạng thái task
-            await self._update_job_status(job.job_id, TaskStatus.PENDING)
-            
-            logger.info(f"Enqueued job {job.job_id} for function {function_name}")
-            return job.job_id
+            logger.info(f"Enqueued task {task.id} for function {function_name}")
+            return task.id
         except Exception as e:
-            logger.error(f"Failed to enqueue job for {function_name}: {str(e)}")
+            logger.error(f"Failed to enqueue task for {function_name}: {str(e)}")
             raise
     
-    async def get_job_status(self, job_id: str) -> dict[str, Any]:
+    async def get_task_status(self, task_id: str) -> dict[str, Any]:
         """
         Lấy trạng thái của một task.
         
         Args:
-            job_id: ID của task
+            task_id: ID của task
             
         Returns:
             dict: Thông tin trạng thái của task
         """
-        if not self._pool:
+        if not self._celery:
             await self.init()
             
         try:
-            status_data = await self._pool.get(f"task_status:{job_id}")
-            if status_data:
-                return eval(status_data)  # Convert string to dict
-            return {"status": "unknown"}
+            result = AsyncResult(task_id, app=self._celery)
+            status_data = {
+                "status": result.status,
+                "updated_at": datetime.utcnow().isoformat()
+            }
+            
+            if result.successful():
+                status_data["result"] = result.result
+            elif result.failed():
+                status_data["error"] = str(result.result)
+                
+            return status_data
         except Exception as e:
-            logger.error(f"Failed to get status for job {job_id}: {str(e)}")
+            logger.error(f"Failed to get status for task {task_id}: {str(e)}")
             return {"status": "error", "error": str(e)}
     
-    def get_worker(self, queue_name: str = "default") -> Worker:
-        """
-        Tạo worker để xử lý các task trong queue.
-        
-        Args:
-            queue_name: Tên của queue cần xử lý
-            
-        Returns:
-            Worker: Worker instance
-        """
-        redis_settings = RedisSettings(
-            host=settings.REDIS_QUEUE_HOST,
-            port=settings.REDIS_QUEUE_PORT
-        )
-        
-        return Worker(
-            functions=list(self._functions.values()),
-            redis_settings=redis_settings,
-            queue_name=queue_name
-        )
+    async def health_check(self) -> bool:
+        """Kiểm tra kết nối Redis và Celery."""
+        try:
+            if not self._celery:
+                await self.init()
+            return self._celery.control.inspect().ping() is not None
+        except Exception as e:
+            logger.error(f"Celery health check failed: {str(e)}")
+            return False
 
 
 # Singleton instance

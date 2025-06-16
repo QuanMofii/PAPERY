@@ -150,6 +150,7 @@ async def register_user(
     # Tạo user mới
     user_data = user_in.model_dump()
     user_data["hashed_password"] = get_password_hash(user_data.pop("password"))
+    user_data["tier_id"] = 1
     user_data["is_superuser"] = False
     user_data["is_active"] = False
     user_data["last_login"] = None
@@ -167,6 +168,8 @@ async def register_user(
         name=user.name,
         verification_code=token
     )
+    print("job_id",job_id)
+    print("token",token)
     
     return {
         "message": "User registered successfully. Please check your email for verification.",
@@ -201,7 +204,7 @@ async def verify_account(
     return {"message": "Account verified successfully"}
 
 
-@router.post("/request-password-reset", status_code=status.HTTP_200_OK)
+@router.post("/forgot-password", status_code=status.HTTP_200_OK)
 async def request_password_reset(
     request: PasswordResetRequest,
     background_tasks: BackgroundTasks,

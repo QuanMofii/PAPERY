@@ -1,24 +1,36 @@
 import asyncio
 import logging
+from typing import Any
 
-import uvloop
-from arq.worker import Worker
+from celery import Task
+from ..utils.redis import redis_manager
 
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-
+logger = logging.getLogger(__name__)
 
 # -------- background tasks --------
-async def sample_background_task(ctx: Worker, name: str) -> str:
+async def sample_background_task(name: str) -> str:
+    """Task mẫu để test background worker."""
     await asyncio.sleep(5)
     return f"Task {name} is complete!"
 
-
 # -------- base functions --------
-async def startup(ctx: Worker) -> None:
-    logging.info("Worker Started")
+async def startup() -> None:
+    """Khởi tạo worker."""
+    logger.info("Worker Started")
+    await redis_manager.init()
 
+async def shutdown() -> None:
+    """Đóng worker."""
+    logger.info("Worker end")
+    await redis_manager.close()
 
-async def shutdown(ctx: Worker) -> None:
-    logging.info("Worker end")
+# -------- task decorators --------
+def create_task(func: Any) -> Task:
+    """Decorator để tạo Celery task."""
+    from .celery_app import celery_app
+    
+    @celery_app.task(name=func.__name__)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        return asyncio.run(func(*args, **kwargs))
+    
+    return wrapper

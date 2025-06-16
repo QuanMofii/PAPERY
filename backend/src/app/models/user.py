@@ -6,10 +6,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..core.db.database import Base
 from ..core.db.models import UUIDMixin, TimestampMixin, SoftDeleteMixin
+
 from .tier import Tier
 
 if TYPE_CHECKING:
     from .project import Project
+ 
 
 
 class User(Base, UUIDMixin, TimestampMixin, SoftDeleteMixin):
