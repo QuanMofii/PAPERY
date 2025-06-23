@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { useSelectedLayoutSegment } from 'next/navigation';
 
 import { LanguageSwitcher } from '@/components/language-switcher';
-import { ThemeSwitcher } from '@/components/theme-switcher';
 import { NavUser } from '@/components/nav-user';
+import { ThemeSwitcher } from '@/components/theme-switcher';
 import { cn } from '@/registry/new-york-v4/lib/utils';
 import { Button } from '@/registry/new-york-v4/ui/button';
 import {
@@ -14,6 +14,7 @@ import {
 } from '@/registry/new-york-v4/ui/dropdown-menu';
 import { Input } from '@/registry/new-york-v4/ui/input';
 import { Skeleton } from '@/registry/new-york-v4/ui/skeleton';
+
 // import { useUser } from '@/context/user-context';
 
 import { Menu, Search } from 'lucide-react';
@@ -40,7 +41,7 @@ export function Header() {
                         asChild
                         className={cn(
                             'hover:bg-primary/90 font-medium transition-colors',
-                            isActive && 'bg-transparent text-primary border-2 border-primary'
+                            isActive && 'text-primary border-primary border-2 bg-transparent'
                         )}>
                         <span>{link.label}</span>
                     </Button>
@@ -50,7 +51,7 @@ export function Header() {
     };
 
     return (
-        <header className='flex h-16 shrink-0 items-center justify-between flex-1'>
+        <header className='flex h-16 flex-1 shrink-0 items-center justify-between'>
             {/* Left section */}
             <div className='flex items-center gap-4'>
                 {/* Desktop Navigation */}

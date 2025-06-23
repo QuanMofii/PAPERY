@@ -25,8 +25,8 @@ const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
 type SidebarContext = {
     stateLeft: 'expanded' | 'collapsed';
     stateRight: 'expanded' | 'collapsed';
-    open: boolean;
-    setOpen: (open: boolean) => void;
+    openSidebarLeft: boolean;
+    setOpenSidebarLeft: (open: boolean) => void;
     openMobileLeft: boolean;
     setOpenMobileLeft: (open: boolean) => void;
     openMobileRight: boolean;
@@ -50,7 +50,7 @@ function useSidebar() {
 }
 
 function SidebarProvider({
-    defaultOpen = true,
+    defaultOpen = false,
     open: openProp,
     onOpenChange: setOpenProp,
     className,
@@ -70,17 +70,17 @@ function SidebarProvider({
     // This is the internal state of the sidebar.
     // We use openProp and setOpenProp for control from outside the component.
     // State sidebar left
-    const [_open, _setOpen] = React.useState(defaultOpen);
+    const [openSidebarLeft, setOpenSidebarLeft] = React.useState(defaultOpen);
     // State sidebar right
     const [openSidebarRight, setOpenSidebarRight] = React.useState(defaultOpen);
-    const open = openProp ?? _open;
+    const open = openProp ?? openSidebarLeft;
     const setOpen = React.useCallback(
         (value: boolean | ((value: boolean) => boolean)) => {
             const openState = typeof value === 'function' ? value(open) : value;
             if (setOpenProp) {
                 setOpenProp(openState);
             } else {
-                _setOpen(openState);
+                setOpenSidebarLeft(openState);
             }
 
             // This sets the cookie to keep the sidebar state.
@@ -91,7 +91,7 @@ function SidebarProvider({
 
     // Helper to toggle the sidebar.
     const toggleSidebarLeft = React.useCallback(() => {
-        return isMobile ? setOpenMobileLeft((open) => !open) : setOpen((open) => !open);
+        return isMobile ? setOpenMobileLeft((open) => !open) : setOpenSidebarLeft((open) => !open);
     }, [isMobile, setOpen, setOpenMobileLeft]);
 
     const toggleSideBarRight = React.useCallback(() => {
@@ -120,8 +120,8 @@ function SidebarProvider({
         () => ({
             stateLeft,
             stateRight,
-            open,
-            setOpen,
+            openSidebarLeft,
+            setOpenSidebarLeft,
             isMobile,
             openMobileLeft,
             setOpenMobileLeft,
@@ -135,13 +135,13 @@ function SidebarProvider({
         [
             stateLeft,
             stateRight,
-            open,
-            setOpen,
             isMobile,
             openMobileLeft,
             setOpenMobileLeft,
             openMobileRight,
             setOpenMobileRight,
+            openSidebarLeft,
+            setOpenSidebarLeft,
             openSidebarRight,
             setOpenSidebarRight,
             toggleSideBarRight,
@@ -186,7 +186,7 @@ function Sidebar({
     variant?: 'sidebar' | 'floating' | 'inset';
     collapsible?: 'offcanvas' | 'icon' | 'none';
 }) {
-    const { isMobile, stateLeft, stateRight, openMobileLeft, openMobileRight, setOpenMobileRight, setOpenMobileLeft } =
+    const { isMobile, stateLeft, stateRight, openMobileLeft, openMobileRight, setOpenMobileLeft, setOpenMobileRight } =
         useSidebar();
     const state = side === 'left' ? stateLeft : stateRight;
 
@@ -249,7 +249,7 @@ function Sidebar({
             />
             <div
                 className={cn(
-                    'fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex',
+                    'absolute z-10 hidden h-[90%] w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex',
                     side === 'left'
                         ? 'left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]'
                         : 'right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',
