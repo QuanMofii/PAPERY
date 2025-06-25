@@ -1,17 +1,15 @@
-from datetime import datetime, timedelta
-from typing import Annotated, Optional
+from datetime import datetime
+from typing import Annotated
 
 from fastapi import APIRouter, BackgroundTasks, Cookie, Depends, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
 from ...core.config import settings
 from ...core.db.database import async_get_db
 from ...core.exceptions.http_exceptions import BadRequestException, NotFoundException, UnauthorizedException
 from ...core.security import (
-    ACCESS_TOKEN_EXPIRE_MINUTES,
     authenticate_user,
     blacklist_tokens,
     create_access_token,
@@ -30,35 +28,36 @@ from ...schemas.auth import (
     PasswordResetRequest,
     EmailVerification,
     AuthUserCreate,
-    AuthUserCreateInternal,
     AuthUserRead,
     RefreshToken
 )
+from ...schemas.user import UserCreateInternal, UserReadInternal
+from ...schemas.utils import APIResponse
 
 from ...core.utils.email import send_verification_email
 from ...core.utils.queue import redis_queue
 
 router = APIRouter(tags=["auth"])
 
-@router.post("/login", response_model=Token, status_code=status.HTTP_200_OK)
+@router.post("/login", response_model=APIResponse[Token])
 async def login_for_access_token(
     response: Response,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Annotated[AsyncSession, Depends(async_get_db)],
-) -> dict[str, str]:
+) -> APIResponse[Token]:
     """Đăng nhập và lấy access token."""
-    user = await authenticate_user(username_or_email=form_data.username, password=form_data.password, db=db)
-    if not user:
+    authenticated_user = await authenticate_user(username_or_email=form_data.username, password=form_data.password, db=db)
+    if not authenticated_user:
         raise UnauthorizedException("Wrong username, email or password.")
     
-    if not user["is_active"]:
+    user = UserReadInternal.model_validate(authenticated_user)
+    
+    if not user.is_active:
         raise UnauthorizedException("Account is not activated. Please verify your email first.")
 
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = await create_access_token(data={"sub": user["username"]}, expires_delta=access_token_expires)
-
-    refresh_token = await create_refresh_token(data={"sub": user["username"]})
-    max_age = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
+    access_token = await create_access_token(data={"sub": user.username})
+    refresh_token = await create_refresh_token(data={"sub": user.username})
+    # max_age = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
     # response.set_cookie(
     #     key="refresh_token",
     #     value=refresh_token,
@@ -71,21 +70,45 @@ async def login_for_access_token(
     await crud_users.update(
         db=db,
         object={"last_login": datetime.utcnow()},
-        id=user["id"]
+        id=user.id
     )
-
-    return {
-        "access_token": access_token, 
-        "token_type": "bearer",
-        "refresh_token": refresh_token
-    }
+    
+    token_data = Token(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
+    return APIResponse(message="Login successful", data=token_data)
 
 
-@router.post("/refresh-token", response_model=Token, status_code=status.HTTP_200_OK)
+@router.post("/token", response_model=Token)
+async def login_for_access_token_oauth2(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: Annotated[AsyncSession, Depends(async_get_db)],
+) -> Token:
+    """OAuth2 compatible token endpoint for FastAPI docs."""
+    authenticated_user = await authenticate_user(username_or_email=form_data.username, password=form_data.password, db=db)
+    if not authenticated_user:
+        raise UnauthorizedException("Wrong username, email or password.")
+    
+    user = UserReadInternal.model_validate(authenticated_user)
+    
+    if not user.is_active:
+        raise UnauthorizedException("Account is not activated. Please verify your email first.")
+
+    access_token = await create_access_token(data={"sub": user.username})
+    refresh_token = await create_refresh_token(data={"sub": user.username})
+
+    await crud_users.update(
+        db=db,
+        object={"last_login": datetime.utcnow()},
+        id=user.id
+    )
+    
+    return Token(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
+
+
+@router.post("/refresh-token", response_model=APIResponse[Token])
 async def refresh_access_token(
     refresh_data: RefreshToken,
     db: AsyncSession = Depends(async_get_db)
-) -> dict[str, str]:
+) -> APIResponse[Token]:
     """Làm mới access token bằng refresh token."""
     refresh_token = refresh_data.refresh_token
     if not refresh_token:
@@ -95,28 +118,32 @@ async def refresh_access_token(
     if not user_data:
         raise UnauthorizedException("Invalid refresh token.")
 
-    # Kiểm tra xem user có còn active không
-    user = await crud_users.get(db=db, username=user_data.username_or_email, schema_to_select=AuthUserRead)
-    if not user or not user["is_active"]:
+    db_user = await crud_users.get(
+        db=db, 
+        username=user_data.username_or_email,
+        
+    )
+    if not db_user:
+        raise UnauthorizedException("User not found.") # Should not happen if token is valid
+        
+    user = UserReadInternal.model_validate(db_user)
+    if not user.is_active:
         raise UnauthorizedException("User is not active.")
 
-    new_access_token = await create_access_token(data={"sub": user_data.username_or_email})
-    new_refresh_token = await create_refresh_token(data={"sub": user_data.username_or_email})
+    new_access_token = await create_access_token(data={"sub": user.username})
+    new_refresh_token = await create_refresh_token(data={"sub": user.username})
     
-    return {
-        "access_token": new_access_token, 
-        "token_type": "bearer",
-        "refresh_token": new_refresh_token
-    }
+    token_data = Token(access_token=new_access_token, refresh_token=new_refresh_token, token_type="bearer")
+    return APIResponse(message="Token refreshed successfully", data=token_data)
 
 
-@router.post("/logout", status_code=status.HTTP_200_OK)
+@router.post("/logout", response_model=APIResponse)
 async def logout(
     response: Response,
     refresh_data: RefreshToken,
     access_token: str = Depends(oauth2_scheme),
     db: AsyncSession = Depends(async_get_db)
-) -> dict[str, str]:
+) -> APIResponse:
     """Đăng xuất và blacklist tokens."""
     try:
         refresh_token = refresh_data.refresh_token
@@ -129,129 +156,131 @@ async def logout(
             db=db
         )
 
-        return {"message": "Logged out successfully"}
+        return APIResponse(message="Logged out successfully")
 
     except JWTError:
         raise UnauthorizedException("Invalid token.")
 
 
-@router.post("/register", status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=APIResponse, status_code=status.HTTP_201_CREATED)
 async def register_user(
     user_in: AuthUserCreate,
     db: AsyncSession = Depends(async_get_db)
-) -> dict:
+) -> APIResponse:
     """Đăng ký user mới."""
-    # Kiểm tra username và email
     if await crud_users.exists(db=db, username=user_in.username):
         raise BadRequestException("Username already exists")
     if await crud_users.exists(db=db, email=user_in.email):
         raise BadRequestException("Email already exists")
     
-    # Tạo user mới
     user_data = user_in.model_dump()
     user_data["hashed_password"] = get_password_hash(user_data.pop("password"))
     user_data["tier_id"] = 1
-    user_data["is_superuser"] = False
-    user_data["is_active"] = False
-    user_data["last_login"] = None
     
-    user_internal = AuthUserCreateInternal(**user_data)
+    user_internal = UserCreateInternal(**user_data)
     user = await crud_users.create(db=db, object=user_internal)
     
-    # Tạo verification token và gửi email
     token = await create_verification_token(user.email, TokenType.VERIFY_ACCOUNT)
     
-    # Thêm task gửi email vào queue
-    job_id = await redis_queue.enqueue(
+    await redis_queue.enqueue(
         "send_email",
         email=user.email,
-        name=user.name,
+        name=user.username,
         verification_code=token
     )
-    print("job_id",job_id)
-    print("token",token)
     
-    return {
-        "message": "User registered successfully. Please check your email for verification.",
-        
-    }
+    return APIResponse(message="User registered successfully. Please check your email for verification.")
 
-@router.get("/task/{task_id}", status_code=status.HTTP_200_OK)
-async def get_task_status(task_id: str) -> dict:
-    """Kiểm tra trạng thái của task."""
-    status = await redis_queue.get_job_status(task_id)
-    return status
 
-@router.post("/verify-account", status_code=status.HTTP_200_OK)
+@router.post("/verify-account", response_model=APIResponse, status_code=status.HTTP_200_OK)
 async def verify_account(
     verification: EmailVerification,
     db: AsyncSession = Depends(async_get_db)
-) -> dict:
+) -> APIResponse:
     """Xác thực tài khoản."""
     email = await verify_token_from_redis(verification.token, TokenType.VERIFY_ACCOUNT)
     if not email:
         raise BadRequestException("Invalid or expired verification token")
     
-    user = await crud_users.get(db=db, email=email, schema_to_select=AuthUserRead)
-    if not user:
+    db_user = await crud_users.get(db=db, email=email, )
+    if not db_user:
         raise NotFoundException("User not found")
     
-    if user["is_active"]:
-        return {"message": "Account already verified"}
+    user = UserReadInternal.model_validate(db_user)
+    if user.is_active:
+        return APIResponse(message="Account already verified")
     
-    # Kích hoạt tài khoản
-    await crud_users.update(db=db, object={"is_active": True}, id=user["id"])
-    return {"message": "Account verified successfully"}
+    await crud_users.update(db=db, object={"is_active": True}, id=user.id)
+    return APIResponse(message="Account verified successfully")
 
 
-@router.post("/forgot-password", status_code=status.HTTP_200_OK)
+@router.post("/forgot-password", response_model=APIResponse, status_code=status.HTTP_200_OK)
 async def request_password_reset(
     request: PasswordResetRequest,
-    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(async_get_db)
-) -> dict:
+) -> APIResponse:
     """Yêu cầu reset password."""
-    user = await crud_users.get(db=db, email=request.email, schema_to_select=AuthUserRead)
-    if not user:
-        # Trả về thông báo thành công ngay cả khi email không tồn tại để tránh leak thông tin
-        return {"message": "If your email is registered, you will receive password reset instructions"}
+    db_user = await crud_users.get(db=db, email=request.email, )
+    if not db_user:
+        return APIResponse(message="If your email is registered, you will receive password reset instructions")
     
-    # Tạo reset token và gửi email
-    token = await create_verification_token(user["email"], TokenType.RESET_PASSWORD)
+    user = UserReadInternal.model_validate(db_user)
+    token = await create_verification_token(user.email, TokenType.RESET_PASSWORD)
     
-    background_tasks.add_task(
-        send_verification_email,
-        email=user["email"],
-        name=user["name"],
+    await redis_queue.enqueue(
+        "send_email",
+        email=user.email,
+        name=user.username,
         verification_code=token
     )
     
-    return {"message": "If your email is registered, you will receive password reset instructions"}
+    return APIResponse(message="If your email is registered, you will receive password reset instructions")
 
 
-@router.post("/reset-password", status_code=status.HTTP_200_OK)
+@router.post("/reset-password", response_model=APIResponse, status_code=status.HTTP_200_OK)
 async def reset_password(
     reset_data: PasswordReset,
     db: AsyncSession = Depends(async_get_db)
-) -> dict:
+) -> APIResponse:
     """Reset password với token."""
     email = await verify_token_from_redis(reset_data.token, TokenType.RESET_PASSWORD)
     if not email:
         raise BadRequestException("Invalid or expired reset token")
     
-    user = await crud_users.get(db=db, email=email, schema_to_select=AuthUserRead)
-    if not user:
+    db_user = await crud_users.get(db=db, email=email, )
+    if not db_user:
         raise NotFoundException("User not found")
     
-    # Cập nhật password
+    user = UserReadInternal.model_validate(db_user)
     hashed_password = get_password_hash(reset_data.new_password)
     await crud_users.update(
         db=db, 
         object={"hashed_password": hashed_password}, 
-        id=user["id"]
+        id=user.id
     )
     
-    # Đăng xuất khỏi tất cả các thiết bị
-    # TODO: Implement logout from all devices
-    
-    return {"message": "Password reset successfully"} 
+    return APIResponse(message="Password reset successfully")
+
+@router.post("/resend-verification", response_model=APIResponse, status_code=status.HTTP_200_OK)
+async def resend_verification_token(
+    data: EmailVerification,
+    db: AsyncSession = Depends(async_get_db)
+) -> APIResponse:
+    """Gửi lại token xác thực tài khoản cho user chưa xác thực."""
+    db_user = await crud_users.get(db=db, email=data.email, )
+    if not db_user:
+        return APIResponse(message="If your email is registered, you will receive verification instructions")
+        
+    user = UserReadInternal.model_validate(db_user)
+    if user.is_active:
+        return APIResponse(message="Account already verified")
+
+    token = await create_verification_token(user.email, TokenType.VERIFY_ACCOUNT)
+
+    await redis_queue.enqueue(
+        "send_email",
+        email=user.email,
+        name=user.username,
+        verification_code=token
+    )
+    return APIResponse(message="Verification email sent. Please check your email.") 

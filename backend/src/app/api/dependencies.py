@@ -9,11 +9,13 @@ from ..core.exceptions.http_exceptions import ForbiddenException, RateLimitExcep
 from ..core.logger import logging
 from ..core.security import TokenType, oauth2_scheme, verify_token
 from ..core.utils.rate_limit import rate_limiter
-from ..crud.crud_rate_limit import crud_rate_limits
-from ..crud.crud_tier import crud_tiers
+from ..crud.crud_rate_limits import crud_rate_limits
+from ..crud.crud_tiers import crud_tiers
 from ..crud.crud_users import crud_users
 from ..models.user import User
 from ..schemas.rate_limit import sanitize_path
+from ..schemas.user import UserReadInternal
+from ..schemas.tier import TierRead
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +25,7 @@ DEFAULT_PERIOD = settings.DEFAULT_RATE_LIMIT_PERIOD
 
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)], db: Annotated[AsyncSession, Depends(async_get_db)]
-) -> dict[str, Any] | None:
+) -> UserReadInternal | None:
     """Get the current authenticated user from the token.
     
     Raises:
@@ -38,20 +40,22 @@ async def get_current_user(
         raise UnauthorizedException("User not authenticated.")
 
     if "@" in token_data.username_or_email:
-        user: dict | None = await crud_users.get(db=db, email=token_data.username_or_email, is_deleted=False)
+        db_user = await crud_users.get(db=db, email=token_data.username_or_email, is_deleted=False)
     else:
-        user = await crud_users.get(db=db, username=token_data.username_or_email, is_deleted=False)
+        db_user = await crud_users.get(db=db, username=token_data.username_or_email, is_deleted=False)
 
-    if not user:
+    if not db_user:
         raise UnauthorizedException("User not found or has been deleted.")
+    
+    user = UserReadInternal.model_validate(db_user)
         
-    if not user.get("is_active"):
+    if not user.is_active:
         raise UnauthorizedException("Account is not activated. Please verify your email first.")
 
     return user
 
 
-async def get_optional_user(request: Request, db: AsyncSession = Depends(async_get_db)) -> dict | None:
+async def get_optional_user(request: Request, db: AsyncSession = Depends(async_get_db)) -> UserReadInternal | None:
     """Get user information from token if available, without raising exceptions.
     
     This is used for endpoints that:
@@ -75,11 +79,16 @@ async def get_optional_user(request: Request, db: AsyncSession = Depends(async_g
             return None
 
         if "@" in token_data.username_or_email:
-            user: dict | None = await crud_users.get(db=db, email=token_data.username_or_email, is_deleted=False)
+            db_user = await crud_users.get(db=db, email=token_data.username_or_email, is_deleted=False)
         else:
-            user = await crud_users.get(db=db, username=token_data.username_or_email, is_deleted=False)
+            db_user = await crud_users.get(db=db, username=token_data.username_or_email, is_deleted=False)
 
-        if not user or not user.get("is_active"):
+        if not db_user:
+            return None
+
+        user = UserReadInternal.model_validate(db_user)
+        
+        if not user.is_active:
             return None
 
         return user
@@ -94,16 +103,16 @@ async def get_optional_user(request: Request, db: AsyncSession = Depends(async_g
         return None
 
 
-async def get_current_superuser(current_user: Annotated[dict, Depends(get_current_user)]) -> dict:
+async def get_current_superuser(current_user: Annotated[UserReadInternal, Depends(get_current_user)]) -> UserReadInternal:
     """Check if the current user is a superuser."""
-    if not current_user["is_superuser"]:
+    if not current_user.is_superuser:
         raise ForbiddenException("You do not have enough privileges.")
 
     return current_user
 
 
 async def rate_limiter_dependency(
-    request: Request, db: Annotated[AsyncSession, Depends(async_get_db)], user: User | None = Depends(get_optional_user)
+    request: Request, db: Annotated[AsyncSession, Depends(async_get_db)], user: UserReadInternal | None = Depends(get_optional_user)
 ) -> None:
     """Check rate limits for user or IP address."""
     if hasattr(request.app.state, "initialization_complete"):
@@ -111,15 +120,19 @@ async def rate_limiter_dependency(
 
     path = sanitize_path(request.url.path)
     if user:
-        user_id = user["id"]
-        tier = await crud_tiers.get(db, id=user["tier_id"])
-        if tier:
-            rate_limit = await crud_rate_limits.get(db=db, tier_id=tier["id"], path=path)
-            if rate_limit:
-                limit, period = rate_limit["limit"], rate_limit["period"]
+        user_id = user.id
+        db_tier = await crud_tiers.get(db, id=user.tier_id)
+        if db_tier:
+            tier = TierRead.model_validate(db_tier)
+            # Rate limit CRUD doesn't have a read schema, so we need to handle this differently
+            # We'll use the raw model or create a custom query
+            rate_limit_dict = await crud_rate_limits.get(db=db, tier_id=tier.id, path=path)
+            if rate_limit_dict:
+                # Since rate_limits CRUD has no read schema, we need to access the dict directly
+                limit, period = rate_limit_dict["limit"], rate_limit_dict["period"]
             else:
                 logger.warning(
-                    f"User {user_id} with tier '{tier['name']}' has no specific rate limit for path '{path}'. \
+                    f"User {user_id} with tier '{tier.name}' has no specific rate limit for path '{path}'. \
                         Applying default rate limit."
                 )
                 limit, period = DEFAULT_LIMIT, DEFAULT_PERIOD
@@ -127,9 +140,17 @@ async def rate_limiter_dependency(
             logger.warning(f"User {user_id} has no assigned tier. Applying default rate limit.")
             limit, period = DEFAULT_LIMIT, DEFAULT_PERIOD
     else:
-        user_id = request.client.host
+        user_id = request.client.host if request.client else "unknown"
         limit, period = DEFAULT_LIMIT, DEFAULT_PERIOD
 
-    is_limited = await rate_limiter.is_rate_limited(db=db, user_id=user_id, path=path, limit=limit, period=period)
+    # Convert user_id to int for rate limiter if it's a user ID, otherwise use string for IP
+    if isinstance(user_id, int):
+        rate_limit_user_id = user_id
+    else:
+        # For IP addresses, we'll use a hash or some other method to convert to int
+        # For now, we'll use a simple hash
+        rate_limit_user_id = hash(user_id) % (2**31)  # Ensure it fits in int32
+
+    is_limited = await rate_limiter.is_rate_limited(db=db, user_id=rate_limit_user_id, path=path, limit=limit, period=period)
     if is_limited:
         raise RateLimitException("Rate limit exceeded.")

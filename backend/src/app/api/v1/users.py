@@ -1,243 +1,185 @@
-from typing import Annotated, Any
-
+from typing import Annotated
+from uuid import UUID
 from fastapi import APIRouter, Depends, Request, status
-from fastcrud.paginated import PaginatedListResponse, compute_offset, paginated_response
+from fastcrud.paginated import compute_offset, paginated_response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...api.dependencies import get_current_superuser, get_current_user
 from ...core.db.database import async_get_db
-from ...core.exceptions.http_exceptions import DuplicateValueException, ForbiddenException, NotFoundException
+from ...core.exceptions.http_exceptions import DuplicateValueException, CustomException, NotFoundException
 from ...core.security import blacklist_token, get_password_hash, oauth2_scheme
-from ...crud.crud_rate_limit import crud_rate_limits
-from ...crud.crud_tier import crud_tiers
 from ...crud.crud_users import crud_users
-from ...models.tier import Tier
-from ...schemas.tier import TierRead
-from ...schemas.user import UserCreate, UserCreateInternal, UserRead, UserTierUpdate, UserUpdate
+
+from ...schemas.user import UserRead, UserCreate, UserUpdate, AdminUserRead, AdminUserCreate, AdminUserUpdate, UserTierUpdate, UserCreateInternal, UserReadInternal
+from ...schemas.utils import APIResponse, PaginatedAPIResponse
 
 router = APIRouter(tags=["users"])
 
 # Regular user endpoints
-@router.get("/user/me", response_model=UserRead)
-async def read_user_me(
+@router.get("/users/me", response_model=APIResponse[UserRead])
+async def read_current_user(
     request: Request, 
-    current_user: Annotated[UserRead, Depends(get_current_user)]
-) -> UserRead:
-    """Get current user information"""
-    
-    return current_user
+    current_user: Annotated[UserReadInternal, Depends(get_current_user)]
+) -> APIResponse[UserRead]:
+    """Get current user's information."""
+    return APIResponse(message="User data retrieved successfully", data=current_user)
 
-
-@router.patch("/user/me")
-async def update_user_me(
+@router.patch("/users/me", response_model=APIResponse[UserRead])
+async def update_current_user(
     request: Request,
-    values: UserUpdate,
-    current_user: Annotated[UserRead, Depends(get_current_user)],
+    user_update: UserUpdate,
+    current_user: Annotated[UserReadInternal, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(async_get_db)],
-) -> dict[str, str]:
-    """Update current user information"""
-    if values.username != current_user["username"]:
-        existing_username = await crud_users.exists(db=db, username=values.username)
-        if existing_username:
+) -> APIResponse[UserRead]:
+    """Update current user's information."""
+    if user_update.username and user_update.username != current_user.username:
+        user_exists = await crud_users.exists(db=db, username=user_update.username)
+        if user_exists:
             raise DuplicateValueException("Username not available")
 
-    if values.email != current_user["email"]:
-        existing_email = await crud_users.exists(db=db, email=values.email)
-        if existing_email:
+    if user_update.email and user_update.email != current_user.email:
+        email_exists = await crud_users.exists(db=db, email=user_update.email)
+        if email_exists:
             raise DuplicateValueException("Email is already registered")
 
-    await crud_users.update(db=db, object=values, username=current_user["username"])
-    return {"message": "User updated"}
+    update_dict = user_update.model_dump(exclude_unset=True)
+    user_data = await crud_users.update(db=db, object=update_dict, uuid=current_user.uuid,return_as_model=True,schema_to_select=UserReadInternal)
+    if  not user_data:
+         raise CustomException(status_code=500 ,detail="Failed to update user. Please try again later.")
+    
+    return APIResponse(message="User updated successfully", data=user_data)
 
-
-@router.delete("/user/me")
-async def delete_user_me(
+@router.delete("/users/me", response_model=APIResponse, status_code=status.HTTP_200_OK)
+async def delete_current_user(
     request: Request,
-    current_user: Annotated[UserRead, Depends(get_current_user)],
+    current_user: Annotated[UserReadInternal, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(async_get_db)],
     token: str = Depends(oauth2_scheme),
-) -> dict[str, str]:
-    """Delete current user (mark as deleted)"""
-    await crud_users.delete(db=db, username=current_user["username"])
+) -> APIResponse:
+    """Delete current user."""
+    await crud_users.delete(db=db, id=current_user.id)
     await blacklist_token(token=token, db=db)
-    return {"message": "User deleted"}
-
-
-@router.get("/user/me/tier")
-async def read_user_me_tier(
-    request: Request,
-    current_user: Annotated[UserRead, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(async_get_db)]
-) -> dict | None:
-    """Get current user tier information"""
-    db_tier = await crud_tiers.exists(db=db, id=current_user["tier_id"])
-    if not db_tier:
-        raise NotFoundException("Tier not found")
-
-    joined: dict = await crud_users.get_joined(
-        db=db,
-        join_model=Tier,
-        join_prefix="tier_",
-        schema_to_select=UserRead,
-        join_schema_to_select=TierRead,
-        username=current_user["username"],
-    )
-
-    return joined
-
-
-@router.get("/user/me/rate_limits")
-async def read_user_me_rate_limits(
-    request: Request,
-    current_user: Annotated[UserRead, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(async_get_db)]
-) -> dict[str, Any]:
-    """Get current user rate limits"""
-    if current_user["tier_id"] is None:
-        current_user["tier_rate_limits"] = []
-        return current_user
-
-    db_tier = await crud_tiers.get(db=db, id=current_user["tier_id"])
-    if db_tier is None:
-        raise NotFoundException("Tier not found")
-
-    db_rate_limits = await crud_rate_limits.get_multi(db=db, tier_id=db_tier["id"])
-    current_user["tier_rate_limits"] = db_rate_limits["data"]
-
-    return current_user
+    return APIResponse(message="User deleted successfully")
 
 # Superuser endpoints
-@router.post("/user", response_model=UserRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(get_current_superuser)])
-async def create_user(
+@router.post("/admin/users", response_model=APIResponse[AdminUserRead], dependencies=[Depends(get_current_superuser)])
+async def admin_create_user(
     request: Request, 
-    user: UserCreate, 
+    user_create: AdminUserCreate, 
     db: Annotated[AsyncSession, Depends(async_get_db)]
-) -> UserRead:
-    """Create a new user (Superuser only)"""
-    email_row = await crud_users.exists(db=db, email=user.email)
-    if email_row:
+) -> APIResponse[AdminUserRead]:
+    """Create a new user (Superuser only)."""
+    email_exists = await crud_users.exists(db=db, email=user_create.email)
+    if email_exists:
         raise DuplicateValueException("Email is already registered")
 
-    username_row = await crud_users.exists(db=db, username=user.username)
-    if username_row:
+    username_exists = await crud_users.exists(db=db, username=user_create.username)
+    if username_exists:
         raise DuplicateValueException("Username not available")
 
-    user_internal_dict = user.model_dump()
-    user_internal_dict["hashed_password"] = get_password_hash(password=user_internal_dict["password"])
-    del user_internal_dict["password"]
+    create_dict = user_create.model_dump()
+    create_dict["hashed_password"] = get_password_hash(password=create_dict.pop("password"))
 
-    user_internal = UserCreateInternal(**user_internal_dict)
-    created_user: UserRead = await crud_users.create(db=db, object=user_internal)
-    return created_user
+    create_internal = UserCreateInternal(**create_dict)
+    user_data = await crud_users.create(db=db, object=create_internal)
+    
+    if not user_data:
+        raise CustomException(status_code=500 ,detail="Failed to create user. Please try again later.")
+    
 
+    return APIResponse(message="User created successfully", data=user_data)
 
-@router.get("/users", response_model=PaginatedListResponse[UserRead], dependencies=[Depends(get_current_superuser)])
-async def read_users(
+@router.get("/admin/users", response_model=PaginatedAPIResponse[AdminUserRead], dependencies=[Depends(get_current_superuser)])
+async def admin_read_users(
     request: Request, 
     db: Annotated[AsyncSession, Depends(async_get_db)], 
     page: int = 1, 
     items_per_page: int = 10
-) -> dict:
-    """Get all users with pagination (Superuser only)"""
+) -> PaginatedAPIResponse[AdminUserRead]:
+    """Get a paginated list of users (Superuser only)."""
     users_data = await crud_users.get_multi(
         db=db,
         offset=compute_offset(page, items_per_page),
         limit=items_per_page,
-        schema_to_select=UserRead,
-        is_deleted=False,
+        return_total_count=True
     )
+    if not users_data:
+        raise NotFoundException("Users not found")
+    
+    paginated_result = paginated_response(crud_data=users_data, page=page, items_per_page=items_per_page)
 
-    response: dict[str, Any] = paginated_response(crud_data=users_data, page=page, items_per_page=items_per_page)
-    return response
+    return PaginatedAPIResponse(message="Users retrieved successfully", **paginated_result)
 
-
-@router.get("/user/{username}", response_model=UserRead, dependencies=[Depends(get_current_superuser)])
-async def read_user(
+@router.get("/admin/users/{user_id}", response_model=APIResponse[AdminUserRead], dependencies=[Depends(get_current_superuser)])
+async def admin_read_user(
     request: Request, 
-    username: str, 
+    user_id: int, 
     db: Annotated[AsyncSession, Depends(async_get_db)]
-) -> dict:
-    """Get user by username (Superuser only)"""
-    db_user: UserRead | None = await crud_users.get(
-        db=db, schema_to_select=UserRead, username=username, is_deleted=False
+) -> APIResponse[AdminUserRead]:
+    """Get user information by ID (Superuser only)."""
+    user_data = await crud_users.get(
+        db=db, id=user_id
     )
-    if db_user is None:
+    if not user_data:
         raise NotFoundException("User not found")
 
-    return db_user
+    return APIResponse(message="User retrieved successfully", data=user_data)
 
-
-@router.patch("/user/{username}", dependencies=[Depends(get_current_superuser)])
-async def update_user(
+@router.patch("/admin/users/{user_id}", response_model=APIResponse[AdminUserRead], dependencies=[Depends(get_current_superuser)])
+async def admin_update_user(
     request: Request,
-    username: str,
-    values: UserUpdate,
+    user_id: int,
+    user_update: AdminUserUpdate,
     db: Annotated[AsyncSession, Depends(async_get_db)],
-) -> dict[str, str]:
-    """Update user by username (Superuser only)"""
-    db_user = await crud_users.get(db=db, schema_to_select=UserRead, username=username)
-    if db_user is None:
+) -> APIResponse[AdminUserRead]:
+    """Update a user by ID (Superuser only)."""
+    user_exists = await crud_users.exists(db=db, id=user_id)
+    if not user_exists:
         raise NotFoundException("User not found")
 
-    if values.username != db_user["username"]:
-        existing_username = await crud_users.exists(db=db, username=values.username)
-        if existing_username:
+    if user_update.username:
+        user_exists = await crud_users.exists(db=db, username=user_update.username)
+        if user_exists:
             raise DuplicateValueException("Username not available")
 
-    if values.email != db_user["email"]:
-        existing_email = await crud_users.exists(db=db, email=values.email)
-        if existing_email:
+    if user_update.email:
+        email_exists = await crud_users.exists(db=db, email=user_update.email)
+        if email_exists:
             raise DuplicateValueException("Email is already registered")
 
-    await crud_users.update(db=db, object=values, username=username)
-    return {"message": "User updated"}
+    update_dict = user_update.model_dump(exclude_unset=True)
+    if "password" in update_dict:
+        update_dict["hashed_password"] = get_password_hash(update_dict.pop("password"))
+        
+    user_data = await crud_users.update(db=db, object=update_dict, id=user_id)
+    if not user_data:
+        raise CustomException(status_code=500 ,detail="Failed to update user. Please try again later.")
+    
+    return APIResponse(message="User updated successfully", data=user_data)
 
 
-@router.delete("/user/{username}", dependencies=[Depends(get_current_superuser)])
-async def delete_user(
+@router.delete("/admin/users/{user_id}", response_model=APIResponse, dependencies=[Depends(get_current_superuser)])
+async def admin_delete_user(
     request: Request,
-    username: str,
+    user_id: int,
     db: Annotated[AsyncSession, Depends(async_get_db)],
-) -> dict[str, str]:
-    """Delete user by username (mark as deleted) (Superuser only)"""
-    db_user = await crud_users.get(db=db, schema_to_select=UserRead, username=username)
-    if not db_user:
-        raise NotFoundException("User not found")
+) -> APIResponse:
+    """Delete a user by ID (mark as deleted) (Superuser only)."""
+    user_exists = await crud_users.exists(db=db, id=user_id, is_deleted=False)
+    if not user_exists:
+        raise NotFoundException("User not found or already delete")
+    await crud_users.delete(db=db, id=user_id)
+    return APIResponse(message="User deleted successfully")
 
-    await crud_users.delete(db=db, username=username)
-    return {"message": "User deleted"}
-
-
-@router.delete("/db_user/{username}", dependencies=[Depends(get_current_superuser)])
-async def delete_db_user(
+@router.delete("/admin/users/{user_id}/force", response_model=APIResponse, dependencies=[Depends(get_current_superuser)])
+async def admin_force_delete_user(
     request: Request,
-    username: str,
+    user_id: int,
     db: Annotated[AsyncSession, Depends(async_get_db)],
-) -> dict[str, str]:
-    """Permanently delete user from database (Superuser only)"""
-    db_user = await crud_users.exists(db=db, username=username)
-    if not db_user:
+) -> APIResponse:
+    """Permanently delete a user from the database (Superuser only)."""
+    user_exists = await crud_users.exists(db=db, id=user_id)
+    if not user_exists:
         raise NotFoundException("User not found")
-
-    await crud_users.db_delete(db=db, username=username)
-    return {"message": "User deleted from the database"}
-
-
-@router.patch("/user/{username}/tier", dependencies=[Depends(get_current_superuser)])
-async def update_user_tier(
-    request: Request, 
-    username: str, 
-    values: UserTierUpdate, 
-    db: Annotated[AsyncSession, Depends(async_get_db)]
-) -> dict[str, str]:
-    """Update user tier (Superuser only)"""
-    db_user = await crud_users.get(db=db, username=username, schema_to_select=UserRead)
-    if db_user is None:
-        raise NotFoundException("User not found")
-
-    db_tier = await crud_tiers.get(db=db, id=values.tier_id)
-    if db_tier is None:
-        raise NotFoundException("Tier not found")
-
-    await crud_users.update(db=db, object=values, username=username)
-    return {"message": f"User {db_user['name']} Tier updated"}
+    await crud_users.db_delete(db=db, id=user_id)
+    return APIResponse(message="User permanently deleted from the database")

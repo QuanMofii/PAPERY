@@ -17,13 +17,13 @@ class Project(Base, UUIDMixin, TimestampMixin, SoftDeleteMixin):
     
     # Primary key
     id: Mapped[int] = mapped_column("id", autoincrement=True, nullable=False, unique=True, primary_key=True, init=False)
+    # Foreign keys
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"), index=True, nullable=False)
     
     # Required fields
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"), index=True, init=False)
-    
-    
+   
     # Relationships
     user: Mapped[User] = relationship(back_populates="projects", init=False)
     chat_sessions: Mapped[list["ChatSession"]] = relationship(

@@ -38,7 +38,7 @@ class Document(Base, UUIDMixin, TimestampMixin, SoftDeleteMixin):
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     file_path: Mapped[str] = mapped_column(String(255), nullable=False)
     file_type: Mapped[str] = mapped_column(SQLEnum(DocumentType), nullable=False)
-    project_id: Mapped[int] = mapped_column(ForeignKey("project.id", ondelete="CASCADE"), index=True, init=False)
+    project_id: Mapped[int] = mapped_column(ForeignKey("project.id", ondelete="CASCADE"), index=True)
     
     # Optional fields with defaults
     description: Mapped[str] = mapped_column(Text, nullable=True)

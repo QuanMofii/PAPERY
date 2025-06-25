@@ -28,7 +28,8 @@ class CryptSettings(BaseSettings):
     ALGORITHM: str = config("ALGORITHM", default="HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = config("ACCESS_TOKEN_EXPIRE_MINUTES", default=30)
     REFRESH_TOKEN_EXPIRE_DAYS: int = config("REFRESH_TOKEN_EXPIRE_DAYS", default=7)
-
+    RESET_PASSWORD_EXPIRE_MINUTES: int = config("RESET_PASSWORD_EXPIRE_MINUTES", default=8)
+    VERIFY_ACCOUNT_EXPIRE_MINUTES: int = config("VERIFY_ACCOUNT_EXPIRE_MINUTES", default=8)
 
 class DatabaseSettings(BaseSettings):
     pass
@@ -49,7 +50,7 @@ class MySQLSettings(DatabaseSettings):
     MYSQL_URI: str = f"{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_SERVER}:{MYSQL_PORT}/{MYSQL_DB}"
     MYSQL_SYNC_PREFIX: str = config("MYSQL_SYNC_PREFIX", default="mysql://")
     MYSQL_ASYNC_PREFIX: str = config("MYSQL_ASYNC_PREFIX", default="mysql+aiomysql://")
-    MYSQL_URL: str = config("MYSQL_URL", default=None)
+    MYSQL_URL: str | None = config("MYSQL_URL", default=None)
 
 
 class PostgresSettings(DatabaseSettings):
@@ -65,10 +66,10 @@ class PostgresSettings(DatabaseSettings):
 
 
 class FirstUserSettings(BaseSettings):
-    ADMIN_NAME: str = config("ADMIN_NAME", default="admin")
     ADMIN_EMAIL: str = config("ADMIN_EMAIL", default="admin@admin.com")
     ADMIN_USERNAME: str = config("ADMIN_USERNAME", default="admin")
     ADMIN_PASSWORD: str = config("ADMIN_PASSWORD", default="!Ch4ng3Th1sP4ssW0rd!")
+    ADMIN_AUTH_TYPE: str = config("ADMIN_AUTH_TYPE", default="local")
 
 
 class TestSettings(BaseSettings):
@@ -122,7 +123,7 @@ class EnvironmentOption(Enum):
 
 
 class EnvironmentSettings(BaseSettings):
-    ENVIRONMENT: EnvironmentOption = config("ENVIRONMENT", default="local")
+    ENVIRONMENT: EnvironmentOption = config("ENVIRONMENT", cast=EnvironmentOption, default="local")  # type: ignore
 
 
 class CorsSettings(BaseSettings):

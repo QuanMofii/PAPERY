@@ -16,14 +16,11 @@ class ChatSession(Base, UUIDMixin, TimestampMixin, SoftDeleteMixin):
     
     # Primary key
     id: Mapped[int] = mapped_column("id", autoincrement=True, nullable=False, unique=True, primary_key=True, init=False)
-    
+    # Foreign keys
+    project_id: Mapped[int] = mapped_column(ForeignKey("project.id", ondelete="CASCADE"), index=True)
+
     # Required fields
     title: Mapped[str] = mapped_column(String(255), nullable=False)
-    project_id: Mapped[int] = mapped_column(ForeignKey("project.id", ondelete="CASCADE"), index=True, init=False)
-    
-    # Optional fields with defaults
-    description: Mapped[str] = mapped_column(Text, nullable=True)
-    settings: Mapped[dict] = mapped_column(Text, nullable=True)
     
     # Relationships
     project: Mapped[Project] = relationship(back_populates="chat_sessions", init=False)
