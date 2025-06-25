@@ -202,7 +202,7 @@ async def verify_account(
     if not email:
         raise BadRequestException("Invalid or expired verification token")
     
-    db_user = await crud_users.get(db=db, email=email, )
+    db_user = await crud_users.get(db=db, email=email )
     if not db_user:
         raise NotFoundException("User not found")
     

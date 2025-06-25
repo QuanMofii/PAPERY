@@ -13,9 +13,9 @@ from ..crud.crud_rate_limits import crud_rate_limits
 from ..crud.crud_tiers import crud_tiers
 from ..crud.crud_users import crud_users
 from ..models.user import User
-from ..schemas.rate_limit import sanitize_path
+from ..schemas.rate_limit import sanitize_path, RateLimitReadInternal
 from ..schemas.user import UserReadInternal
-from ..schemas.tier import TierRead
+from ..schemas.tier import TierReadInternal
 
 logger = logging.getLogger(__name__)
 
@@ -121,20 +121,30 @@ async def rate_limiter_dependency(
     path = sanitize_path(request.url.path)
     if user:
         user_id = user.id
-        db_tier = await crud_tiers.get(db, id=user.tier_id)
-        if db_tier:
-            tier = TierRead.model_validate(db_tier)
-            # Rate limit CRUD doesn't have a read schema, so we need to handle this differently
-            # We'll use the raw model or create a custom query
-            rate_limit_dict = await crud_rate_limits.get(db=db, tier_id=tier.id, path=path)
-            if rate_limit_dict:
-                # Since rate_limits CRUD has no read schema, we need to access the dict directly
-                limit, period = rate_limit_dict["limit"], rate_limit_dict["period"]
-            else:
-                logger.warning(
-                    f"User {user_id} with tier '{tier.name}' has no specific rate limit for path '{path}'. \
-                        Applying default rate limit."
+        if user.tier_id:
+            db_tier = await crud_tiers.get(db=db, id=user.tier_id, return_as_model=True, schema_to_select=TierReadInternal)
+            if db_tier:
+                tier = TierReadInternal.model_validate(db_tier)
+                # Get rate limit for this tier and path
+                rate_limit_data = await crud_rate_limits.get(
+                    db=db, 
+                    tier_id=tier.id, 
+                    path=path,
+                    is_deleted=False,
+                    return_as_model=True,
+                    schema_to_select=RateLimitReadInternal
                 )
+                if rate_limit_data:
+                    rate_limit = RateLimitReadInternal.model_validate(rate_limit_data)
+                    limit, period = rate_limit.limit, rate_limit.period
+                else:
+                    logger.warning(
+                        f"User {user_id} with tier '{tier.name}' has no specific rate limit for path '{path}'. \
+                            Applying default rate limit."
+                    )
+                    limit, period = DEFAULT_LIMIT, DEFAULT_PERIOD
+            else:
+                logger.warning(f"User {user_id} has invalid tier_id {user.tier_id}. Applying default rate limit.")
                 limit, period = DEFAULT_LIMIT, DEFAULT_PERIOD
         else:
             logger.warning(f"User {user_id} has no assigned tier. Applying default rate limit.")

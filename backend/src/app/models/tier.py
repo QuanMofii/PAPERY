@@ -10,9 +10,11 @@ if TYPE_CHECKING:
 from ..core.db.database import Base
 from ..core.db.models import UUIDMixin, TimestampMixin, SoftDeleteMixin
 
-
 class Tier(Base, UUIDMixin, TimestampMixin, SoftDeleteMixin):
     __tablename__ = "tier"
+    # Primary key
     id: Mapped[int] = mapped_column("id", autoincrement=True, nullable=False, unique=True, primary_key=True, init=False)
+    # Required fields
     name: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    # Relationships
     users: Mapped[list["User"]] = relationship(back_populates="tier", init=False)
