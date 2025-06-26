@@ -68,7 +68,7 @@ export default function ChatIndex() {
             handleInputChange={handleInputChange}
             isGenerating={isGenerating}
             setMessages={setMessages}
-            className='h-full w-[50%] rounded-2xl bg-white px-2'
+            className='h-full w-[50%] rounded-2xl px-2'
         />
     );
 }

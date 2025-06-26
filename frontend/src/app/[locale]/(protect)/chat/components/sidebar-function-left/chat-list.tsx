@@ -79,7 +79,7 @@ const HISTORY_ITEMS = [
 ];
 
 export function ChatList() {
-    const { stateLeft, setOpen } = useSidebar();
+    // const { stateLeft, setOpen } = useSidebar();
     const pathname = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -210,11 +210,11 @@ export function ChatList() {
         }
     };
 
-    const handleHeaderClick = (title: string) => {
-        if (stateLeft === 'collapsed') {
-            setOpen(true);
-        }
-    };
+    // const handleHeaderClick = (title: string) => {
+    //     if (stateLeft === 'collapsed') {
+    //         setOpen(true);
+    //     }
+    // };
 
     return (
         <SidebarGroup className='flex max-h-full flex-1 flex-col overflow-x-hidden overflow-y-auto pt-0'>
