@@ -34,7 +34,11 @@ export function Header() {
             const isActive = link.segment === segment;
 
             return (
-                <Link key={link.href} href={link.href} className='' aria-current={isActive ? 'page' : undefined}>
+                <Link
+                    key={link.href}
+                    href={link.href}
+                    className='text-white'
+                    aria-current={isActive ? 'page' : undefined}>
                     <Button
                         variant='ghost'
                         size='default'
@@ -97,7 +101,7 @@ export function Header() {
             </div>
 
             {/* Right section */}
-            <div className='flex items-center gap-4'>
+            <div className='flex items-center gap-4 text-white'>
                 {/* Desktop Search */}
                 <div className='relative hidden max-w-sm sm:block'>
                     <Search className='text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 transform' />

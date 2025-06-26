@@ -1,61 +1,24 @@
-import { useEffect, useRef, useState } from 'react';
-
-import { Checkbox } from '@/registry/new-york-v4/ui/checkbox';
-
-import { DropdownMenuNav } from './dropdown-menu';
-import { FileIcon } from './file-icon';
+import { EllipsisVertical } from 'lucide-react';
 
 export function FileItem({ file }) {
-    const [showControls, setShowControls] = useState(false);
-    const [isDropDownOpen, setIsDropDownOpen] = useState(false);
-    const itemRef = useRef(null);
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (itemRef.current && !itemRef.current.contains(event.target) && isDropDownOpen) {
-                setIsDropDownOpen(false);
-                setShowControls(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [isDropDownOpen]);
-
     return (
         <div
-            ref={itemRef}
-            onMouseEnter={() => setShowControls(true)}
-            onMouseLeave={() => {
-                if (!isDropDownOpen) {
-                    setShowControls(false);
-                }
-            }}
-            className='file flex items-center justify-between rounded-lg p-2 hover:bg-gray-100'>
-            <div className='flex items-center space-x-2 p-2'>
-                <div className='relative h-5 w-5'>
-                    <div
-                        className={`absolute inset-0 transition-opacity duration-200 ${showControls || isDropDownOpen ? 'opacity-0' : 'opacity-100'}`}>
-                        <FileIcon file={file} />
-                    </div>
-                    <div
-                        className={`absolute inset-0 transition-opacity duration-200 ${showControls || isDropDownOpen ? 'opacity-100' : 'opacity-0'}`}>
-                        <DropdownMenuNav
-                            isDropDownOpen={isDropDownOpen}
-                            setIsDropDownOpen={setIsDropDownOpen}
-                            setShowControls={setShowControls}
-                        />
-                    </div>
-                </div>
-                <div className='flex flex-col gap-1'>
-                    <p className='text-sm font-medium'>{file.name}</p>
+            className={`file relative flex h-full w-full items-center justify-between rounded-lg p-2 ${file.type === 'pdf' ? 'bg-orange-400' : 'bg-blue-500'}`}>
+            <div className={`flex h-16 w-6 items-center space-x-2 p-2`}>
+                <div className={`translate-x-[-50%] -rotate-90 font-semibold text-white uppercase`}>{file.type}</div>
+            </div>
+            <div
+                className={`absolute right-0 z-50 flex h-full w-[90%] justify-between gap-1 rounded-lg bg-yellow-400 px-2`}>
+                <div className='flex flex-col justify-center'>
+                    <p className='text-sm font-medium text-stone-700'>{file.name}</p>
                     <p className='text-xs text-gray-500'>{file.size}</p>
                 </div>
+                <div className={`inset-0 transition-opacity duration-200`}>
+                    <div className='flex h-full w-full cursor-pointer items-center justify-center border-none text-stone-500'>
+                        <EllipsisVertical className='h-5 w-5' />
+                    </div>
+                </div>
             </div>
-            <Checkbox className='h-5 w-5 border-stone-500 ring-stone-500 data-[state=checked]:border-stone-500' />
         </div>
     );
 }

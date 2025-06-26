@@ -23,13 +23,15 @@ const mockFiles = [
 export function FileList() {
     return (
         <div className='p-4'>
-            <h3 className='mb-2 text-sm font-medium'>Tài liệu đã tải lên</h3>
             <div className='overflow-hidden rounded-lg'>
                 <div className='flex w-full items-center justify-between p-2 text-sm font-medium'>
-                    Danh sách tài liệu
-                    <Checkbox className='h-5 w-5 border-stone-500 ring-stone-500 data-[state=checked]:border-stone-500' />
+                    Library
+                    <div className='flex gap-2'>
+                        <Checkbox className='h-5 w-5 border-stone-500 ring-stone-500 data-[state=checked]:border-stone-500' />
+                        <Checkbox className='h-5 w-5 rounded-full border-stone-500 ring-stone-500 data-[state=checked]:border-stone-500' />
+                    </div>
                 </div>
-                <div className='h-96 overflow-y-auto p-2'>
+                <div className='flex h-96 flex-col gap-2 overflow-y-auto p-2'>
                     {mockFiles.map((file) => (
                         <FileItem key={file.id} file={file} />
                     ))}

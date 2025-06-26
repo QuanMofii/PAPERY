@@ -32,11 +32,11 @@ export function FileUploader() {
                 {...getRootProps()}
                 className={`cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors ${isDragActive ? 'border-primary bg-primary/10' : 'hover:border-primary border-gray-300'}`}>
                 <input {...getInputProps()} />
-                <Upload className='mx-auto h-12 w-12 text-gray-400' />
+                <Upload className='mx-auto h-12 w-12 text-gray-600' />
                 <p className='mt-2 text-sm text-gray-600'>
                     {isDragActive ? 'Thả file vào đây...' : 'Kéo thả file vào đây hoặc click để chọn file'}
                 </p>
-                <p className='mt-1 text-xs text-gray-500'>Hỗ trợ: PDF, DOCX (Tối đa 10MB)</p>
+                <p className='mt-1 text-xs text-gray-600'>Hỗ trợ: PDF, DOCX (Tối đa 10MB)</p>
             </div>
         </div>
     );
