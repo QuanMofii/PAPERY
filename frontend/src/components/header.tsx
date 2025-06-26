@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { useSelectedLayoutSegment } from 'next/navigation';
 
@@ -55,7 +57,7 @@ export function Header() {
     };
 
     return (
-        <header className='flex h-16 flex-1 shrink-0 items-center justify-between'>
+        <header className='flex h-16 shrink-0 items-center justify-between'>
             {/* Left section */}
             <div className='flex items-center gap-4'>
                 {/* Desktop Navigation */}

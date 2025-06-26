@@ -10,14 +10,10 @@ export default function SidebarRight() {
 
     return (
         <div
-            className={`h-[90vh] overflow-hidden transition-all ${open ? 'visible w-80' : 'invisible w-0'} rounded-lg bg-white`}>
+            className={`h-full overflow-hidden transition-all ${open ? 'visible w-80' : 'invisible w-0'} rounded-lg bg-[#f2fbff]`}>
             <div className={`${open ? 'block' : 'hidden'}`}>
-                <div>
-                    <FileUploader />
-                </div>
-                <div>
-                    <FileList />
-                </div>
+                <FileUploader />
+                <FileList />
                 <button onClick={(open) => setOpen(!open)}>Toggle</button>
             </div>
         </div>
