@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { CreateProjectAPI, GetAllProjectsAPI } from '@/app/api/client/project-list.api';
@@ -25,7 +26,7 @@ import { toast } from 'sonner';
 
 export function ProjectSwitcher() {
     const router = useRouter();
-    const { isMobile } = useSidebar();
+    // const { isMobile } = useSidebar();
     const searchParams = useSearchParams();
     const { projects, selectedProject, setSelectedProject, setProjects } = useListProjectStore();
     const [isLoading, setIsLoading] = useState(false);
@@ -145,7 +146,7 @@ export function ProjectSwitcher() {
                     <DropdownMenuContent
                         className='w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg border-none shadow-lg outline-hidden'
                         align='start'
-                        side={isMobile ? 'bottom' : 'right'}
+                        // side={isMobile ? 'bottom' : 'right'}
                         sideOffset={4}>
                         <DropdownMenuLabel className='text-muted-foreground text-xs'>Dự án</DropdownMenuLabel>
                         {isLoading ? (
@@ -170,7 +171,7 @@ export function ProjectSwitcher() {
                                 <DropdownMenuSeparator />
                                 <Dialog open={isOpen} onOpenChange={setIsOpen}>
                                     <DialogTrigger asChild>
-                                        <div className='hover:bg-primary/50 gap-2 p-2 flex-row flex rounded-sm cursor-pointer'>
+                                        <div className='hover:bg-primary/50 flex cursor-pointer flex-row gap-2 rounded-sm p-2'>
                                             <div className='bg-background flex size-6 items-center justify-center rounded-md border'>
                                                 <Plus className='size-4' />
                                             </div>

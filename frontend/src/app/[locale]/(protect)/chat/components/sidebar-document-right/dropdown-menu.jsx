@@ -16,10 +16,7 @@ import {
 } from '@/registry/new-york-v4/ui/dropdown-menu';
 
 //icon
-import { EllipsisVertical } from 'lucide-react';
-import { BookOpen } from 'lucide-react';
-import { FilePen } from 'lucide-react';
-import { Trash2 } from 'lucide-react';
+import { BookOpen, EllipsisVertical, FilePen, Trash2 } from 'lucide-react';
 
 export function DropdownMenuNav({ setIsDropDownOpen, isDropDownOpen, setShowControls }) {
     function handleClick(e) {
@@ -38,9 +35,7 @@ export function DropdownMenuNav({ setIsDropDownOpen, isDropDownOpen, setShowCont
         <DropdownMenu open={isDropDownOpen} onOpenChange={handleOpenChange}>
             <DropdownMenuTrigger
                 onClick={handleClick}
-                className='flex h-full w-full items-center justify-center border-none text-stone-500'>
-                <EllipsisVertical className='h-5 w-5' />
-            </DropdownMenuTrigger>
+                className='flex h-full w-full items-center justify-center border-none text-stone-500'></DropdownMenuTrigger>
             <DropdownMenuContent align='start' className='w-[200px]'>
                 <DropdownMenuGroup className='text-primary'>
                     <DropdownMenuItem className='flex items-center gap-2 px-3 py-2'>

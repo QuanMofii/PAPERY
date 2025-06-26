@@ -98,11 +98,12 @@ export function ChatList() {
 
         const fetchChats = async () => {
             setIsLoading(true);
-            // const response = await GetAllChatsAPI(projectId);
-            const response = {
-                success: true,
-                data: MOCK_CHATS
-            };
+            const response = await GetAllChatsAPI(projectId);
+            console.log(response);
+            // const response = {
+            //     success: true,
+            //     data: MOCK_CHATS
+            // };
 
             if (response.success) {
                 setChats(response.data);
