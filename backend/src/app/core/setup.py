@@ -38,34 +38,34 @@ async def create_tables() -> None:
         await conn.run_sync(Base.metadata.create_all)
 
 # -------------- redis --------------
-async def init_redis() -> None:
+async def init_redis() -> bool:
     """Khởi tạo Redis connection."""
     try:
         await redis_manager.init()
+        logger.info("Redis connection initialized successfully")
+        return True
     except Exception as e:
-        logger.error(f"Failed to initialize Redis: {str(e)}")
-        raise
+        logger.error(f"Failed to initialize Redis - {e}")
+        # Không raise exception để ứng dụng vẫn có thể chạy
+        return False
 
 async def close_redis() -> None:
     """Đóng kết nối Redis."""
     try:
         await redis_manager.close()
+        logger.info("Redis connection closed successfully")
     except Exception as e:
-        logger.error(f"Error closing Redis connection: {str(e)}")
+        logger.error(f"Error closing Redis connection - {e}")
 
 async def check_redis_health() -> bool:
     """Kiểm tra sức khỏe của Redis."""
     try:
         return await redis_manager.health_check()
     except Exception as e:
-        logger.error(f"Redis health check failed: {str(e)}")
+        logger.error(f"Redis health check failed - {e}")
         return False
 
 # -------------- application --------------
-async def set_threadpool_tokens(number_of_tokens: int = 100) -> None:
-    limiter = anyio.to_thread.current_default_thread_limiter()
-    limiter.total_tokens = number_of_tokens
-
 def lifespan_factory(
     settings: (
         DatabaseSettings
@@ -87,14 +87,14 @@ def lifespan_factory(
         initialization_complete = Event()
         app.state.initialization_complete = initialization_complete
 
-        await set_threadpool_tokens()
-
         try:
             if isinstance(settings, (RedisCacheSettings, RedisQueueSettings, RedisRateLimiterSettings)):
-                await init_redis()
-                if not await check_redis_health():
-                    logger.error("Redis health check failed")
-                    return
+                redis_initialized = await init_redis()
+                if not redis_initialized:
+                    logger.warning("Redis initialization failed, some features may be limited")
+                else:
+                    if not await check_redis_health():
+                        logger.warning("Redis health check failed, some features may be limited")
 
             initialization_complete.set()
             yield
@@ -163,12 +163,26 @@ def create_application(
     # --- before creating application ---
     lifespan = lifespan_factory(settings, create_tables_on_start=create_tables_on_start)
 
+    # Get app settings from the settings object
+    app_name = getattr(settings, 'APP_NAME', 'PAPERY API')
+    app_description = getattr(settings, 'APP_DESCRIPTION', 'PAPERY API Documentation')
+    contact_name = getattr(settings, 'CONTACT_NAME', 'PAPERY Team')
+    contact_email = getattr(settings, 'CONTACT_EMAIL', 'contact@papery.com')
+    license_name = getattr(settings, 'LICENSE_NAME', 'MIT')
+    terms_of_service = getattr(settings, 'TERMS_OF_SERVICE', 'https://papery.com/terms')
+    
+    # Get CORS settings
+    cors_origins = getattr(settings, 'CORS_ORIGINS', ['*'])
+    cors_credentials = getattr(settings, 'CORS_CREDENTIALS', True)
+    cors_methods = getattr(settings, 'CORS_METHODS', ['*'])
+    cors_headers = getattr(settings, 'CORS_HEADERS', ['*'])
+
     application = FastAPI(
-        title=settings.APP_NAME,
-        description=settings.APP_DESCRIPTION,
-        contact={"name": settings.CONTACT_NAME, "email": settings.CONTACT_EMAIL},
-        license_info={"name": settings.LICENSE_NAME},
-        terms_of_service=settings.TERMS_OF_SERVICE,
+        title=app_name,
+        description=app_description,
+        contact={"name": contact_name, "email": contact_email},
+        license_info={"name": license_name},
+        terms_of_service=terms_of_service,
         lifespan=lifespan,
         **kwargs
     )
@@ -176,14 +190,13 @@ def create_application(
     # Add CORS middleware
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.CORS_ORIGINS,
-        allow_credentials=settings.CORS_CREDENTIALS,
-        allow_methods=settings.CORS_METHODS,
-        allow_headers=settings.CORS_HEADERS,
+        allow_origins=cors_origins,
+        allow_credentials=cors_credentials,
+        allow_methods=cors_methods,
+        allow_headers=cors_headers,
     )
 
     application.include_router(router)
-
 
     if isinstance(settings, ClientSideCacheSettings):
         application.add_middleware(ClientCacheMiddleware, max_age=settings.CLIENT_CACHE_MAX_AGE)
@@ -209,4 +222,4 @@ def create_application(
 
             application.include_router(docs_router)
 
-        return application
+    return application

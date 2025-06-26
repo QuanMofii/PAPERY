@@ -23,7 +23,16 @@ class RateLimiter:
         return await redis_manager.health_check()
 
     async def is_rate_limited(self, db: AsyncSession, user_id: int, path: str, limit: int, period: int) -> bool:
+        """Kiểm tra rate limit cho user."""
+        if not redis_manager.is_available():
+            logger.warning("Redis is not available, rate limiting is disabled")
+            return False
+
         client = redis_manager.get_client()
+        if not client:
+            logger.warning("Redis client is not available, rate limiting is disabled")
+            return False
+
         current_timestamp = int(datetime.now(UTC).timestamp())
         window_start = current_timestamp - (current_timestamp % period)
 
@@ -36,11 +45,14 @@ class RateLimiter:
                 await client.expire(key, period)
 
             if current_count > limit:
+                logger.info(f"Rate limit exceeded for user {user_id} on path {path}")
                 return True
 
         except Exception as e:
-            logger.exception(f"Error checking rate limit for user {user_id} on path {path}: {e}")
-            raise e
+            error_msg = str(e).replace("Error ", "")
+            logger.error(f"Error checking rate limit for user {user_id} on path {path}: {error_msg}")
+            # Trong trường hợp lỗi, cho phép request đi qua
+            return False
 
         return False
 

@@ -23,6 +23,8 @@ class ChatMessage(Base, UUIDMixin, TimestampMixin, SoftDeleteMixin):
     
     # Primary key
     id: Mapped[int] = mapped_column("id", autoincrement=True, nullable=False, unique=True, primary_key=True, init=False)
+    # Foreign keys
+    chat_session_id: Mapped[int] = mapped_column(ForeignKey("chat_session.id", ondelete="CASCADE"), index=True, nullable=False)
     
     # Required fields
     content: Mapped[str] = mapped_column(Text, nullable=False)
@@ -31,8 +33,6 @@ class ChatMessage(Base, UUIDMixin, TimestampMixin, SoftDeleteMixin):
     model_name: Mapped[str] = mapped_column(String(50), nullable=False)
     token_count: Mapped[int] = mapped_column(Integer, default=0)
     
-    # Foreign keys
-    chat_session_id: Mapped[int] = mapped_column(ForeignKey("chat_session.id", ondelete="CASCADE"), index=True, init=False)
     
     # Relationships
     chat_session: Mapped[ChatSession] = relationship(back_populates="messages", init=False)

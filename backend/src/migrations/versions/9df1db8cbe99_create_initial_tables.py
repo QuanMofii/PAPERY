@@ -1,8 +1,8 @@
 """create_initial_tables
 
-Revision ID: 08ba940af901
+Revision ID: 9df1db8cbe99
 Revises: 
-Create Date: 2025-06-16 18:36:46.400061
+Create Date: 2025-06-25 08:18:11.169496
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '08ba940af901'
+revision: str = '9df1db8cbe99'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -23,9 +23,12 @@ def upgrade() -> None:
     op.create_table('tier',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('name', sa.String(), nullable=False),
+    sa.Column('uuid', sa.Uuid(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('current_timestamp(0)'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('current_timestamp(0)'), nullable=True),
-    sa.PrimaryKeyConstraint('id'),
+    sa.Column('deleted_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('is_deleted', sa.Boolean(), nullable=False),
+    sa.PrimaryKeyConstraint('id', 'uuid'),
     sa.UniqueConstraint('id'),
     sa.UniqueConstraint('name')
     )
@@ -44,21 +47,24 @@ def upgrade() -> None:
     sa.Column('path', sa.String(), nullable=False),
     sa.Column('limit', sa.Integer(), nullable=False),
     sa.Column('period', sa.Integer(), nullable=False),
+    sa.Column('uuid', sa.Uuid(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('current_timestamp(0)'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('current_timestamp(0)'), nullable=True),
+    sa.Column('deleted_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('is_deleted', sa.Boolean(), nullable=False),
     sa.ForeignKeyConstraint(['tier_id'], ['tier.id'], ),
-    sa.PrimaryKeyConstraint('id'),
+    sa.PrimaryKeyConstraint('id', 'uuid'),
     sa.UniqueConstraint('id'),
     sa.UniqueConstraint('name')
     )
     op.create_index(op.f('ix_rate_limit_tier_id'), 'rate_limit', ['tier_id'], unique=False)
     op.create_table('user',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('name', sa.String(length=30), nullable=False),
+    sa.Column('tier_id', sa.Integer(), nullable=True),
     sa.Column('username', sa.String(length=20), nullable=False),
     sa.Column('email', sa.String(length=50), nullable=False),
     sa.Column('hashed_password', sa.String(), nullable=True),
-    sa.Column('tier_id', sa.Integer(), nullable=True),
+    sa.Column('auth_type', sa.Enum('LOCAL', 'GOOGLE', 'GITHUB', name='authprovider'), nullable=False),
     sa.Column('last_login', sa.DateTime(timezone=True), nullable=True),
     sa.Column('profile_image_url', sa.String(), nullable=True),
     sa.Column('is_superuser', sa.Boolean(), nullable=False),
@@ -68,35 +74,20 @@ def upgrade() -> None:
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('current_timestamp(0)'), nullable=True),
     sa.Column('deleted_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('is_deleted', sa.Boolean(), nullable=False),
-    sa.ForeignKeyConstraint(['tier_id'], ['tier.id'], ),
+    sa.ForeignKeyConstraint(['tier_id'], ['tier.id'], ondelete='SET NULL'),
     sa.PrimaryKeyConstraint('id', 'uuid'),
     sa.UniqueConstraint('id')
     )
+    op.create_index(op.f('ix_user_auth_type'), 'user', ['auth_type'], unique=False)
     op.create_index(op.f('ix_user_email'), 'user', ['email'], unique=True)
     op.create_index(op.f('ix_user_is_active'), 'user', ['is_active'], unique=False)
     op.create_index(op.f('ix_user_tier_id'), 'user', ['tier_id'], unique=False)
     op.create_index(op.f('ix_user_username'), 'user', ['username'], unique=True)
-    op.create_table('post',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('created_by_user_id', sa.Integer(), nullable=False),
-    sa.Column('title', sa.String(length=30), nullable=False),
-    sa.Column('text', sa.String(length=63206), nullable=False),
-    sa.Column('media_url', sa.String(), nullable=True),
-    sa.Column('uuid', sa.Uuid(), server_default=sa.text('gen_random_uuid()'), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('current_timestamp(0)'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('current_timestamp(0)'), nullable=True),
-    sa.Column('deleted_at', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('is_deleted', sa.Boolean(), nullable=False),
-    sa.ForeignKeyConstraint(['created_by_user_id'], ['user.id'], ),
-    sa.PrimaryKeyConstraint('id', 'uuid'),
-    sa.UniqueConstraint('id')
-    )
-    op.create_index(op.f('ix_post_created_by_user_id'), 'post', ['created_by_user_id'], unique=False)
     op.create_table('project',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
     sa.Column('description', sa.Text(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('uuid', sa.Uuid(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('current_timestamp(0)'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('current_timestamp(0)'), nullable=True),
@@ -109,10 +100,8 @@ def upgrade() -> None:
     op.create_index(op.f('ix_project_user_id'), 'project', ['user_id'], unique=False)
     op.create_table('chat_session',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('title', sa.String(length=255), nullable=False),
     sa.Column('project_id', sa.Integer(), nullable=False),
-    sa.Column('description', sa.Text(), nullable=True),
-    sa.Column('settings', sa.Text(), nullable=True),
+    sa.Column('title', sa.String(length=255), nullable=False),
     sa.Column('uuid', sa.Uuid(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('current_timestamp(0)'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('current_timestamp(0)'), nullable=True),
@@ -145,12 +134,12 @@ def upgrade() -> None:
     op.create_index(op.f('ix_document_project_id'), 'document', ['project_id'], unique=False)
     op.create_table('chat_message',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('chat_session_id', sa.Integer(), nullable=False),
     sa.Column('content', sa.Text(), nullable=False),
     sa.Column('role', sa.Enum('user', 'bot', name='role'), nullable=False),
     sa.Column('sequence_number', sa.Integer(), nullable=False),
     sa.Column('model_name', sa.String(length=50), nullable=False),
     sa.Column('token_count', sa.Integer(), nullable=False),
-    sa.Column('chat_session_id', sa.Integer(), nullable=False),
     sa.Column('uuid', sa.Uuid(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('current_timestamp(0)'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('current_timestamp(0)'), nullable=True),
@@ -197,12 +186,11 @@ def downgrade() -> None:
     op.drop_table('chat_session')
     op.drop_index(op.f('ix_project_user_id'), table_name='project')
     op.drop_table('project')
-    op.drop_index(op.f('ix_post_created_by_user_id'), table_name='post')
-    op.drop_table('post')
     op.drop_index(op.f('ix_user_username'), table_name='user')
     op.drop_index(op.f('ix_user_tier_id'), table_name='user')
     op.drop_index(op.f('ix_user_is_active'), table_name='user')
     op.drop_index(op.f('ix_user_email'), table_name='user')
+    op.drop_index(op.f('ix_user_auth_type'), table_name='user')
     op.drop_table('user')
     op.drop_index(op.f('ix_rate_limit_tier_id'), table_name='rate_limit')
     op.drop_table('rate_limit')

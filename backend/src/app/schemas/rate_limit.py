@@ -1,60 +1,69 @@
-from datetime import datetime
 from typing import Annotated
+from uuid import UUID
+from pydantic import BaseModel, ConfigDict, Field
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
-
-from ..core.schemas import TimestampSchema
-
-
+from ..core.schemas import PersistentDeletion, TimestampSchema, UUIDSchema
 def sanitize_path(path: str) -> str:
     return path.strip("/").replace("/", "_")
-
-
 class RateLimitBase(BaseModel):
-    path: Annotated[str, Field(examples=["users"])]
-    limit: Annotated[int, Field(examples=[5])]
-    period: Annotated[int, Field(examples=[60])]
-
-    @field_validator("path")
-    def validate_and_sanitize_path(cls, v: str) -> str:
-        return sanitize_path(v)
-
-
-class RateLimit(TimestampSchema, RateLimitBase):
     tier_id: int
-    name: Annotated[str | None, Field(default=None, examples=["users:5:60"])]
+    name: Annotated[str, Field(min_length=1, max_length=100, examples=["API Rate Limit", "Chat Rate Limit"])]
+    path: Annotated[str, Field(min_length=1, max_length=255, examples=["/api/v1/chat", "/api/v1/projects"])]
+    limit: Annotated[int, Field(gt=0, examples=[100, 1000])]
+    period: Annotated[int, Field(gt=0, examples=[60, 3600])]  # in seconds
 
-
-class RateLimitRead(RateLimitBase):
+class RateLimit(TimestampSchema, RateLimitBase, UUIDSchema, PersistentDeletion):
     id: int
-    tier_id: int
-    name: str
 
+class RateLimitCreateInternal(RateLimitBase):
+    pass
+
+class RateLimitUpdateInternal(BaseModel):
+    tier_id: int | None = None
+    name: Annotated[str | None, Field(min_length=1, max_length=100, examples=["API Rate Limit", "Chat Rate Limit"], default=None)] = None
+    path: Annotated[str | None, Field(min_length=1, max_length=255, examples=["/api/v1/chat", "/api/v1/projects"], default=None)] = None
+    limit: Annotated[int | None, Field(gt=0, examples=[100, 1000], default=None)] = None
+    period: Annotated[int | None, Field(gt=0, examples=[60, 3600], default=None)] = None  # in seconds
+
+class RateLimitDeleteInternal(BaseModel):
+    is_deleted: bool
+
+class RateLimitReadInternal(RateLimit):
+    pass
+
+class RateLimitRead(BaseModel):
+    uuid: UUID | None = None
+    tier_id: int
+    name: Annotated[str, Field(min_length=1, max_length=100, examples=["API Rate Limit", "Chat Rate Limit"])]
+    path: Annotated[str, Field(min_length=1, max_length=255, examples=["/api/v1/chat", "/api/v1/projects"])]
+    limit: Annotated[int, Field(gt=0, examples=[100, 1000])]
+    period: Annotated[int, Field(gt=0, examples=[60, 3600])]  # in seconds
 
 class RateLimitCreate(RateLimitBase):
     model_config = ConfigDict(extra="forbid")
 
-    name: Annotated[str | None, Field(default=None, examples=["api_v1_users:5:60"])]
-
-
-class RateLimitCreateInternal(RateLimitCreate):
-    tier_id: int
-
-
 class RateLimitUpdate(BaseModel):
-    path: str | None = Field(default=None)
-    limit: int | None = None
-    period: int | None = None
-    name: str | None = None
+    model_config = ConfigDict(extra="forbid")
+    name: Annotated[str | None, Field(min_length=1, max_length=100, examples=["API Rate Limit", "Chat Rate Limit"], default=None)] = None
+    path: Annotated[str | None, Field(min_length=1, max_length=255, examples=["/api/v1/chat", "/api/v1/projects"], default=None)] = None
+    limit: Annotated[int | None, Field(gt=0, examples=[100, 1000], default=None)] = None
+    period: Annotated[int | None, Field(gt=0, examples=[60, 3600], default=None)] = None  # in seconds
 
-    @field_validator("path")
-    def validate_and_sanitize_path(cls, v: str) -> str:
-        return sanitize_path(v) if v is not None else None
-
-
-class RateLimitUpdateInternal(RateLimitUpdate):
-    updated_at: datetime
-
-
-class RateLimitDelete(BaseModel):
+class AdminRateLimitRead(RateLimit):
     pass
+
+class AdminRateLimitCreate(RateLimitBase):
+    pass
+
+class AdminRateLimitUpdate(BaseModel):
+    tier_id: int | None = None
+    name: Annotated[str | None, Field(min_length=1, max_length=100, examples=["API Rate Limit", "Chat Rate Limit"], default=None)] = None
+    path: Annotated[str | None, Field(min_length=1, max_length=255, examples=["/api/v1/chat", "/api/v1/projects"], default=None)] = None
+    limit: Annotated[int | None, Field(gt=0, examples=[100, 1000], default=None)] = None
+    period: Annotated[int | None, Field(gt=0, examples=[60, 3600], default=None)] = None  # in seconds
+
+class AdminRateLimitDelete(BaseModel):
+    is_deleted: bool
+
+class RateLimitRestoreDeleted(BaseModel):
+    is_deleted: bool

@@ -14,7 +14,6 @@ def test_post_user(client: TestClient) -> None:
     response = client.post(
         "/api/v1/user",
         json={
-            "name": fake.name(),
             "username": fake.user_name(),
             "email": fake.email(),
             "password": fake.password(),

@@ -1,39 +1,49 @@
-from datetime import datetime
 from typing import Annotated
+from uuid import UUID
+from pydantic import BaseModel, ConfigDict, Field
 
-from pydantic import BaseModel, Field
-
-from ..core.schemas import TimestampSchema
-
+from ..core.schemas import PersistentDeletion, TimestampSchema, UUIDSchema
 
 class TierBase(BaseModel):
-    name: Annotated[str, Field(examples=["free"])]
+    name: Annotated[str, Field(min_length=1, max_length=100, examples=["Free", "Premium", "Enterprise"])]
 
+class Tier(TimestampSchema, TierBase, UUIDSchema, PersistentDeletion):
+    id: int
 
-class Tier(TimestampSchema, TierBase):
+class TierCreateInternal(TierBase):
     pass
 
+class TierUpdateInternal(BaseModel):
+    name: Annotated[str | None, Field(min_length=1, max_length=100, examples=["Free", "Premium", "Enterprise"], default=None)] = None
 
-class TierRead(TierBase):
-    id: int
-    created_at: datetime
+class TierDeleteInternal(BaseModel):
+    is_deleted: bool
 
+class TierReadInternal(Tier):
+    pass
+
+class TierRead(BaseModel):
+    uuid: UUID | None = None
+    name: Annotated[str, Field(min_length=1, max_length=100, examples=["Free", "Premium", "Enterprise"])]
 
 class TierCreate(TierBase):
-    pass
-
-
-class TierCreateInternal(TierCreate):
-    pass
-
+    model_config = ConfigDict(extra="forbid")
 
 class TierUpdate(BaseModel):
-    name: str | None = None
+    model_config = ConfigDict(extra="forbid")
+    name: Annotated[str | None, Field(min_length=1, max_length=100, examples=["Free", "Premium", "Enterprise"], default=None)] = None
 
-
-class TierUpdateInternal(TierUpdate):
-    updated_at: datetime
-
-
-class TierDelete(BaseModel):
+class AdminTierRead(Tier):
     pass
+
+class AdminTierCreate(TierBase):
+    pass
+
+class AdminTierUpdate(BaseModel):
+    name: Annotated[str | None, Field(min_length=1, max_length=100, examples=["Free", "Premium", "Enterprise"], default=None)] = None
+
+class AdminTierDelete(BaseModel):
+    is_deleted: bool
+
+class TierRestoreDeleted(BaseModel):
+    is_deleted: bool

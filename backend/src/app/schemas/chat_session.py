@@ -1,60 +1,62 @@
-from datetime import datetime
 from typing import Annotated
-
+from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 from ..core.schemas import PersistentDeletion, TimestampSchema, UUIDSchema
 
-
 class ChatSessionBase(BaseModel):
     title: Annotated[str, Field(min_length=1, max_length=255, examples=["New Chat Session"])]
-    description: Annotated[str | None, Field(examples=["A detailed description of the chat session"], default=None)]
-
 
 class ChatSession(TimestampSchema, ChatSessionBase, UUIDSchema, PersistentDeletion):
     project_id: int
-    settings: dict | None = None
+
+class ChatSessionCreateInternal(ChatSessionBase):
+    project_id: int
+
+class ChatSessionUpdateInternal(BaseModel):
+    title: Annotated[str | None, Field(min_length=1, max_length=255, examples=["New Chat Session"], default=None)] = None
+    project_id: int | None = None
+
+
+class ChatSessionDeleteInternal(BaseModel):
+    is_deleted: bool
+ 
+
+class ChatSessionReadInternal(ChatSession):
+    pass
 
 
 class ChatSessionRead(BaseModel):
-    id: int
+ 
+    uuid: UUID | None = None
     title: Annotated[str, Field(min_length=1, max_length=255, examples=["New Chat Session"])]
-    description: Annotated[str | None, Field(examples=["A detailed description of the chat session"], default=None)]
     project_id: int
-    settings: dict | None = None
-    created_at: datetime
-    updated_at: datetime
 
 
 class ChatSessionCreate(ChatSessionBase):
     model_config = ConfigDict(extra="forbid")
-    
-    settings: dict | None = None
-
-
-class ChatSessionCreateInternal(ChatSessionBase):
-    project_id: int
-    settings: dict | None = None
-
 
 class ChatSessionUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
+    title: Annotated[str | None, Field(min_length=1, max_length=255, examples=["New Chat Session"], default=None)] = None
 
-    title: Annotated[str | None, Field(min_length=1, max_length=255, examples=["New Chat Session"], default=None)]
-    description: Annotated[str | None, Field(examples=["A detailed description of the chat session"], default=None)]
-    settings: dict | None = None
+class AdminChatSessionRead(ChatSession):
+    pass
 
+class AdminChatSessionCreate(ChatSessionBase):
+    project_id: int
 
-class ChatSessionUpdateInternal(ChatSessionUpdate):
-    updated_at: datetime
+class AdminChatSessionUpdate(BaseModel):
+    title: Annotated[str | None, Field(min_length=1, max_length=255, examples=["New Chat Session"], default=None)] = None
+    project_id: int | None = None
 
-
-class ChatSessionDelete(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
+class AdminChatSessionDelete(BaseModel):
     is_deleted: bool
-    deleted_at: datetime
-
 
 class ChatSessionRestoreDeleted(BaseModel):
     is_deleted: bool
+
+class ChatSessionDelete(BaseModel):
+    is_deleted: bool
+
+

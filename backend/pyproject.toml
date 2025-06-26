@@ -10,7 +10,9 @@ license = "MIT"
 
 
 [tool.poetry]
-packages = [{ include = "src" }]  
+packages = [{ include = "app", from = "backend/src" }]  
+
+
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -41,6 +43,7 @@ pytest-mock = "^3.14.0"
 fastcrud = "^0.15.5"
 jinja2 = "^3.1.6"
 celery = "^5.5.3"
+poetry-plugin-shell = "^1.0.1"
 
 
 [build-system]

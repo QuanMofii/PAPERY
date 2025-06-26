@@ -16,7 +16,6 @@ class Token(BaseModel):
 class AuthUserCreate(UserBase):
   
     model_config = ConfigDict(extra="forbid")
-    
     password: Annotated[str, Field(
         pattern=r"^.{8,}|[0-9]+|[A-Z]+|[a-z]+|[^a-zA-Z0-9]+$", 
         examples=["Str1ngst!"]
@@ -24,11 +23,12 @@ class AuthUserCreate(UserBase):
 
 
 class AuthUserCreateInternal(UserBase):
+
     hashed_password: str
     is_superuser: bool = False
     is_active: bool = False
     last_login: datetime | None = None
-
+    tier_id: int = 1
 
 class PasswordReset(BaseModel):
     email: EmailStr
@@ -54,7 +54,7 @@ class AuthUserRead(UserBase):
     is_active: bool
     is_superuser: bool
     last_login: datetime | None
-    profile_image_url: str
+    profile_image_url: str | None = None
 
 
 class RefreshToken(BaseModel):
