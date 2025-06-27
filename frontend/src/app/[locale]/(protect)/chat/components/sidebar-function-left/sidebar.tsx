@@ -85,7 +85,7 @@ export function SidebarLeft() {
         <div className='flex h-full'>
             <nav className='flex h-full w-20 flex-col rounded-lg bg-transparent'>
                 <div className='flex w-full cursor-pointer items-center justify-between rounded-xl p-6 pb-6 transition-all duration-200'>
-                    <div className='flex size-8 items-center justify-center rounded-lg bg-white text-[#728b92]'>
+                    <div className='flex size-8 items-center justify-center rounded-lg text-gray-600'>
                         <Briefcase className='size-4' />
                     </div>
                 </div>
@@ -94,7 +94,7 @@ export function SidebarLeft() {
                         {config_item.map((item) => (
                             <li
                                 key={item.title}
-                                className='group relative m-2 flex flex-col items-center gap-2 px-4 py-4 text-white hover:rounded-lg hover:bg-[#424242]]'>
+                                className='group relative m-2 flex flex-col items-center gap-2 px-4 py-4 text-gray-600 hover:rounded-lg hover:bg-[#424242]]'>
                                 <div className={`px-1 transition-all duration-2 group-hover:-translate-y-2`}>
                                     <item.icon />
                                 </div>
@@ -107,7 +107,7 @@ export function SidebarLeft() {
                 </div>
                 <button onClick={() => setExpanded((expanded) => !expanded)}>toggle</button>
             </nav>
-            <div className='flex h-full rounded-lg bg-[#f2fbff]'>
+            <div className='flex h-full rounded-lg bg-white shadow-sm'>
                 <div className={`overflow-hidden transition-all ${expanded ? 'ml-2 w-50' : 'm-0 w-0'}`}>
                     {HISTORY_ITEMS.map((item) => (
                         <div key={item.title} className='flex items-center justify-between px-2 py-4 text-lg'>

@@ -9,9 +9,8 @@ export default function SidebarRight() {
     const [open, setOpen] = useState(true);
 
     return (
-        <div
-            className={`h-full overflow-hidden transition-all ${open ? 'visible w-80' : 'invisible w-0'} rounded-lg bg-[#f2fbff]`}>
-            <div className={`${open ? 'block' : 'hidden'}`}>
+        <div className={`h-full transition-all ${open ? 'visible w-80' : 'invisible w-0'} rounded-lg bg-white`}>
+            <div className={`${open ? 'block' : 'hidden'} flex flex-col overflow-hidden`}>
                 <FileUploader />
                 <FileList />
                 <button onClick={(open) => setOpen(!open)}>Toggle</button>
