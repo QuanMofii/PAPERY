@@ -22,7 +22,7 @@ const mockFiles = [
 
 export function FileList() {
     return (
-        <div className='overflow-hidden rounded-lg p-4'>
+        <div className='h-full flex-1 rounded-lg p-4'>
             <div className='flex w-full items-center justify-between p-2 text-sm font-medium'>
                 Library
                 <div className='flex gap-2'>
@@ -30,7 +30,7 @@ export function FileList() {
                     <Checkbox className='h-5 w-5 rounded-full border-stone-500 ring-stone-500 data-[state=checked]:border-stone-500' />
                 </div>
             </div>
-            <div className='flex h-96 flex-col gap-2 overflow-y-auto p-2'>
+            <div className='flex flex-col gap-2 overflow-y-auto p-2'>
                 {mockFiles.map((file) => (
                     <FileItem key={file.id} file={file} />
                 ))}

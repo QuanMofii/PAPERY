@@ -39,7 +39,7 @@ export function Header() {
                 <Link
                     key={link.href}
                     href={link.href}
-                    className='text-white'
+                    className='text-gray-600'
                     aria-current={isActive ? 'page' : undefined}>
                     <Button
                         variant='ghost'
@@ -103,7 +103,7 @@ export function Header() {
             </div>
 
             {/* Right section */}
-            <div className='flex items-center gap-4 text-white'>
+            <div className='flex items-center gap-4 text-gray-600'>
                 {/* Desktop Search */}
                 <div className='relative hidden max-w-sm sm:block'>
                     <Search className='text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 transform' />
