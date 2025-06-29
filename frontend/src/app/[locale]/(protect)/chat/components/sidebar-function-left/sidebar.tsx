@@ -1,19 +1,22 @@
 'use client';
 
-import { createContext, useContext, useState } from 'react';
+import { ReactNode, createContext, useContext, useState } from 'react';
 
+import { FileList } from '../sidebar-document-right/file-list';
+import { FileUploader } from '../sidebar-document-right/file-uploader';
 import {
     Briefcase,
     ChevronRight,
     History,
     MessageCircleMore,
     Package,
+    PanelLeft,
+    PanelRight,
     Settings2,
     Star,
     TrainFront
 } from 'lucide-react';
-
-// const SidebarContext = createContext<{ expanded: boolean }>({ expanded: true });
+import { string } from 'zod';
 
 interface ChatItem {
     id: string;
@@ -71,6 +74,7 @@ const MOCK_CHATS: ChatItem[] = [
         favorite: false
     }
 ];
+
 const config_item = [
     { title: 'Models', icon: Package },
     { title: 'Agents', icon: TrainFront },
@@ -78,8 +82,58 @@ const config_item = [
     { title: 'History Chat', icon: MessageCircleMore }
 ];
 
+type SidebarContext = {
+    expandedLeft: boolean;
+    expandedRight: boolean;
+    setExpandedLeft: (open: boolean) => void;
+    setExpandedRight: (open: boolean) => void;
+};
+
+const SidebarContext = createContext<SidebarContext | null>(null);
+
+export function useSidebar() {
+    const context = useContext(SidebarContext);
+    if (!context) {
+        throw new Error('useSidebar must be used within a SidebarProvider');
+    }
+
+    return context;
+}
+
+export default function SidebarProvider({ children }: { children: ReactNode }) {
+    const [expandedLeft, setExpandedLeft] = useState(true);
+    const [expandedRight, setExpandedRight] = useState(true);
+
+    const context: SidebarContext = {
+        expandedLeft,
+        expandedRight,
+        setExpandedLeft,
+        setExpandedRight
+    };
+
+    return <SidebarContext.Provider value={context}>{children}</SidebarContext.Provider>;
+}
+
+export function SidebarTrigger({ side, className }: { side: string; className: string }) {
+    const { expandedLeft, expandedRight, setExpandedLeft, setExpandedRight } = useSidebar();
+
+    function handleClick() {
+        if (side === 'left') {
+            setExpandedLeft(!expandedLeft);
+        } else {
+            setExpandedRight(!expandedRight);
+        }
+    }
+
+    return (
+        <button className={className} onClick={handleClick}>
+            {side === 'left' ? <PanelLeft /> : <PanelRight />}
+        </button>
+    );
+}
+
 export function SidebarLeft() {
-    const [expanded, setExpanded] = useState(true);
+    const { expandedLeft } = useSidebar();
 
     return (
         <div className='flex h-full'>
@@ -94,8 +148,8 @@ export function SidebarLeft() {
                         {config_item.map((item) => (
                             <li
                                 key={item.title}
-                                className='group relative m-2 flex flex-col items-center gap-2 px-4 py-4 text-gray-600 hover:rounded-lg hover:bg-[#424242]]'>
-                                <div className={`px-1 transition-all duration-2 group-hover:-translate-y-2`}>
+                                className='group relative m-2 flex flex-col items-center gap-2 px-4 py-4 text-gray-600 hover:rounded-lg hover:bg-[#424242]'>
+                                <div className={`px-1 transition-all duration-200 group-hover:-translate-y-2`}>
                                     <item.icon />
                                 </div>
                                 <div className='absolute bottom-2 hidden truncate text-center text-xs group-hover:block'>
@@ -105,10 +159,9 @@ export function SidebarLeft() {
                         ))}
                     </ul>
                 </div>
-                <button onClick={() => setExpanded((expanded) => !expanded)}>toggle</button>
             </nav>
             <div className='flex h-full rounded-lg bg-white shadow-sm'>
-                <div className={`overflow-hidden transition-all ${expanded ? 'ml-2 w-50' : 'm-0 w-0'}`}>
+                <div className={`overflow-hidden transition-all ${expandedLeft ? 'ml-2 w-50' : 'm-0 w-0'}`}>
                     {HISTORY_ITEMS.map((item) => (
                         <div key={item.title} className='flex items-center justify-between px-2 py-4 text-lg'>
                             <div className='flex items-center gap-1'>
@@ -118,6 +171,22 @@ export function SidebarLeft() {
                             <ChevronRight />
                         </div>
                     ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export function SidebarRight() {
+    const { expandedRight } = useSidebar();
+
+    return (
+        <div
+            className={`h-full transition-all ${expandedRight ? 'visible w-80' : 'invisible w-0'} rounded-lg bg-white`}>
+            <div className={`${expandedRight ? 'block' : 'hidden'} flex h-full flex-col overflow-hidden`}>
+                <FileUploader />
+                <div className='flex-1 overflow-hidden'>
+                    <FileList />
                 </div>
             </div>
         </div>
