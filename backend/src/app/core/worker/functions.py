@@ -3,7 +3,7 @@ import logging
 from typing import Any
 
 from celery import Task
-from ..utils.redis import redis_manager
+from ..utils.redis import redis
 
 logger = logging.getLogger(__name__)
 
@@ -17,20 +17,20 @@ async def sample_background_task(name: str) -> str:
 async def startup() -> None:
     """Khởi tạo worker."""
     logger.info("Worker Started")
-    await redis_manager.init()
+    await redis.init()
 
 async def shutdown() -> None:
     """Đóng worker."""
     logger.info("Worker end")
-    await redis_manager.close()
+    await redis.close()
 
 # -------- task decorators --------
 def create_task(func: Any) -> Task:
     """Decorator để tạo Celery task."""
-    from .celery_app import celery_app
+    from .celery_app import celery_app # type: ignore
     
     @celery_app.task(name=func.__name__)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         return asyncio.run(func(*args, **kwargs))
     
-    return wrapper
+    return wrapper # type: ignore

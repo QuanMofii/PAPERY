@@ -4,7 +4,7 @@ from .functions import sample_background_task, startup, shutdown
 import asyncio
 
 # -------- Celery settings --------
-celery_app = Celery(
+celery_app: Celery = Celery(
     'tasks',
     broker=f'redis://{settings.REDIS_QUEUE_HOST}:{settings.REDIS_QUEUE_PORT}/0',
     backend=f'redis://{settings.REDIS_QUEUE_HOST}:{settings.REDIS_QUEUE_PORT}/1'
@@ -28,17 +28,17 @@ celery_app.conf.update(
 celery_app.task(name='sample_background_task')(sample_background_task)
 
 # Event handlers
-@celery_app.on_after_configure.connect
+@celery_app.on_after_configure.connect  # type: ignore
 def setup_periodic_tasks(sender, **kwargs):
     """Cấu hình các task định kỳ."""
     pass
 
-@celery_app.on_after_finalize.connect
+@celery_app.on_after_finalize.connect  # type: ignore
 def setup_startup(sender, **kwargs):
     """Khởi tạo worker."""
     asyncio.run(startup())
 
-@celery_app.on_after_finalize.connect
+@celery_app.on_after_finalize.connect  # type: ignore
 def setup_shutdown(sender, **kwargs):
     """Đóng worker."""
     asyncio.run(shutdown())
