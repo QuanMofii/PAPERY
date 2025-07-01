@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 /* Schema chung có thể tái sử dụng */
 const TitleSchema = z.object({
-    title: z.string().min(1, 'Tên dự án không được để trống')
+    name: z.string().min(1, 'Tên dự án không được để trống')
 });
 
 const DescriptionSchema = z.object({
@@ -26,17 +26,15 @@ const IdSchema = z.object({
 /* Schema response chung */
 const SuccessResponseSchema = z.object({
     success: z.boolean(),
-    error: z.object({
-        message: z.string()
-    }).optional()
+    error: z
+        .object({
+            message: z.string()
+        })
+        .optional()
 });
 
 /* Schema chính */
-const Project = IdSchema
-    .merge(TitleSchema)
-    .merge(DescriptionSchema)
-    .merge(TimestampSchema)
-    .merge(CountSchema);
+const Project = IdSchema.merge(TitleSchema).merge(DescriptionSchema).merge(TimestampSchema).merge(CountSchema);
 
 const CreateProjectRequest = TitleSchema.merge(DescriptionSchema);
 
@@ -57,10 +55,4 @@ export type UpdateProjectRequestType = z.infer<typeof UpdateProjectRequest>;
 export type ProjectResponseType = z.infer<typeof ProjectResponse>;
 export type SingleProjectResponseType = z.infer<typeof SingleProjectResponse>;
 
-export {
-    Project,
-    CreateProjectRequest,
-    UpdateProjectRequest,
-    ProjectResponse,
-    SingleProjectResponse
-};
+export { Project, CreateProjectRequest, UpdateProjectRequest, ProjectResponse, SingleProjectResponse };

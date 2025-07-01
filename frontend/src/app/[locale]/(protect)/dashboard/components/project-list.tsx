@@ -1,19 +1,29 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+
+import { DeleteProjectAPI, UpdateProjectAPI } from '@/app/api/client/project-list.api';
+import { ProjectDialogContent } from '@/components/project-dialog';
+import useFetchList from '@/hooks/use-fetch-list';
+import useNotification from '@/hooks/useNotification';
+import useQuery from '@/hooks/useQuery';
 import { Button } from '@/registry/new-york-v4/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/registry/new-york-v4/ui/card';
-import { Dialog, } from '@/registry/new-york-v4/ui/dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/registry/new-york-v4/ui/dropdown-menu';
-
-import { CalendarIcon, Edit, FileText, MessageSquare, MoreVertical, Trash2 } from 'lucide-react';
+import { Dialog } from '@/registry/new-york-v4/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
+} from '@/registry/new-york-v4/ui/dropdown-menu';
 import { ProjectType } from '@/schemas/project-list.schemas';
 import { useListProjectStore } from '@/store/project-list.store';
-import { GetAllProjectsAPI, UpdateProjectAPI, DeleteProjectAPI } from '@/app/api/client/project-list.api';
+
 import { ProjectSkeleton } from './project-list-skeleton';
-import { ProjectDialogContent } from '@/components/project-dialog';
+import { CalendarIcon, Edit, FileText, MessageSquare, MoreVertical, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export function ProjectList() {
     const router = useRouter();
@@ -21,18 +31,46 @@ export function ProjectList() {
     const [isLoading, setIsLoading] = useState(true);
     const { projects, setProjects, sortBy, updateProject, removeProject, setSelectedProject } = useListProjectStore();
 
+    // lay data projects tu api
+    const [query] = useQuery({
+        page: 1,
+        items_per_page: 10
+    });
+    const data = useFetchList('projects', query);
+    console.log(data);
+
+    const parseProjects = () => {
+        const projects = (data['data' as keyof typeof data] ?? []) as any[];
+        const newProjects: Array<any> = [];
+        projects.map((project: any) => {
+            const newProject = {
+                id: project.uuid,
+                name: project.name,
+                description: project.description,
+                createAt: ''
+            };
+            newProjects.push(newProject);
+        });
+
+        return newProjects;
+    };
+
     useEffect(() => {
-        if (projects.length === 0) {
-            fetchProjects();
+        if (projects.length === 0 && data['success' as keyof typeof data]) {
+            setIsLoading(true);
+            const newProjects = parseProjects();
+            setProjects(newProjects);
+            useNotification('fetch', data, 'projects');
+            setIsLoading(false);
         } else {
             setIsLoading(false);
         }
-    }, []);
+    }, [data]);
 
     const sortedProjects = [...projects].sort((a, b) => {
         switch (sortBy) {
             case 'name':
-                return a.title.localeCompare(b.title);
+                return a.name.localeCompare(b.name);
             case 'created':
                 return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
             case 'updated':
@@ -42,60 +80,11 @@ export function ProjectList() {
         }
     });
 
-    const fetchProjects = async () => {
-        setIsLoading(true);
-        const responses = await GetAllProjectsAPI();
-
-        const response = {
-            success: true,
-            data: [
-                {
-                    id: '1',
-                    title: 'Dự án AI Chatbot',
-                    description: 'Xây dựng chatbot thông minh sử dụng AI',
-                    fileCount: 5,
-                    conversationCount: 10,
-                    updatedAt: '2024-03-20',
-                    createdAt: '2024-03-20'
-                },
-                {
-                    id: '2',
-                    title: 'Aệ thống quản lý',
-                    description: 'Phần mềm quản lý dự án và tài liệu',
-                    fileCount: 8,
-                    conversationCount: 15,
-                    updatedAt: '2024-03-19',
-                    createdAt: '2024-03-19'
-                },
-                {
-                    id: '3',
-                    title: 'Website bán hàng',
-                    description: 'Thiết kế và phát triển website thương mại điện tử',
-                    fileCount: 12,
-                    conversationCount: 20,
-                    updatedAt: '2024-03-18',
-                    createdAt: '2024-03-18'
-                }
-            ],
-            error: { message: 'Error message' }
-        };
-
-        toast[response.success ? 'success' : 'error'](response.success ? 'Success' : 'Error', {
-            description: response.success
-                ? 'Projects fetched successfully'
-                : response.error?.message || 'Failed to fetch projects',
-            duration: 2000
-        });
-
-        response.success && setProjects(response.data);
-        setIsLoading(false);
-    };
-
     const handleUpdateProject = async (data: { name: string; description: string }) => {
         if (!editingProject) return;
         const response = await UpdateProjectAPI({
             id: editingProject.id,
-            title: data.name,
+            name: data.name,
             description: data.description
         });
 
@@ -109,7 +98,7 @@ export function ProjectList() {
         if (response.success) {
             updateProject({
                 ...editingProject,
-                title: data.name,
+                name: data.name,
                 description: data.description
             });
             setEditingProject(null);
@@ -132,7 +121,7 @@ export function ProjectList() {
     };
 
     const handleProjectClick = (projectId: string) => {
-        const project = projects.find(p => p.id === projectId);
+        const project = projects.find((p) => p.id === projectId);
         if (project) {
             setSelectedProject(project);
         }
@@ -141,83 +130,80 @@ export function ProjectList() {
 
     return (
         <>
-            {isLoading ? (
-                Array(3).fill(0).map((_, i) => (
-                    <ProjectSkeleton key={i} />
-                ))
-            ) : (
-                sortedProjects.map((project) => (
-                    <Card
-                        key={project.id}
-                        className="group relative overflow-hidden border-border/40 transition-all hover:shadow-md cursor-pointer gap-0 flex flex-col h-[200px] py-0"
-                        onClick={() => handleProjectClick(project.id)}
-                    >
-                        <div className="absolute -right-10 top-0 h-20 w-20 rotate-12 bg-primary/5 opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
-                        <CardHeader className="relative z-10 bg-gradient-to-r from-primary/5 to-transparent px-3 py-2 bg-accent group-hover:bg-primary transition-all duration-500">
-                            <div className="absolute -left-6 -top-6 h-12 w-12 rounded-full bg-primary/5 opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
-                            <div className="flex items-center justify-between">
-                                <CardTitle className="relative z-10 line-clamp-1 text-lg">{project.title}</CardTitle>
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                                            <MoreVertical className="h-4 w-4" />
-                                            <span className="sr-only">More options</span>
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuItem onClick={(e) => {
-                                            e.stopPropagation();
-                                            setEditingProject(project);
-                                        }}>
-                                            <Edit className="mr-2 h-4 w-4" />
-                                            <span>Chỉnh sửa</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                            className="text-destructive focus:text-destructive"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleDeleteProject(project.id);
-                                            }}
-                                        >
-                                            <Trash2 className="mr-2 h-4 w-4" />
-                                            <span>Xóa</span>
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="px-4 relative z-10 flex-1 flex flex-col pt-1 bg-accent/30">
-                            <p className="line-clamp-3 text-sm text-muted-foreground flex-1">{project.description}</p>
-                            <div className="flex items-center gap-4 my-2">
-                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                    <FileText className="h-3.5 w-3.5" />
-                                    <span>{project.fileCount} tài liệu</span>
-                                </div>
-                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                    <MessageSquare className="h-3.5 w-3.5" />
-                                    <span>{project.conversationCount} cuộc trò chuyện</span>
-                                </div>
-                            </div>
-                        </CardContent>
-                        <CardFooter className="relative z-10 border-t border-border px-4 py-2 bg-accent/30">
-                            <div className="flex w-full items-center justify-between">
-                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                    <CalendarIcon className="h-3.5 w-3.5" />
-                                    <span>Cập nhật: {project.updatedAt}</span>
-                                </div>
-                            </div>
-                        </CardFooter>
-                    </Card>
-                ))
-            )}
+            {isLoading
+                ? Array(3)
+                      .fill(0)
+                      .map((_, i) => <ProjectSkeleton key={i} />)
+                : sortedProjects.map((project, i) => (
+                      <Card
+                          key={project.id}
+                          className='group border-border/40 relative flex h-[200px] cursor-pointer flex-col gap-0 overflow-hidden py-0 transition-all hover:shadow-md'
+                          onClick={() => handleProjectClick(project.id)}>
+                          <div className='bg-primary/5 absolute top-0 -right-10 h-20 w-20 rotate-12 opacity-0 transition-all duration-300 group-hover:opacity-100'></div>
+                          <CardHeader className='from-primary/5 bg-accent group-hover:bg-primary relative z-10 bg-gradient-to-r to-transparent px-3 py-2 transition-all duration-500'>
+                              <div className='bg-primary/5 absolute -top-6 -left-6 h-12 w-12 rounded-full opacity-0 transition-all duration-300 group-hover:opacity-100'></div>
+                              <div className='flex items-center justify-between'>
+                                  <CardTitle className='relative z-10 line-clamp-1 text-lg'>{project.name}</CardTitle>
+                                  <DropdownMenu>
+                                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                          <Button variant='ghost' size='icon' className='h-8 w-8'>
+                                              <MoreVertical className='h-4 w-4' />
+                                              <span className='sr-only'>More options</span>
+                                          </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align='end'>
+                                          <DropdownMenuItem
+                                              onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  setEditingProject(project);
+                                              }}>
+                                              <Edit className='mr-2 h-4 w-4' />
+                                              <span>Chỉnh sửa</span>
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem
+                                              className='text-destructive focus:text-destructive'
+                                              onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  handleDeleteProject(project.id);
+                                              }}>
+                                              <Trash2 className='mr-2 h-4 w-4' />
+                                              <span>Xóa</span>
+                                          </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                  </DropdownMenu>
+                              </div>
+                          </CardHeader>
+                          <CardContent className='bg-accent/30 relative z-10 flex flex-1 flex-col px-4 pt-1'>
+                              <p className='text-muted-foreground line-clamp-3 flex-1 text-sm'>{project.description}</p>
+                              <div className='my-2 flex items-center gap-4'>
+                                  <div className='text-muted-foreground flex items-center gap-1 text-xs'>
+                                      <FileText className='h-3.5 w-3.5' />
+                                      <span>{project.fileCount} tài liệu</span>
+                                  </div>
+                                  <div className='text-muted-foreground flex items-center gap-1 text-xs'>
+                                      <MessageSquare className='h-3.5 w-3.5' />
+                                      <span>{project.conversationCount} cuộc trò chuyện</span>
+                                  </div>
+                              </div>
+                          </CardContent>
+                          <CardFooter className='border-border bg-accent/30 relative z-10 border-t px-4 py-2'>
+                              <div className='flex w-full items-center justify-between'>
+                                  <div className='text-muted-foreground flex items-center gap-1 text-xs'>
+                                      <CalendarIcon className='h-3.5 w-3.5' />
+                                      <span>Cập nhật: {project.updatedAt}</span>
+                                  </div>
+                              </div>
+                          </CardFooter>
+                      </Card>
+                  ))}
 
             <Dialog open={!!editingProject} onOpenChange={() => setEditingProject(null)}>
                 {editingProject && (
                     <ProjectDialogContent
-                        title="Chỉnh sửa dự án"
-                        description="Cập nhật thông tin dự án của bạn"
+                        title='Chỉnh sửa dự án'
+                        description='Cập nhật thông tin dự án của bạn'
                         defaultValues={{
-                            name: editingProject.title,
+                            name: editingProject.name,
                             description: editingProject.description
                         }}
                         onSubmit={handleUpdateProject}

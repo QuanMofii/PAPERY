@@ -1,7 +1,7 @@
 import { http } from '@/lib/http';
 
 export const UserMeAPI = async () => {
-    return await http.get('/user/me', {
+    return await http.get('/users/me', {
         headers: {
             accept: 'application/json'
         },

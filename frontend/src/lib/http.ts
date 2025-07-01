@@ -106,7 +106,7 @@ const createHttpClient = () => {
                 ...defaultHeaders,
                 ...axiosConfig.headers
             };
-          
+
             const response = await axios({
                 ...axiosConfig,
                 method,
@@ -115,15 +115,14 @@ const createHttpClient = () => {
                 headers
             });
 
-            return { success: true, data: response.data };
+            return { success: true, data: response.data.data };
         } catch (error) {
             return { success: false, error: new HttpError(error as AxiosError) };
         }
     };
 
     return {
-        get: (url: string, config?: HttpConfig & AxiosRequestConfig) =>
-            request('GET', url, config),
+        get: (url: string, config?: HttpConfig & AxiosRequestConfig) => request('GET', url, config),
 
         post: (url: string, data: any, config: HttpConfig & AxiosRequestConfig = {}) =>
             request('POST', url, { ...config, data }),
@@ -134,8 +133,7 @@ const createHttpClient = () => {
         patch: (url: string, data: any, config: HttpConfig & AxiosRequestConfig = {}) =>
             request('PATCH', url, { ...config, data }),
 
-        delete: (url: string, config?: HttpConfig & AxiosRequestConfig) =>
-            request('DELETE', url, config)
+        delete: (url: string, config?: HttpConfig & AxiosRequestConfig) => request('DELETE', url, config)
     };
 };
 
