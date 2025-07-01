@@ -1,8 +1,8 @@
 """create_initial_tables
 
-Revision ID: 9df1db8cbe99
+Revision ID: 91cf26b4fe1a
 Revises: 
-Create Date: 2025-06-25 08:18:11.169496
+Create Date: 2025-07-01 05:04:30.428085
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '9df1db8cbe99'
+revision: str = '91cf26b4fe1a'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -83,6 +83,26 @@ def upgrade() -> None:
     op.create_index(op.f('ix_user_is_active'), 'user', ['is_active'], unique=False)
     op.create_index(op.f('ix_user_tier_id'), 'user', ['tier_id'], unique=False)
     op.create_index(op.f('ix_user_username'), 'user', ['username'], unique=True)
+    op.create_table('access_control',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('resource_id', sa.Integer(), nullable=False),
+    sa.Column('resource_uuid', sa.UUID(), nullable=False),
+    sa.Column('resource_type', sa.Enum('PROJECT', 'CHAT_SESSION', 'CHAT_MESSAGE', 'DOCUMENT', name='resourcetype'), nullable=False),
+    sa.Column('permission', sa.Enum('OWNER', 'COLLABORATOR', 'VIEWER', name='permissiontype'), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('current_timestamp(0)'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('current_timestamp(0)'), nullable=True),
+    sa.Column('deleted_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('is_deleted', sa.Boolean(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('id')
+    )
+    op.create_index(op.f('ix_access_control_permission'), 'access_control', ['permission'], unique=False)
+    op.create_index(op.f('ix_access_control_resource_id'), 'access_control', ['resource_id'], unique=False)
+    op.create_index(op.f('ix_access_control_resource_type'), 'access_control', ['resource_type'], unique=False)
+    op.create_index(op.f('ix_access_control_resource_uuid'), 'access_control', ['resource_uuid'], unique=False)
+    op.create_index(op.f('ix_access_control_user_id'), 'access_control', ['user_id'], unique=False)
     op.create_table('project',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -186,6 +206,12 @@ def downgrade() -> None:
     op.drop_table('chat_session')
     op.drop_index(op.f('ix_project_user_id'), table_name='project')
     op.drop_table('project')
+    op.drop_index(op.f('ix_access_control_user_id'), table_name='access_control')
+    op.drop_index(op.f('ix_access_control_resource_uuid'), table_name='access_control')
+    op.drop_index(op.f('ix_access_control_resource_type'), table_name='access_control')
+    op.drop_index(op.f('ix_access_control_resource_id'), table_name='access_control')
+    op.drop_index(op.f('ix_access_control_permission'), table_name='access_control')
+    op.drop_table('access_control')
     op.drop_index(op.f('ix_user_username'), table_name='user')
     op.drop_index(op.f('ix_user_tier_id'), table_name='user')
     op.drop_index(op.f('ix_user_is_active'), table_name='user')

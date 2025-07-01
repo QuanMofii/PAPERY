@@ -67,3 +67,4 @@ class AdminRateLimitDelete(BaseModel):
 
 class RateLimitRestoreDeleted(BaseModel):
     is_deleted: bool
+

@@ -12,10 +12,13 @@
 #     has_more: bool
 #     page: int
 #     items_per_page: int 
-
+from pydantic import BaseModel
 from typing import Generic, TypeVar
 from pydantic import Field
 from pydantic.generics import GenericModel
+
+import warnings
+warnings.filterwarnings("ignore", message="`pydantic.generics:GenericModel` has been moved")
 
 T = TypeVar('T')
 

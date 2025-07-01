@@ -11,8 +11,8 @@ from app.core.config import settings
 from app.models.user import AuthProvider
 
 # revision identifiers
-revision: str = 'cd7553a9a2fb'
-down_revision: Union[str, None] = '9df1db8cbe99'
+revision: str = 'bd7553a9a2fb'
+down_revision: Union[str, None] = '91cf26b4fe1a'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
