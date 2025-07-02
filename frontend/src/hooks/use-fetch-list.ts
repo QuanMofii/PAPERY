@@ -2,9 +2,6 @@ import { useEffect, useState } from 'react';
 
 import { http } from '@/lib/http';
 
-import { config } from './../middleware';
-import useQuery from './useQuery';
-
 export default function useFetchList(path: string, query = {}, config = { withCredentials: true }) {
     const [data, setData] = useState({});
     useEffect(() => {
