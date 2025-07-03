@@ -27,7 +27,7 @@ from .config import (
 
 from .db.database import Base
 from .db.database import async_engine as engine
-from .utils.redis import redis_manager
+from .utils.redis import redis
 from .logger import logging
 
 logger = logging.getLogger(__name__)
@@ -41,7 +41,7 @@ async def create_tables() -> None:
 async def init_redis() -> bool:
     """Khởi tạo Redis connection."""
     try:
-        await redis_manager.init()
+        await redis.init()
         logger.info("Redis connection initialized successfully")
         return True
     except Exception as e:
@@ -52,7 +52,7 @@ async def init_redis() -> bool:
 async def close_redis() -> None:
     """Đóng kết nối Redis."""
     try:
-        await redis_manager.close()
+        await redis.close()
         logger.info("Redis connection closed successfully")
     except Exception as e:
         logger.error(f"Error closing Redis connection - {e}")
@@ -60,7 +60,7 @@ async def close_redis() -> None:
 async def check_redis_health() -> bool:
     """Kiểm tra sức khỏe của Redis."""
     try:
-        return await redis_manager.health_check()
+        return await redis.health_check()
     except Exception as e:
         logger.error(f"Redis health check failed - {e}")
         return False

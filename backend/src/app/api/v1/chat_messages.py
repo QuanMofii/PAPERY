@@ -3,6 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Request, status
 from fastcrud.paginated import compute_offset, paginated_response
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import text
 
 from ...api.dependencies import get_current_superuser, get_current_user
 from ...core.db.database import async_get_db
@@ -14,7 +15,7 @@ from ...schemas.access_control import AccessControlCreateInternal, AccessControl
 from ...schemas.chat_message import ChatMessageRead, ChatMessageCreate, ChatMessageUpdate, AdminChatMessageRead, AdminChatMessageCreate, AdminChatMessageUpdate, ChatMessageCreateInternal, ChatMessageReadInternal
 from ...schemas.chat_session import ChatSessionReadInternal
 from ...schemas.user import UserReadInternal
-from ...schemas.utils import APIResponse, PaginatedAPIResponse
+from ...schemas.utils import APIResponse, PaginatedAPIResponse, OnlyID
 
 router = APIRouter(tags=["chat_messages"])
 
@@ -107,16 +108,15 @@ async def create_chat_message(
         raise NotFoundException("Chat session not found or access denied")
     chat_session_id = cast(dict, acl_chat_session)["resource_id"]
 
-    # Kiểm tra sequence_number trùng trong chat session
-    message_exists = await crud_chatMessages.exists(
-        db=db,
-        sequence_number=message_create.sequence_number,
-        chat_session_id=chat_session_id
+    result = await db.execute(
+        text("SELECT MAX(sequence_number) FROM chat_message WHERE chat_session_id = :chat_session_id"),
+        {"chat_session_id": chat_session_id}
     )
-    if message_exists:
-        raise DuplicateValueException("A message with this sequence number already exists in this chat session.")
+    max_seq = result.scalar() or 0
+    next_seq = max_seq + 1
     create_dict = message_create.model_dump()
     create_dict["chat_session_id"] = chat_session_id
+    create_dict["sequence_number"] = next_seq
     create_internal = ChatMessageCreateInternal(**create_dict)
     message_data = await crud_chatMessages.create(db=db, object=create_internal)
     if not message_data:
@@ -154,26 +154,7 @@ async def update_chat_message(
     )
     if not acl_exists:
         raise NotFoundException("Message not found or access denied")
-    # Lấy thông tin message hiện tại để lấy chat_session_id
-    current_message = await crud_chatMessages.get(
-        db=db,
-        uuid=message_uuid,
-        is_deleted=False,
-        schema_to_select=cast(type[ChatMessageReadInternal], ChatMessageReadInternal),
-    )
-    if not current_message:
-        raise NotFoundException("Message not found")
-    current_message = ChatMessageReadInternal.model_validate(current_message)
-    chat_session_id = current_message.chat_session_id
-    # Kiểm tra sequence_number trùng trong chat session
-    if message_update.sequence_number is not None:
-        message_exists = await crud_chatMessages.exists(
-            db=db,
-            sequence_number=message_update.sequence_number,
-            chat_session_id=chat_session_id
-        )
-        if message_exists:
-            raise DuplicateValueException("A message with this sequence number already exists in this chat session.")
+
     update_dict = message_update.model_dump(exclude_unset=True)
     message_data = await crud_chatMessages.update(
         db=db,
@@ -252,14 +233,6 @@ async def admin_create_chat_message(
     db: Annotated[AsyncSession, Depends(async_get_db)]
 ) -> APIResponse[AdminChatMessageRead]:
     """Create a new message (Superuser only)."""
-    # Kiểm tra trùng lặp sequence_number trong chat session
-    message_exists = await crud_chatMessages.exists(
-        db=db,
-        sequence_number=message_create.sequence_number,
-        chat_session_id=message_create.chat_session_id
-    )
-    if message_exists:
-        raise DuplicateValueException("A message with this sequence number already exists in this chat session.")
     create_internal = ChatMessageCreateInternal(**message_create.model_dump())
     message_data = await crud_chatMessages.create(db=db, object=create_internal)
     if not message_data:
@@ -275,24 +248,7 @@ async def admin_update_chat_message(
     db: Annotated[AsyncSession, Depends(async_get_db)]
 ) -> APIResponse[AdminChatMessageRead]:
     """Update a specific message by ID (Superuser only)."""
-    current_message = await crud_chatMessages.get(
-        db=db,
-        id=message_id,
-        return_as_model=True,
-        schema_to_select=cast(type[ChatMessageReadInternal], AdminChatMessageRead)
-    )
-    if not current_message:
-        raise NotFoundException("Message not found")
-    current_message = AdminChatMessageRead.model_validate(current_message)
-    chat_session_id = current_message.chat_session_id
-    if message_update.sequence_number is not None:
-        message_exists = await crud_chatMessages.exists(
-            db=db,
-            sequence_number=message_update.sequence_number,
-            chat_session_id=chat_session_id
-        )
-        if message_exists:
-            raise DuplicateValueException("A message with this sequence number already exists in this chat session.")
+
     update_dict = message_update.model_dump(exclude_unset=True)
     message_data = await crud_chatMessages.update(
         db=db,

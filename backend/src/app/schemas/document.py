@@ -1,9 +1,23 @@
 from typing import Annotated
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
+from enum import Enum
 
 from ..core.schemas import PersistentDeletion, TimestampSchema, UUIDSchema
-from ..models.document import DocumentType
+
+class DocumentType(str, Enum):
+    pdf = "pdf"
+    docx = "docx"
+    txt = "txt"
+    markdown = "markdown"
+    html = "html"
+    json = "json"
+    csv = "csv"
+    excel = "excel"
+    image = "image"
+    audio = "audio"
+    video = "video"
+    other = "other"
 
 class DocumentBase(BaseModel):
     title: Annotated[str, Field(min_length=1, max_length=255, examples=["My Document"])]

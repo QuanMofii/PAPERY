@@ -9,12 +9,12 @@ from ..models.chat_message import Role
 class ChatMessageBase(BaseModel):
     content: Annotated[str, Field(examples=["what is the capital of France?"])]
     role: Annotated[Role, Field(examples=["user"])]
-    sequence_number: Annotated[int, Field(examples=[1])]
     model_name: Annotated[str, Field(min_length=1, max_length=50, examples=["gpt-4"])]
 
 
 class ChatMessage(TimestampSchema, ChatMessageBase, UUIDSchema, PersistentDeletion):
     chat_session_id: int
+    sequence_number: int
     token_count: int = 0
 
 
@@ -25,7 +25,6 @@ class ChatMessageCreateInternal(ChatMessageBase):
 class ChatMessageUpdateInternal(BaseModel):
     content: Annotated[str | None, Field(examples=["what is the capital of France?"], default=None)] = None
     role: Annotated[Role | None, Field(examples=["user"], default=None)] = None
-    sequence_number: Annotated[int | None, Field(examples=[1], default=None)] = None
     model_name: Annotated[str | None, Field(min_length=1, max_length=50, examples=["gpt-4"], default=None)] = None
     chat_session_id: int | None = None
     token_count: int | None = None
@@ -43,7 +42,7 @@ class ChatMessageRead(BaseModel):
     uuid: UUID | None = None
     content: Annotated[str, Field(examples=["what is the capital of France?"])]
     role: Annotated[Role, Field(examples=["user"])]
-    sequence_number: Annotated[int, Field(examples=[1])]
+    sequence_number: int
     model_name: Annotated[str, Field(min_length=1, max_length=50, examples=["gpt-4"])]
     chat_session_id: int
     token_count: int
@@ -57,7 +56,6 @@ class ChatMessageUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
     content: Annotated[str | None, Field(examples=["what is the capital of France?"], default=None)] = None
     role: Annotated[Role | None, Field(examples=["user"], default=None)] = None
-    sequence_number: Annotated[int | None, Field(examples=[1], default=None)] = None
     model_name: Annotated[str | None, Field(min_length=1, max_length=50, examples=["gpt-4"], default=None)] = None
     token_count: int | None = None
 
@@ -69,10 +67,9 @@ class AdminChatMessageCreate(ChatMessageBase):
     chat_session_id: int
     token_count: int = 0
 
-class AdminChatMessageUpdate(ChatMessageBase):
+class AdminChatMessageUpdate(BaseModel):
     content: Annotated[str | None, Field(examples=["what is the capital of France?"], default=None)] = None
     role: Annotated[Role | None, Field(examples=["user"], default=None)] = None
-    sequence_number: Annotated[int | None, Field(examples=[1], default=None)] = None
     model_name: Annotated[str | None, Field(min_length=1, max_length=50, examples=["gpt-4"], default=None)] = None
     chat_session_id: int | None = None
     token_count: int | None = None

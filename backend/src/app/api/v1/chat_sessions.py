@@ -14,7 +14,7 @@ from ...schemas.access_control import AccessControlCreateInternal, AccessControl
 from ...schemas.chat_session import ChatSessionRead, ChatSessionCreate, ChatSessionUpdate, AdminChatSessionRead, AdminChatSessionCreate, AdminChatSessionUpdate, ChatSessionCreateInternal, ChatSessionReadInternal
 from ...schemas.project import ProjectRead, ProjectReadInternal
 from ...schemas.user import UserReadInternal
-from ...schemas.utils import APIResponse, PaginatedAPIResponse
+from ...schemas.utils import APIResponse, PaginatedAPIResponse, OnlyID
 
 router = APIRouter(tags=["chat_sessions"])
 
@@ -171,13 +171,13 @@ async def update_chat_session(
         db=db,
         uuid=chat_session_uuid,
         is_deleted=False,
-        schema_to_select=cast(type[ChatSessionReadInternal], ChatSessionReadInternal),
+        schema_to_select=cast(type[ChatSessionReadInternal], OnlyID),
+   
     )
     if not current_chat_session:
         raise NotFoundException("Chat session not found")
-    current_chat_session = ChatSessionReadInternal.model_validate(current_chat_session)
-    project_id = current_chat_session.project_id
-    
+
+    project_id = cast(dict,current_chat_session)["id"]
     if chat_session_update.title:
         chat_session_exists = await crud_chatSessions.exists(
             db=db, 

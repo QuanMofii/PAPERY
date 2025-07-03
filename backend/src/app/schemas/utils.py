@@ -33,3 +33,6 @@ class PaginatedAPIResponse(GenericModel, Generic[T]):
     has_more: bool
     page: int
     items_per_page: int
+
+class OnlyID(BaseModel):
+    id: int
