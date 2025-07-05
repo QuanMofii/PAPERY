@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...core.logger import logging
 from ...schemas.rate_limit import sanitize_path
-from .redis import redis_manager
+from .redis import redis
 
 logger = logging.getLogger(__name__)
 
@@ -20,15 +20,15 @@ class RateLimiter:
 
     async def health_check(self) -> bool:
         """Kiểm tra kết nối Redis."""
-        return await redis_manager.health_check()
+        return await redis.health_check()
 
     async def is_rate_limited(self, db: AsyncSession, user_id: int, path: str, limit: int, period: int) -> bool:
         """Kiểm tra rate limit cho user."""
-        if not redis_manager.is_available():
+        if not redis.is_available():
             logger.warning("Redis is not available, rate limiting is disabled")
             return False
 
-        client = redis_manager.get_client()
+        client = redis.get_client()
         if not client:
             logger.warning("Redis client is not available, rate limiting is disabled")
             return False

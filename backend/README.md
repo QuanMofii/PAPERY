@@ -52,7 +52,7 @@ Before running Papery backend, make sure you have the following installed:
 
 | Tool            | Required | Notes                                      |
 |-----------------|----------|--------------------------------------------|
-| 🐍 Python       | ✅ Yes   | Version **3.11+** recommended               |
+| 🐍 Python       | ✅ Yes   | Version **3.11** recommended               |
 | 🐳 Docker       | Optional | For easier setup with Docker Compose       |
 | 🧪 Poetry       | ✅ Yes   | Python dependency manager                  |
 | 📦 Git          | ✅ Yes   | To clone the repository                    |
@@ -255,13 +255,13 @@ docker run --name papery-redis -p 6379:6379 -d redis:alpine
 #### 5. Migrate Database
 
 ```bash
+cd src
 poetry run alembic upgrade head
 ```
 
 #### 6. Run the backend server
 
 ```bash
-cd src
 uvicorn app.main:app --reload
 ```
 

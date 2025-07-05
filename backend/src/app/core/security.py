@@ -12,7 +12,7 @@ from ..crud.crud_users import crud_users
 from .config import settings
 from .db.crud_token_blacklist import crud_token_blacklist
 from .schemas import TokenBlacklistCreate, TokenData
-from .utils.redis_storage import redis_storage
+from .utils.redis import redis
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/token")
@@ -48,7 +48,7 @@ async def create_verification_token(email: str, token_type: TokenType) -> str:
     # Lưu vào Redis với thời gian hết hạn
     key = f"{token_type}:{token}"
     expire_seconds = int(expires.timestamp() - datetime.now(UTC).timestamp())
-    await redis_storage.set(key, email, expire=expire_seconds)
+    await redis.set(key, email, expire=expire_seconds)
     
     return token
 
@@ -56,7 +56,7 @@ async def create_verification_token(email: str, token_type: TokenType) -> str:
 async def verify_token_from_redis(token: str, token_type: TokenType) -> str | None:
     """Xác thực token từ Redis và trả về email nếu hợp lệ"""
     key = f"{token_type}:{token}"
-    email = await redis_storage.get(key, delete=True)
+    email = await redis.get(key, delete=True)
     if email:
         return email
     return None

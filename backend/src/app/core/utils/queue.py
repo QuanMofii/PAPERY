@@ -5,7 +5,7 @@ from celery import Celery
 from celery.result import AsyncResult
 
 from ..config import settings
-from .redis import redis_manager
+from .redis import redis
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class RedisQueue:
         """Khởi tạo Celery app."""
         if not self._celery:
             try:
-                if not redis_manager.is_available():
+                if not redis.is_available():
                     logger.warning("Redis is not available, queue initialization skipped")
                     return
 
@@ -57,7 +57,7 @@ class RedisQueue:
     
     def is_available(self) -> bool:
         """Kiểm tra xem queue có khả dụng không."""
-        return self._is_available and redis_manager.is_available()
+        return self._is_available and redis.is_available()
     
     def register_function(self, func: Callable, name: str | None = None) -> None:
         """
