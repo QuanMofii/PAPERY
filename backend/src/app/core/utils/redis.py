@@ -1,17 +1,17 @@
 from typing import Optional, Any
 import logging
-import redis.asyncio as redis
+import redis.asyncio as redis_async
 from ..config import settings
 from ..logger import logging as app_logging
 
 logger = logging.getLogger(__name__)
 
-class RedisManager:
+class Redis:
     """Lớp quản lý Redis tập trung cho toàn bộ ứng dụng."""
     
-    _instance: Optional["RedisManager"] = None
-    _client: Optional[redis.Redis] = None
-    _pool: Optional[redis.ConnectionPool] = None
+    _instance: Optional["Redis"] = None
+    _client: Optional[redis_async.Redis] = None
+    _pool: Optional[redis_async.ConnectionPool] = None
     _is_available: bool = False
     
     def __new__(cls):
@@ -23,12 +23,12 @@ class RedisManager:
         """Khởi tạo Redis client và connection pool."""
         if not self._client:
             try:
-                self._pool = redis.ConnectionPool.from_url(
+                self._pool = redis_async.ConnectionPool.from_url(
                     settings.REDIS_CACHE_URL,
                     encoding="utf-8",
                     decode_responses=True
                 )
-                self._client = redis.Redis(connection_pool=self._pool)
+                self._client = redis_async.Redis(connection_pool=self._pool)
                 # Test connection
                 await self._client.ping()
                 self._is_available = True
@@ -58,6 +58,8 @@ class RedisManager:
         try:
             if not self._client:
                 await self.init()
+            if not self._client:
+                raise RuntimeError("Redis client is not initialized")
             is_healthy = await self._client.ping()
             self._is_available = is_healthy
             return is_healthy
@@ -71,7 +73,7 @@ class RedisManager:
         """Kiểm tra xem Redis có khả dụng không."""
         return self._is_available
     
-    def get_client(self) -> Optional[redis.Redis]:
+    def get_client(self) -> Optional[redis_async.Redis]:
         """Lấy Redis client instance."""
         if not self._client or not self._is_available:
             logger.warning("Redis client is not available")
@@ -87,6 +89,8 @@ class RedisManager:
         try:
             if not self._client:
                 await self.init()
+            if not self._client:
+                raise RuntimeError("Redis client is not initialized")
             await self._client.set(key, value, ex=expire)
             logger.debug(f"Set key {key} in Redis")
             return True
@@ -104,6 +108,8 @@ class RedisManager:
         try:
             if not self._client:
                 await self.init()
+            if not self._client:
+                raise RuntimeError("Redis client is not initialized")
             if delete:
                 value = await self._client.getdel(key)
             else:
@@ -122,6 +128,8 @@ class RedisManager:
         try:
             if not self._client:
                 await self.init()
+            if not self._client:
+                raise RuntimeError("Redis client is not initialized")
             await self._client.delete(key)
             logger.debug(f"Deleted key {key} from Redis")
             return True
@@ -140,10 +148,12 @@ class RedisManager:
         try:
             if not self._client:
                 await self.init()
+            if not self._client:
+                raise RuntimeError("Redis client is not initialized")
             return bool(await self._client.exists(key))
         except Exception as e:
             logger.error(f"Error checking existence of key {key} - {e}")
             return False
 
 # Singleton instance
-redis_manager = RedisManager()
+redis = Redis()

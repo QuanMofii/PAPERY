@@ -29,7 +29,7 @@ class ChatMessage(Base, UUIDMixin, TimestampMixin, SoftDeleteMixin):
     # Required fields
     content: Mapped[str] = mapped_column(Text, nullable=False)
     role: Mapped[str] = mapped_column(SQLEnum(Role), nullable=False)
-    sequence_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    sequence_number: Mapped[int] = mapped_column(Integer, nullable=False, init=False)
     model_name: Mapped[str] = mapped_column(String(50), nullable=False)
     token_count: Mapped[int] = mapped_column(Integer, default=0)
     

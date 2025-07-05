@@ -149,6 +149,14 @@ class CorsSettings(BaseSettings):
         raise ValueError("Invalid value for CORS field, must be list or JSON string.")
 
 
+class MinioSettings(BaseSettings):
+    MINIO_ENDPOINT: str = config("MINIO_ENDPOINT", default="localhost:9000")
+    MINIO_ACCESS_KEY: str = config("MINIO_ACCESS_KEY", default="minioadmin")
+    MINIO_SECRET_KEY: str = config("MINIO_SECRET_KEY", default="minioadmin")
+    MINIO_BUCKET_NAME: str = config("MINIO_BUCKET_NAME", default="papery-files")
+    MINIO_SECURE: bool = config("MINIO_SECURE", cast=bool, default=False)
+
+
 class Settings(
     AppSettings,
     PostgresSettings,
@@ -163,6 +171,7 @@ class Settings(
     EmailSettings,
     EnvironmentSettings,
     CorsSettings,
+    MinioSettings,
 ):
     pass
 
