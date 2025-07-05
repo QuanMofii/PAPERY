@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 
-import { CreateProjectAPI } from '@/app/api/client/project-list.api';
 import { ProjectDialogContent } from '@/components/project-dialog';
 import useCreate from '@/hooks/use-create';
 import useNotification from '@/hooks/use-notification';
@@ -18,23 +17,9 @@ export function CreateProjectCard() {
 
     const handleCreateProject = async (data: { name: string; description: string }) => {
         setIsLoading(true);
-        const response = await useCreate('projects', data);
-
-        useNotification('projects', response, 'created');
+        const response = await useCreate('projects', data, projects, setProjects);
 
         if (response.success) {
-            setProjects([
-                ...projects,
-                {
-                    id: response.data.uuid,
-                    name: data.name,
-                    description: data.description,
-                    updatedAt: '',
-                    createdAt: '',
-                    fileCount: 0,
-                    conversationCount: 0
-                }
-            ]);
             setIsOpen(false);
         }
         setIsLoading(false);

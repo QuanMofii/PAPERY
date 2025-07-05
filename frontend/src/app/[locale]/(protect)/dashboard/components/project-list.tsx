@@ -25,7 +25,6 @@ import { useListProjectStore } from '@/store/project-list.store';
 
 import { ProjectSkeleton } from './project-list-skeleton';
 import { CalendarIcon, Edit, FileText, MessageSquare, MoreVertical, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
 
 export function ProjectList() {
     const router = useRouter();
@@ -35,84 +34,30 @@ export function ProjectList() {
     const { projects, setProjects, sortBy, updateProject, removeProject, setSelectedProject } = useListProjectStore();
 
     // lay data projects tu api
+
     const [query] = useQuery({
         page: 1,
         items_per_page: 10
     });
-    const data = useFetchList('projects', query);
-
-    const parseProjects = () => {
-        const projects = (data['data' as keyof typeof data] ?? []) as any[];
-        const newProjects: Array<any> = [];
-        projects.map((project: any) => {
-            const newProject = {
-                id: project.uuid,
-                name: project.name,
-                description: project.description,
-                createAt: ''
-            };
-            newProjects.push(newProject);
-        });
-
-        return newProjects;
-    };
-
-    useEffect(() => {
-        if (projects.length === 0 && data['success' as keyof typeof data]) {
-            setIsLoading(true);
-            const newProjects = parseProjects();
-            setProjects(newProjects);
-            useNotification('fetch', data, 'projects');
-            setIsLoading(false);
-        } else {
-            setIsLoading(false);
-        }
-    }, [data]);
-
-    const sortedProjects = [...projects].sort((a, b) => {
-        switch (sortBy) {
-            case 'name':
-                return a.name.localeCompare(b.name);
-            case 'created':
-                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-            case 'updated':
-                return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-            default:
-                return 0;
-        }
-    });
+    useFetchList('projects', query, 'project', setIsLoading);
 
     const handleUpdateProject = async (data: { name: string; description: string }) => {
         if (!editingProject) return;
-        const response = await useUpdate(
+        await useUpdate(
             'projects',
             {
                 name: data.name,
                 description: data.description
             },
-            editingProject.id
+            editingProject.id,
+            editingProject,
+            updateProject
         );
-
-        useNotification('projects', response, 'update');
-
-        if (response.success) {
-            updateProject({
-                ...editingProject,
-                name: response.data.name,
-                description: response.data.description
-            });
-            setEditingProject(null);
-        }
+        setEditingProject(null);
     };
 
     const handleDeleteProject = async (id: string) => {
-        const response = await useDelete('projects', id);
-
-        useNotification('projects', response, 'deleted');
-
-        if (response.success) {
-            removeProject(id);
-        }
+        await useDelete('projects', id, removeProject);
     };
 
     const handleProjectClick = (projectId: string) => {
@@ -129,7 +74,7 @@ export function ProjectList() {
                 ? Array(3)
                       .fill(0)
                       .map((_, i) => <ProjectSkeleton key={i} />)
-                : sortedProjects.map((project, i) => (
+                : projects.map((project, i) => (
                       <Card
                           key={project.id}
                           className='group border-border/40 relative flex h-[200px] cursor-pointer flex-col gap-0 overflow-hidden py-0 transition-all hover:shadow-md'

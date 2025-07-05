@@ -2,8 +2,9 @@
 
 import { ReactNode, createContext, useContext, useState } from 'react';
 
-import { FileList } from '../sidebar-document-right/file-list';
-import { FileUploader } from '../sidebar-document-right/file-uploader';
+import { FileList } from './sidebar-document-right/file-list';
+import { FileUploader } from './sidebar-document-right/file-uploader';
+import { ChatList } from './sidebar-function-left/chat-list';
 import {
     Briefcase,
     ChevronRight,
@@ -162,15 +163,7 @@ export function SidebarLeft() {
             </nav>
             <div className='flex h-full rounded-lg bg-white shadow-sm'>
                 <div className={`overflow-hidden transition-all ${expandedLeft ? 'ml-2 w-50' : 'm-0 w-0'}`}>
-                    {HISTORY_ITEMS.map((item) => (
-                        <div key={item.title} className='flex items-center justify-between px-2 py-4 text-lg'>
-                            <div className='flex items-center gap-1'>
-                                {item.icon}
-                                <div>{item.title}</div>
-                            </div>
-                            <ChevronRight />
-                        </div>
-                    ))}
+                    <ChatList />
                 </div>
             </div>
         </div>
@@ -182,12 +175,10 @@ export function SidebarRight() {
 
     return (
         <div
-            className={`h-full transition-all ${expandedRight ? 'visible w-80' : 'invisible w-0'} rounded-lg bg-white`}>
-            <div className={`${expandedRight ? 'block' : 'hidden'} flex h-full flex-col overflow-hidden`}>
+            className={`h-full transition-all ${expandedRight ? 'visible w-80' : 'invisible w-0'} rounded-lg bg-white pr-5`}>
+            <div className={`${expandedRight ? 'block' : 'hidden'} flex h-full flex-col`}>
                 <FileUploader />
-                <div className='flex-1 overflow-hidden'>
-                    <FileList />
-                </div>
+                <FileList />
             </div>
         </div>
     );
