@@ -2,7 +2,7 @@
 
 import ChatIndex from '../components/chat-arena/chat-arena-index';
 import { DocumentViewIndex } from '../components/document-view/document-view-index';
-import { SidebarTrigger } from '../components/sidebar-function-left/sidebar';
+import { SidebarTrigger } from '../components/sidebar/sidebar';
 
 const ChatPage = () => {
     return (
