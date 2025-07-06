@@ -6,9 +6,11 @@ import { useRouter } from 'next/navigation';
 
 import { DeleteProjectAPI, UpdateProjectAPI } from '@/app/api/client/project-list.api';
 import { ProjectDialogContent } from '@/components/project-dialog';
+import useDelete from '@/hooks/use-delete';
 import useFetchList from '@/hooks/use-fetch-list';
-import useNotification from '@/hooks/useNotification';
-import useQuery from '@/hooks/useQuery';
+import useNotification from '@/hooks/use-notification';
+import useQuery from '@/hooks/use-query';
+import useUpdate from '@/hooks/use-update';
 import { Button } from '@/registry/new-york-v4/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/registry/new-york-v4/ui/card';
 import { Dialog } from '@/registry/new-york-v4/ui/dialog';
@@ -23,101 +25,39 @@ import { useListProjectStore } from '@/store/project-list.store';
 
 import { ProjectSkeleton } from './project-list-skeleton';
 import { CalendarIcon, Edit, FileText, MessageSquare, MoreVertical, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
 
 export function ProjectList() {
     const router = useRouter();
     const [editingProject, setEditingProject] = useState<ProjectType | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [open, setOpen] = useState(false);
     const { projects, setProjects, sortBy, updateProject, removeProject, setSelectedProject } = useListProjectStore();
 
     // lay data projects tu api
+
     const [query] = useQuery({
         page: 1,
         items_per_page: 10
     });
-    const data = useFetchList('projects', query);
-    console.log(data);
-
-    const parseProjects = () => {
-        const projects = (data['data' as keyof typeof data] ?? []) as any[];
-        const newProjects: Array<any> = [];
-        projects.map((project: any) => {
-            const newProject = {
-                id: project.uuid,
-                name: project.name,
-                description: project.description,
-                createAt: ''
-            };
-            newProjects.push(newProject);
-        });
-
-        return newProjects;
-    };
-
-    useEffect(() => {
-        if (projects.length === 0 && data['success' as keyof typeof data]) {
-            setIsLoading(true);
-            const newProjects = parseProjects();
-            setProjects(newProjects);
-            useNotification('fetch', data, 'projects');
-            setIsLoading(false);
-        } else {
-            setIsLoading(false);
-        }
-    }, [data]);
-
-    const sortedProjects = [...projects].sort((a, b) => {
-        switch (sortBy) {
-            case 'name':
-                return a.name.localeCompare(b.name);
-            case 'created':
-                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-            case 'updated':
-                return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-            default:
-                return 0;
-        }
-    });
+    useFetchList('projects', query, 'project', setIsLoading);
 
     const handleUpdateProject = async (data: { name: string; description: string }) => {
         if (!editingProject) return;
-        const response = await UpdateProjectAPI({
-            id: editingProject.id,
-            name: data.name,
-            description: data.description
-        });
-
-        toast[response.success ? 'success' : 'error'](response.success ? 'Success' : 'Error', {
-            description: response.success
-                ? 'Project updated successfully'
-                : response.error?.message || 'Failed to update project',
-            duration: 2000
-        });
-
-        if (response.success) {
-            updateProject({
-                ...editingProject,
+        await useUpdate(
+            'projects',
+            {
                 name: data.name,
                 description: data.description
-            });
-            setEditingProject(null);
-        }
+            },
+            editingProject.id,
+            editingProject,
+            updateProject
+        );
+        setEditingProject(null);
     };
 
     const handleDeleteProject = async (id: string) => {
-        const response = await DeleteProjectAPI(id);
-
-        toast[response.success ? 'success' : 'error'](response.success ? 'Success' : 'Error', {
-            description: response.success
-                ? 'Project deleted successfully'
-                : response.error?.message || 'Failed to delete project',
-            duration: 2000
-        });
-
-        if (response.success) {
-            removeProject(id);
-        }
+        await useDelete('projects', id, removeProject);
     };
 
     const handleProjectClick = (projectId: string) => {
@@ -134,7 +74,7 @@ export function ProjectList() {
                 ? Array(3)
                       .fill(0)
                       .map((_, i) => <ProjectSkeleton key={i} />)
-                : sortedProjects.map((project, i) => (
+                : projects.map((project, i) => (
                       <Card
                           key={project.id}
                           className='group border-border/40 relative flex h-[200px] cursor-pointer flex-col gap-0 overflow-hidden py-0 transition-all hover:shadow-md'
@@ -155,6 +95,7 @@ export function ProjectList() {
                                           <DropdownMenuItem
                                               onClick={(e) => {
                                                   e.stopPropagation();
+                                                  setOpen(!open);
                                                   setEditingProject(project);
                                               }}>
                                               <Edit className='mr-2 h-4 w-4' />
@@ -197,19 +138,19 @@ export function ProjectList() {
                       </Card>
                   ))}
 
-            <Dialog open={!!editingProject} onOpenChange={() => setEditingProject(null)}>
-                {editingProject && (
-                    <ProjectDialogContent
-                        title='Chỉnh sửa dự án'
-                        description='Cập nhật thông tin dự án của bạn'
-                        defaultValues={{
-                            name: editingProject.name,
-                            description: editingProject.description
-                        }}
-                        onSubmit={handleUpdateProject}
-                    />
-                )}
-            </Dialog>
+            {editingProject && (
+                <ProjectDialogContent
+                    title='Chỉnh sửa dự án'
+                    description='Cập nhật thông tin dự án của bạn'
+                    isOpen={open}
+                    onOpenChange={setOpen}
+                    defaultValues={{
+                        name: editingProject.name,
+                        description: editingProject.description
+                    }}
+                    onSubmit={handleUpdateProject}
+                />
+            )}
         </>
     );
 }

@@ -1,7 +1,5 @@
 'use client';
 
-import { ListChatType, UpdateListChatRequestType } from '@/schemas/chat-list.schemas';
-import { Skeleton } from '@/registry/new-york-v4/ui/skeleton';
 import { Button } from '@/registry/new-york-v4/ui/button';
 import {
     DropdownMenu,
@@ -9,7 +7,10 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from '@/registry/new-york-v4/ui/dropdown-menu';
-import { Edit, MoreVertical, Trash2, Star } from 'lucide-react';
+import { Skeleton } from '@/registry/new-york-v4/ui/skeleton';
+import { ListChatType, UpdateListChatRequestType } from '@/schemas/chat-list.schemas';
+
+import { Edit, MoreVertical, Star, Trash2 } from 'lucide-react';
 
 interface ChatListItemsProps {
     chats: ListChatType[];
@@ -21,7 +22,7 @@ interface ChatListItemsProps {
     onKeyDown: (e: React.KeyboardEvent) => void;
     onBlur: () => void;
     onEdit: (chat: ListChatType) => void;
-    onToggleFavorite: (id: string) => void;
+    // onToggleFavorite: (id: string) => void;
     onDelete: (id: string) => void;
     onClick: (id: string) => void;
 }
@@ -36,7 +37,7 @@ export function ChatListItems({
     onKeyDown,
     onBlur,
     onEdit,
-    onToggleFavorite,
+    // onToggleFavorite,
     onDelete,
     onClick
 }: ChatListItemsProps) {
@@ -99,7 +100,7 @@ export function ChatListItems({
                                     <DropdownMenuItem
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            onToggleFavorite(chat.id);
+                                            // onToggleFavorite(chat.id);
                                         }}>
                                         <Star className='mr-2 h-4 w-4' />
                                         <span>{chat.favorite ? 'Bỏ yêu thích' : 'Yêu thích'}</span>

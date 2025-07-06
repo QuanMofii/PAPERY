@@ -25,21 +25,19 @@ const FavoriteSchema = z.object({
 /* Schema response chung */
 const SuccessResponseSchema = z.object({
     success: z.boolean(),
-    error: z.object({
-        message: z.string()
-    }).optional()
+    error: z
+        .object({
+            message: z.string()
+        })
+        .optional()
 });
 
 /* Schema chính */
-const ListChatSchema = IdSchema
-    .merge(TitleSchema)
-    .merge(TimestampSchema)
-    .merge(ProjectIdSchema)
-    .merge(FavoriteSchema);
+const ListChatSchema = IdSchema.merge(TitleSchema).merge(TimestampSchema).merge(ProjectIdSchema).merge(FavoriteSchema);
 
 const CreateListChatRequest = TitleSchema.merge(ProjectIdSchema);
 
-const UpdateListChatRequest = IdSchema.merge(TitleSchema).merge(FavoriteSchema);
+const UpdateListChatRequest = TitleSchema;
 
 const ListChatResponse = SuccessResponseSchema.extend({
     data: z.array(ListChatSchema)
@@ -56,10 +54,4 @@ export type UpdateListChatRequestType = z.infer<typeof UpdateListChatRequest>;
 export type ListChatResponseType = z.infer<typeof ListChatResponse>;
 export type SingleListChatResponseType = z.infer<typeof SingleListChatResponse>;
 
-export {
-    ListChatSchema,
-    CreateListChatRequest,
-    UpdateListChatRequest,
-    ListChatResponse,
-    SingleListChatResponse
-};
+export { ListChatSchema, CreateListChatRequest, UpdateListChatRequest, ListChatResponse, SingleListChatResponse };

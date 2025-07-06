@@ -1,8 +1,15 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/registry/new-york-v4/ui/dialog";
-import { Input } from "@/registry/new-york-v4/ui/input";
-import { Label } from "@/registry/new-york-v4/ui/label";
-import { Textarea } from "@/registry/new-york-v4/ui/textarea";
-import { Button } from "@/registry/new-york-v4/ui/button";
+import { Button } from '@/registry/new-york-v4/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle
+} from '@/registry/new-york-v4/ui/dialog';
+import { Input } from '@/registry/new-york-v4/ui/input';
+import { Label } from '@/registry/new-york-v4/ui/label';
+import { Textarea } from '@/registry/new-york-v4/ui/textarea';
 
 interface ProjectDialogContentProps {
     title: string;
@@ -36,43 +43,40 @@ export const ProjectDialogContent = ({
     };
 
     return (
-
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[95vh] overflow-y-auto">
-            <DialogHeader>
-                <DialogTitle>{title}</DialogTitle>
-                <DialogDescription>
-                    {description}
-                </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                    <Label htmlFor="name">Tên dự án</Label>
-                    <Input
-                        id="name"
-                        name="name"
-                        placeholder="Nhập tên dự án"
-                        defaultValue={defaultValues?.name}
-                        required
-                    />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="description">Mô tả</Label>
-                    <Textarea
-                        id="description"
-                        name="description"
-                        placeholder="Nhập mô tả dự án"
-                        defaultValue={defaultValues?.description}
-                        required
-                    />
-                </div>
-                <DialogFooter>
-                    <Button type="submit" disabled={isLoading}>
-                        {isLoading ? 'Đang xử lý...' : (defaultValues ? 'Cập nhật' : 'Tạo dự án')}
-                    </Button>
-                </DialogFooter>
-            </form>
-        </DialogContent>
-    </Dialog>
+            <DialogContent className='max-h-[95vh] max-w-2xl overflow-y-auto'>
+                <DialogHeader>
+                    <DialogTitle>{title}</DialogTitle>
+                    <DialogDescription>{description}</DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className='space-y-4'>
+                    <div className='space-y-2'>
+                        <Label htmlFor='name'>Tên dự án</Label>
+                        <Input
+                            id='name'
+                            name='name'
+                            placeholder='Nhập tên dự án'
+                            defaultValue={defaultValues?.name}
+                            required
+                        />
+                    </div>
+                    <div className='space-y-2'>
+                        <Label htmlFor='description'>Mô tả</Label>
+                        <Textarea
+                            id='description'
+                            name='description'
+                            placeholder='Nhập mô tả dự án'
+                            defaultValue={defaultValues?.description}
+                            required
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button type='submit' disabled={isLoading}>
+                            {isLoading ? 'Đang xử lý...' : defaultValues ? 'Cập nhật' : 'Tạo dự án'}
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
     );
 };
