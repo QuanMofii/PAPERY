@@ -17,7 +17,7 @@ export function CreateProjectCard() {
 
     const handleCreateProject = async (data: { name: string; description: string }) => {
         setIsLoading(true);
-        const response = await useCreate('projects', data, projects, setProjects);
+        const response = await useCreate('projects', data, projects, setProjects, 'project', null);
 
         if (response.success) {
             setIsOpen(false);

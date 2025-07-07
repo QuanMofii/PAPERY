@@ -6,9 +6,7 @@ import { BookOpen, EllipsisVertical, FilePen, Trash2 } from 'lucide-react';
 
 export function FileItem({ file }) {
     const [open, setOpen] = useState(false);
-    useEffect(() => {
-        console.log(open);
-    }, [open, setOpen]);
+    useEffect(() => {}, [open, setOpen]);
     function handleClick() {
         setOpen(!open);
     }
@@ -25,7 +23,7 @@ export function FileItem({ file }) {
                 <Trash2 className='h-4 w-4' />
             </div>
             <div
-                className={`absolute right-0 z-50 flex h-full w-[88%] justify-between gap-1 rounded-lg bg-white px-2 ${open ? '-translate-x-6.5' : 'translate-x-0.5'} transition-all`}>
+                className={`absolute right-0 z-50 flex h-full w-[86%] justify-between gap-1 rounded-lg bg-white px-2 ${open ? '-translate-x-6.5' : 'translate-x-0'} transition-all`}>
                 <div className='flex flex-col justify-center'>
                     <p className='text-sm font-medium text-stone-700'>{file.name}</p>
                     <p className='text-xs text-gray-500'>{file.size}</p>

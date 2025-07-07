@@ -2,9 +2,15 @@
 
 import { useState } from 'react';
 
+import { useParams, useSearchParams } from 'next/navigation';
+
+import useCreate from '@/hooks/use-create';
+import useQuery from '@/hooks/use-query';
 import { type Message } from '@/registry/new-york-v4/ui/chat-message';
+import { useListChatStore } from '@/store/chat-list.store';
 
 import { Chat } from './chat-ui';
+import { ParkingMeter } from 'lucide-react';
 
 interface ChatSubmitEvent {
     preventDefault?: () => void;
@@ -19,6 +25,11 @@ export default function ChatIndex() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
+    const { chats, setChats } = useListChatStore();
+    const param = useParams();
+    const searchParams = useSearchParams();
+    const projectId = searchParams.get('projectId');
+    const [query] = useQuery({ project_uuid: projectId });
 
     const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setInput(e.target.value);
@@ -32,32 +43,45 @@ export default function ChatIndex() {
             content: input
         };
 
+        if (!param.id) {
+            await useCreate(
+                'chat-sessions',
+                {
+                    title: userMessage.content
+                },
+                chats,
+                setChats,
+                'chat',
+                query
+            );
+        }
+
         const newMessages = [...messages, userMessage];
         setMessages(newMessages);
         setInput('');
         setIsGenerating(true);
 
-        try {
-            const response = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ messages: newMessages, input })
-            });
+        // try {
+        //     const response = await fetch('/api/chat', {
+        //         method: 'POST',
+        //         headers: { 'Content-Type': 'application/json' },
+        //         body: JSON.stringify({ messages: newMessages, input })
+        //     });
 
-            const data = await response.json();
+        //     const data = await response.json();
 
-            const assistantMessage: Message = {
-                id: data.id,
-                role: 'assistant',
-                content: data.content
-            };
+        //     const assistantMessage: Message = {
+        //         id: data.id,
+        //         role: 'assistant',
+        //         content: data.content
+        //     };
 
-            setMessages((prev) => [...prev, assistantMessage]);
-        } catch (err) {
-            console.error('Failed to get response', err);
-        } finally {
-            setIsGenerating(false);
-        }
+        //     setMessages((prev) => [...prev, assistantMessage]);
+        // } catch (err) {
+        //     console.error('Failed to get response', err);
+        // } finally {
+        //     setIsGenerating(false);
+        // }
     };
 
     return (

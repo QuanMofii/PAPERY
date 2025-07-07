@@ -5,17 +5,16 @@ import { useListChatStore } from '@/store/chat-list.store';
 import { useListProjectStore } from '@/store/project-list.store';
 
 import useNotification from './use-notification';
-import { title } from 'process';
 
-export default function useFetchList(
+export default function useGets(
     path: string,
     query = {},
     store: 'project' | 'chat',
     setLoading: React.Dispatch<React.SetStateAction<boolean>>,
     config = { withCredentials: true }
 ) {
-    const { projects, setProjects, updateProject, removeProject, setSelectedProject } = useListProjectStore();
-    const { chats, setChats, addChat, updateChat, removeChat, setSelectedChat } = useListChatStore();
+    const { projects, setProjects } = useListProjectStore();
+    const { chats, setChats } = useListChatStore();
 
     const parseData = (data: []) => {
         const newData: Array<any> = [];
