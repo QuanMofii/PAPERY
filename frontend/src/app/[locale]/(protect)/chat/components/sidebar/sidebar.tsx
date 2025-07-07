@@ -17,7 +17,6 @@ import {
     Star,
     TrainFront
 } from 'lucide-react';
-import { string } from 'zod';
 
 interface ChatItem {
     id: string;
@@ -27,54 +26,6 @@ interface ChatItem {
     projectId: string;
     favorite: boolean;
 }
-
-const HISTORY_ITEMS = [
-    {
-        title: 'Favorite' as const,
-        icon: <Star className='h-4 w-4 group-data-[collapsible=icon]:cursor-pointer' />,
-        isActive: true
-    },
-    {
-        title: 'Recent' as const,
-        icon: <History className='h-4 w-4 group-data-[collapsible=icon]:cursor-pointer' />,
-        isActive: true
-    }
-];
-
-const MOCK_CHATS: ChatItem[] = [
-    {
-        id: '1',
-        title: 'Chat 1',
-        updatedAt: '2024-03-20T10:00:00Z',
-        createdAt: '2024-03-20T10:00:00Z',
-        projectId: '1',
-        favorite: true
-    },
-    {
-        id: '2',
-        title: 'Chat 2',
-        updatedAt: '2024-03-20T09:00:00Z',
-        createdAt: '2024-03-20T09:00:00Z',
-        projectId: '1',
-        favorite: false
-    },
-    {
-        id: '3',
-        title: 'Chat 3',
-        updatedAt: '2024-03-19T15:00:00Z',
-        createdAt: '2024-03-19T15:00:00Z',
-        projectId: '1',
-        favorite: true
-    },
-    {
-        id: '4',
-        title: 'Chat 4',
-        updatedAt: '2024-03-19T14:00:00Z',
-        createdAt: '2024-03-19T14:00:00Z',
-        projectId: '1',
-        favorite: false
-    }
-];
 
 const config_item = [
     { title: 'Models', icon: Package },

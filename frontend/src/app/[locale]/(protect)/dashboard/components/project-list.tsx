@@ -7,13 +7,11 @@ import { useRouter } from 'next/navigation';
 import { DeleteProjectAPI, UpdateProjectAPI } from '@/app/api/client/project-list.api';
 import { ProjectDialogContent } from '@/components/project-dialog';
 import useDelete from '@/hooks/use-delete';
-import useFetchList from '@/hooks/use-fetch-list';
-import useNotification from '@/hooks/use-notification';
+import useGets from '@/hooks/use-gets';
 import useQuery from '@/hooks/use-query';
 import useUpdate from '@/hooks/use-update';
 import { Button } from '@/registry/new-york-v4/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/registry/new-york-v4/ui/card';
-import { Dialog } from '@/registry/new-york-v4/ui/dialog';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -39,7 +37,7 @@ export function ProjectList() {
         page: 1,
         items_per_page: 10
     });
-    useFetchList('projects', query, 'project', setIsLoading);
+    useGets('projects', query, 'project', setIsLoading);
 
     const handleUpdateProject = async (data: { name: string; description: string }) => {
         if (!editingProject) return;

@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import useDelete from '@/hooks/use-delete';
-import useFetchList from '@/hooks/use-fetch-list';
+import useGets from '@/hooks/use-gets';
 import useQuery from '@/hooks/use-query';
 import useUpdate from '@/hooks/use-update';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/registry/new-york-v4/ui/collapsible';
@@ -60,7 +60,7 @@ export function ChatList() {
     const [originalTitle, setOriginalTitle] = useState('');
 
     const [query] = useQuery({ page: 1, items_per_page: 10, project_uuid: projectId });
-    if (projectId) useFetchList('chat-sessions', query, 'chat', setIsLoading);
+    if (projectId) useGets('chat-sessions', query, 'chat', setIsLoading);
 
     const handleStartEditing = (chat: ChatItem) => {
         setEditingChatId(chat.id);

@@ -15,7 +15,7 @@ export default async function useDelete(
 
     deleteData(id);
 
-    useNotification('projects', response, 'deleted');
+    useNotification(path, response, 'deleted');
 
     return response;
 }
