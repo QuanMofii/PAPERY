@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...core.logger import logging
 from ...schemas.rate_limit import sanitize_path
-from .redis import redis
+from ..db.redis  import redis
 
 logger = logging.getLogger(__name__)
 

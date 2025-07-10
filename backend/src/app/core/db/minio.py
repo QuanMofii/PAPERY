@@ -216,4 +216,4 @@ class MinioClient:
             return []
 
 # Singleton instance
-minio_client = MinioClient()
+minio = MinioClient()

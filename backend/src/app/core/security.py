@@ -12,7 +12,7 @@ from ..crud.crud_users import crud_users
 from .config import settings
 from .db.crud_token_blacklist import crud_token_blacklist
 from .schemas import TokenBlacklistCreate, TokenData
-from .utils.redis import redis
+from .db.redis import redis
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/token")

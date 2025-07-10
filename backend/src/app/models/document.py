@@ -15,17 +15,8 @@ if TYPE_CHECKING:
 
 class DocumentType(str, Enum):
     pdf = "pdf"
-    docx = "docx"
+    docs = "docs"
     txt = "txt"
-    markdown = "markdown"
-    html = "html"
-    json = "json"
-    csv = "csv"
-    excel = "excel"
-    image = "image"
-    audio = "audio"
-    video = "video"
-    other = "other"
 
 
 class Document(Base, UUIDMixin, TimestampMixin, SoftDeleteMixin):

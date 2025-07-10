@@ -26,10 +26,10 @@ from .config import (
     settings,
 )
 
-from .db.database import Base
-from .db.database import async_engine as engine
-from .utils.redis import redis
-from .utils.minio import minio_client
+from .db.database import Base,async_engine as engine
+
+from .db.redis import redis
+from .db.minio import minio
 from .logger import logging
 
 logger = logging.getLogger(__name__)
@@ -69,7 +69,7 @@ def lifespan_factory(
 
             # Initialize MinIO if needed
             if isinstance(settings, MinioSettings):
-                minio_client.init()
+                minio.init()
 
             initialization_complete.set()
             yield
