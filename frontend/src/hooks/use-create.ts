@@ -1,33 +1,39 @@
 'use client';
 
 import { http } from '@/lib/http';
-import { useListChatStore } from '@/store/chat-list.store';
 
 import useNotification from './use-notification';
+import { tranQueryToSting } from './use-query';
 
 export default async function useCreate(
     path: string,
     data: any,
     baseData: any,
     setData: (value: any) => void,
+    store: 'project' | 'chat',
+    query: any,
     config = {
         withCredentials: true
     }
 ) {
-    const response = await http.post(`/${path}`, data, config);
+    const queryString = tranQueryToSting(query);
+    console.log(queryString);
+    const response = await http.post(`/${path}${store === 'chat' ? `?${queryString}` : ''}`, data, config);
+
+    const newData =
+        store === 'project'
+            ? {
+                  id: response.data?.uuid,
+                  name: data.name,
+                  description: data.description
+              }
+            : { id: response.data.uuid, title: data.title };
 
     if (response.success) {
-        setData([
-            ...baseData,
-            {
-                id: response.data.uuid,
-                name: data.name,
-                description: data.description
-            }
-        ]);
+        setData([...baseData, newData]);
     }
 
-    useNotification('projects', response, 'deleted');
+    useNotification(path, response, 'created');
 
     return response;
 }

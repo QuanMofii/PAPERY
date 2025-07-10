@@ -16,3 +16,9 @@ export default function useQuery(initial: object) {
 
     return [query, updateQuery, resetQuery];
 }
+
+export function tranQueryToSting(query: any) {
+    const queryString = new URLSearchParams(query).toString();
+
+    return queryString;
+}
