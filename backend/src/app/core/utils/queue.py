@@ -5,7 +5,7 @@ from celery import Celery
 from celery.result import AsyncResult
 
 from ..config import settings
-from .redis import redis
+from ..db.redis import redis
 
 logger = logging.getLogger(__name__)
 

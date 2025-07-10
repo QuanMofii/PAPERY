@@ -124,6 +124,9 @@ Update the following:
 # PostgreSQL
 POSTGRES_SERVER="db"
 
+# MinIO
+MINIO_ENDPOINT="http://minio:9000"
+
 # Redis
 REDIS_CACHE_HOST="redis"
 REDIS_QUEUE_HOST="redis"
@@ -142,6 +145,9 @@ Update the following:
 # PostgreSQL
 POSTGRES_SERVER="localhost"
 
+# MinIO
+MINIO_ENDPOINT="http://localhost:9000"
+
 # Redis
 REDIS_CACHE_HOST="localhost"
 REDIS_QUEUE_HOST="localhost"
@@ -158,7 +164,7 @@ Some variables in `.env.example` are empty and **must be filled**:
 
 ```env
 # --- Required secrets ---
-SECRET_KEY= # e.g. output of: openssl rand -hex 32
+SECRET_KEY=yourkey
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 REFRESH_TOKEN_EXPIRE_DAYS=7
@@ -259,15 +265,56 @@ cd src
 poetry run alembic upgrade head
 ```
 
-#### 6. Run the backend server
+#### 6. Start MinIO locally
+
+Option 1: Run MinIO with Docker
 
 ```bash
+docker run -p 9000:9000 -p 9001:9001 \
+  --name papery-minio \
+  -e MINIO_ROOT_USER=minioadmin \
+  -e MINIO_ROOT_PASSWORD=minioadmin \
+  -v papery_minio_data:/data \
+  quay.io/minio/minio server /data --console-address ":9001"
+```
+
+- ✅ Access console: http://localhost:9001  
+- 🪪 Credentials:
+  - Username: `minioadmin`
+  - Password: `minioadmin`
+
+Option 2: Install MinIO manually
+
+- Download: https://min.io/download
+
+**Linux/macOS**
+```bash
+wget https://dl.min.io/server/minio/release/linux-amd64/minio
+chmod +x minio
+./minio server /data --console-address ":9001"
+```
+
+**Windows**
+- Download EXE: https://dl.min.io/server/minio/release/windows-amd64/minio.exe
+- Run in terminal:
+```powershell
+.\minio.exe server D:\minio-data --console-address ":9001"
+```
+
+#### 7. Run the backend server
+
+```bash
+cd src 
 uvicorn app.main:app --reload
 ```
 
 ---
 
 ## VII. Project structure
+
+> _Coming soon..._
+
+---
 
 ## VIII. Contributing
 

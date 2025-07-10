@@ -6,18 +6,17 @@ from enum import Enum
 from ..core.schemas import PersistentDeletion, TimestampSchema, UUIDSchema
 
 class DocumentType(str, Enum):
-    pdf = "pdf"
-    docx = "docx"
     txt = "txt"
-    markdown = "markdown"
-    html = "html"
-    json = "json"
-    csv = "csv"
-    excel = "excel"
-    image = "image"
-    audio = "audio"
-    video = "video"
-    other = "other"
+    docx = "docx"
+    pdf = "pdf"
+
+# Mapping MIME types với DocumentType
+DOCUMENT_MIME_TYPES = {
+    "text/plain": DocumentType.txt,
+    "application/msword": DocumentType.docx,
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": DocumentType.docx,
+    "application/pdf": DocumentType.pdf,
+}
 
 class DocumentBase(BaseModel):
     title: Annotated[str, Field(min_length=1, max_length=255, examples=["My Document"])]

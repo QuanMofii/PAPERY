@@ -22,12 +22,14 @@ from .config import (
     RedisCacheSettings,
     RedisQueueSettings,
     RedisRateLimiterSettings,
+    MinioSettings,
     settings,
 )
 
-from .db.database import Base
-from .db.database import async_engine as engine
-from .utils.redis import redis
+from .db.database import Base,async_engine as engine
+
+from .db.redis import redis
+from .db.minio import minio
 from .logger import logging
 
 logger = logging.getLogger(__name__)
@@ -36,34 +38,6 @@ logger = logging.getLogger(__name__)
 async def create_tables() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-
-# -------------- redis --------------
-async def init_redis() -> bool:
-    """Khởi tạo Redis connection."""
-    try:
-        await redis.init()
-        logger.info("Redis connection initialized successfully")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to initialize Redis - {e}")
-        # Không raise exception để ứng dụng vẫn có thể chạy
-        return False
-
-async def close_redis() -> None:
-    """Đóng kết nối Redis."""
-    try:
-        await redis.close()
-        logger.info("Redis connection closed successfully")
-    except Exception as e:
-        logger.error(f"Error closing Redis connection - {e}")
-
-async def check_redis_health() -> bool:
-    """Kiểm tra sức khỏe của Redis."""
-    try:
-        return await redis.health_check()
-    except Exception as e:
-        logger.error(f"Redis health check failed - {e}")
-        return False
 
 # -------------- application --------------
 def lifespan_factory(
@@ -75,6 +49,7 @@ def lifespan_factory(
         | RedisQueueSettings
         | RedisRateLimiterSettings
         | EnvironmentSettings
+        | MinioSettings
     ),
     create_tables_on_start: bool = True,
 ) -> Callable[[FastAPI], _AsyncGeneratorContextManager[Any]]:
@@ -88,20 +63,21 @@ def lifespan_factory(
         app.state.initialization_complete = initialization_complete
 
         try:
+            # Initialize Redis if needed
             if isinstance(settings, (RedisCacheSettings, RedisQueueSettings, RedisRateLimiterSettings)):
-                redis_initialized = await init_redis()
-                if not redis_initialized:
-                    logger.warning("Redis initialization failed, some features may be limited")
-                else:
-                    if not await check_redis_health():
-                        logger.warning("Redis health check failed, some features may be limited")
+                await redis.init()
+
+            # Initialize MinIO if needed
+            if isinstance(settings, MinioSettings):
+                minio.init()
 
             initialization_complete.set()
             yield
 
         finally:
+            # Close Redis connection
             if isinstance(settings, (RedisCacheSettings, RedisQueueSettings, RedisRateLimiterSettings)):
-                await close_redis()
+                await redis.close()
 
     return lifespan
 
@@ -116,6 +92,7 @@ def create_application(
         | RedisQueueSettings
         | RedisRateLimiterSettings
         | EnvironmentSettings
+        | MinioSettings
     ),
     create_tables_on_start: bool = True,
     **kwargs: Any,
@@ -142,6 +119,7 @@ def create_application(
         - RedisRateLimiterSettings: Sets up event handlers for creating and closing a Redis rate limiter pool.
         - EnvironmentSettings: Conditionally sets documentation URLs and integrates custom routes for API documentation
           based on the environment type.
+        - MinioSettings: Sets up event handlers for creating and closing MinIO connections.
 
     create_tables_on_start : bool
         A flag to indicate whether to create database tables on application startup.
@@ -157,8 +135,8 @@ def create_application(
 
     The function configures the FastAPI application with different features and behaviors
     based on the provided settings. It includes setting up database connections, Redis pools
-    for caching, queue, and rate limiting, client-side caching, and customizing the API documentation
-    based on the environment settings.
+    for caching, queue, and rate limiting, client-side caching, MinIO for file storage,
+    and customizing the API documentation based on the environment settings.
     """
     # --- before creating application ---
     lifespan = lifespan_factory(settings, create_tables_on_start=create_tables_on_start)
