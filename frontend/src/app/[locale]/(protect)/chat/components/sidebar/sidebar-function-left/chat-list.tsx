@@ -178,6 +178,9 @@ export function ChatList() {
                     </CollapsibleContent>
                 </Collapsible>
             ))}
+            <div className='rounded-lg border border-dashed text-gray-500'>
+                <div className={`w-full cursor-pointer rounded-lg border-gray-500 p-2 text-center`}>New Chat</div>
+            </div>
         </div>
     );
 }
