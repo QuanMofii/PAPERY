@@ -3,7 +3,7 @@ import logging
 from typing import Any
 
 from celery import Task
-from ..utils.redis import redis
+from ..db.redis import redis
 
 logger = logging.getLogger(__name__)
 

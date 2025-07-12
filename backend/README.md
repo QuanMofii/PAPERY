@@ -288,17 +288,22 @@ Option 2: Install MinIO manually
 - Download: https://min.io/download
 
 **Linux/macOS**
+- Run the following command from the system terminal or shell to start a local MinIO instance using the ~/minio folder. You can replace this path with another folder path on the local machine:
 ```bash
 wget https://dl.min.io/server/minio/release/linux-amd64/minio
 chmod +x minio
 ./minio server /data --console-address ":9001"
 ```
+-The mkdir or chmod command creates the folder explicitly at the specified path.
+-The minio server command starts the MinIO server. The path argument ~/minio identifies the folder in which the server operates.
 
 **Windows**
 - Download EXE: https://dl.min.io/server/minio/release/windows-amd64/minio.exe
-- Run in terminal:
+- In PowerShell or the Command Prompt, navigate to the location of the executable or add the path of the minio.exe file to the system $PATH.
+- Use this command to start a local MinIO instance in the C:\minio folder. You can replace C:\minio with another drive or folder path on the local computer.
+- Run in  Command Prompt:
 ```powershell
-.\minio.exe server D:\minio-data --console-address ":9001"
+.\minio.exe server C:\minio-data --console-address ":9001"
 ```
 
 #### 7. Run the backend server
