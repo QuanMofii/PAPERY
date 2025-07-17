@@ -62,20 +62,26 @@ class RedisQueue:
     def register_function(self, func: Callable, name: str | None = None) -> None:
         """
         Đăng ký một hàm để xử lý trong worker.
-        
+        Hỗ trợ cả sync function và async function (coroutine).
         Args:
-            func: Hàm cần đăng ký
+            func: Hàm cần đăng ký (có thể là async hoặc sync)
             name: Tên của hàm (mặc định là tên hàm)
         """
         if not self._is_available:
             logger.warning("Queue is not available, function registration skipped")
             return
-            
         if not self._celery:
             raise Exception("Celery app not initialized")
-            
         function_name = name or func.__name__
-        self._celery.task(name=function_name)(func)
+        # Nếu là async function, wrap lại để celery gọi được
+        import inspect
+        if inspect.iscoroutinefunction(func):
+            import asyncio
+            def sync_wrapper(*args, **kwargs):
+                return asyncio.run(func(*args, **kwargs))
+            self._celery.task(name=function_name)(sync_wrapper)
+        else:
+            self._celery.task(name=function_name)(func)
         logger.info(f"Registered function: {function_name}")
     
     async def enqueue(
@@ -86,26 +92,18 @@ class RedisQueue:
         **kwargs: Any
     ) -> Optional[str]:
         """
-        Thêm một task vào queue.
-        
-        Args:
-            function_name: Tên hàm đã đăng ký
-            *args: Tham số vị trí cho hàm
-            queue_name: Tên của queue (mặc định là "default")
-            **kwargs: Tham số từ khóa cho hàm
-            
+        Thêm một task vào queue. Hỗ trợ cả async và sync function.
+        Nếu function là async, sẽ tự động chạy đúng kiểu.
         Returns:
             Optional[str]: Task ID hoặc None nếu queue không khả dụng
         """
         if not self._is_available:
             logger.warning("Queue is not available, task enqueuing skipped")
             return None
-            
         if not self._celery:
             await self.init()
             if not self._is_available or not self._celery:
                 return None
-            
         try:
             task = self._celery.send_task(
                 function_name,
@@ -113,7 +111,6 @@ class RedisQueue:
                 kwargs=kwargs,
                 queue=queue_name
             )
-            
             logger.info(f"Enqueued task {task.id} for function {function_name}")
             return task.id
         except Exception as e:

@@ -21,40 +21,67 @@ class MinioClient:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def init(self):
-        """Initialize MinIO client with retry mechanism."""
-        if self._client:
-            return
-            
+    def retry_init_minio(self, attempt=1, max_retries=5):
+        """Retry kết nối MinIO tối đa max_retries lần, chạy background."""
+        import time
+        from minio.error import S3Error
+        from urllib3.util.retry import Retry
+        from urllib3 import PoolManager
         last_error = None
-        for attempt in range(self._max_retries):
+        for i in range(attempt, max_retries+1):
             try:
-                # Disable urllib3 retry to avoid duplicate retry messages
-                retry_strategy = Retry(total=0)  # No retry
+                retry_strategy = Retry(total=0)
                 http_client = PoolManager(retries=retry_strategy)
-                
-                self._client = Minio(
+                client = Minio(
                     settings.MINIO_ENDPOINT,
                     access_key=settings.MINIO_ACCESS_KEY,
                     secret_key=settings.MINIO_SECRET_KEY,
                     secure=settings.MINIO_SECURE,
                     http_client=http_client
                 )
-                # Check bucket, create if not exists
-                if not self._client.bucket_exists(settings.MINIO_BUCKET_NAME):
-                    self._client.make_bucket(settings.MINIO_BUCKET_NAME)
-                self._is_available = True
-                logger.info("MinIO connection initialized successfully")
-                return
-            except Exception as e:
-                last_error = e
-                if attempt < self._max_retries - 1:
-                    logger.warning(f"MinIO retry {attempt + 1}/{self._max_retries}: {e}")
-                    time.sleep(self._retry_delay)
-                else:
-                    self._is_available = False
-                    logger.error(f"MinIO connection failed after {self._max_retries} attempts: {last_error}")
-                    # Don't raise exception to prevent server crash
+                if not client.bucket_exists(settings.MINIO_BUCKET_NAME):
+                    client.make_bucket(settings.MINIO_BUCKET_NAME)
+                MinioClient._client = client
+                MinioClient._is_available = True
+                logger.info("MinIO connection initialized successfully (background retry)")
+                return True
+            except Exception as err:
+                last_error = err
+                logger.warning(f"[MinIO Retry Task] Attempt {i}/{max_retries}: {err}")
+                time.sleep(1)
+        MinioClient._is_available = False
+        logger.error(f"[MinIO Retry Task] MinIO connection failed after {max_retries} attempts: {last_error}")
+        return False
+
+    def init(self):
+        """Initialize MinIO client with retry mechanism (non-blocking, background retry using Celery)."""
+        if self._client:
+            return
+        try:
+            # Disable urllib3 retry to avoid duplicate retry messages
+            retry_strategy = Retry(total=0)  # No retry
+            http_client = PoolManager(retries=retry_strategy)
+            self._client = Minio(
+                settings.MINIO_ENDPOINT,
+                access_key=settings.MINIO_ACCESS_KEY,
+                secret_key=settings.MINIO_SECRET_KEY,
+                secure=settings.MINIO_SECURE,
+                http_client=http_client
+            )
+            # Check bucket, create if not exists
+            if not self._client.bucket_exists(settings.MINIO_BUCKET_NAME):
+                self._client.make_bucket(settings.MINIO_BUCKET_NAME)
+            self._is_available = True
+            logger.info("MinIO connection initialized successfully")
+            return
+        except Exception as e:
+            self._is_available = False
+            logger.error(f"MinIO initial connection failed: {e}")
+            # Enqueue background retry task (non-blocking)
+            from ..utils.queue import redis_queue
+            redis_queue.register_function(self.retry_init_minio, name="minio_retry_task")
+            import threading
+            threading.Thread(target=lambda: redis_queue.enqueue("minio_retry_task", 1, 5), daemon=True).start()
 
     def is_available(self):
         """Check if MinIO is available."""

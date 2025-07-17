@@ -22,31 +22,56 @@ class Redis:
             cls._instance = super().__new__(cls)
         return cls._instance
     
-    async def init(self) -> None:
-        """Initialize Redis client and connection pool with retry mechanism."""
-        if self._client:
-            return
-            
-        for attempt in range(self._max_retries):
+    async def retry_init_redis(self, attempt=1, max_retries=5):
+        """Retry kết nối Redis tối đa max_retries lần, chạy background."""
+        import asyncio
+        last_error = None
+        for i in range(attempt, max_retries+1):
             try:
-                self._pool = redis_async.ConnectionPool.from_url(
+                pool = redis_async.ConnectionPool.from_url(
                     settings.REDIS_CACHE_URL,
                     encoding="utf-8",
                     decode_responses=True
                 )
-                self._client = redis_async.Redis(connection_pool=self._pool)
-                await self._client.ping()
-                self._is_available = True
-                logger.info("Redis connection initialized successfully")
-                return
-            except Exception as e:
-                logger.warning(f"Redis retry {attempt + 1}/{self._max_retries}: {e}")
-                if attempt < self._max_retries - 1:
-                    await asyncio.sleep(self._retry_delay)
-                else:
-                    self._is_available = False
-                    logger.error("All Redis connection attempts failed - Redis will be unavailable")
-                    # Don't raise exception to prevent server crash
+                client = redis_async.Redis(connection_pool=pool)
+                await client.ping()
+                Redis._client = client
+                Redis._pool = pool
+                Redis._is_available = True
+                logger.info("Redis connection initialized successfully (background retry)")
+                return True
+            except Exception as err:
+                last_error = err
+                logger.warning(f"[Redis Retry Task] Attempt {i}/{max_retries}: {err}")
+                await asyncio.sleep(1)
+        Redis._is_available = False
+        logger.error(f"[Redis Retry Task] Redis connection failed after {max_retries} attempts: {last_error}")
+        return False
+
+    async def init(self) -> None:
+        """Initialize Redis client and connection pool with retry mechanism (non-blocking, background retry using Celery)."""
+        if self._client:
+            return
+        try:
+            self._pool = redis_async.ConnectionPool.from_url(
+                settings.REDIS_CACHE_URL,
+                encoding="utf-8",
+                decode_responses=True
+            )
+            self._client = redis_async.Redis(connection_pool=self._pool)
+            await self._client.ping()
+            self._is_available = True
+            logger.info("Redis connection initialized successfully")
+            return
+        except Exception as e:
+            self._is_available = False
+            logger.error(f"Redis initial connection failed: {e}")
+            # Enqueue background retry task (non-blocking)
+            from ..utils.queue import redis_queue
+            redis_queue.register_function(self.retry_init_redis, name="redis_retry_task")
+            import threading
+            import asyncio
+            threading.Thread(target=lambda: asyncio.run(redis_queue.enqueue("redis_retry_task", 1, 5)), daemon=True).start()
     
     async def close(self) -> None:
         """Close Redis connection."""

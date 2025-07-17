@@ -7,17 +7,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..core.db.database import Base
 from ..core.db.models import UUIDMixin, TimestampMixin, SoftDeleteMixin
 from .project import Project
+from ..schemas.document import DocumentType
 
 if TYPE_CHECKING:
     from .chat_message import ChatMessage
     from .message_document import MessageDocument
-
-
-class DocumentType(str, Enum):
-    pdf = "pdf"
-    docs = "docs"
-    txt = "txt"
-
 
 class Document(Base, UUIDMixin, TimestampMixin, SoftDeleteMixin):
     __tablename__ = "document"
