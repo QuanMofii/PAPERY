@@ -81,7 +81,8 @@ class MinioClient:
             from ..utils.queue import redis_queue
             redis_queue.register_function(self.retry_init_minio, name="minio_retry_task")
             import threading
-            threading.Thread(target=lambda: redis_queue.enqueue("minio_retry_task", 1, 5), daemon=True).start()
+            import asyncio
+            threading.Thread(target=lambda: asyncio.run(redis_queue.enqueue("minio_retry_task", 1, 5)), daemon=True).start()
 
     def is_available(self):
         """Check if MinIO is available."""
