@@ -6,6 +6,7 @@ import { useSelectedLayoutSegment } from 'next/navigation';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { NavUser } from '@/components/nav-user';
 import { ThemeSwitcher } from '@/components/theme-switcher';
+import { useUser } from '@/context/user-context';
 import { cn } from '@/registry/new-york-v4/lib/utils';
 import { Button } from '@/registry/new-york-v4/ui/button';
 import {
@@ -17,8 +18,6 @@ import {
 import { Input } from '@/registry/new-york-v4/ui/input';
 import { Skeleton } from '@/registry/new-york-v4/ui/skeleton';
 
-// import { useUser } from '@/context/user-context';
-
 import { Menu, Search } from 'lucide-react';
 
 const DASHBOARD_LINKS = [
@@ -29,7 +28,7 @@ const DASHBOARD_LINKS = [
 
 export function Header() {
     const segment = useSelectedLayoutSegment();
-    // const { user } = useUser();
+    const { user } = useUser();
 
     const renderNavLinks = () => {
         return DASHBOARD_LINKS.map((link) => {
@@ -103,7 +102,7 @@ export function Header() {
             </div>
 
             {/* Right section */}
-            <div className='flex items-center gap-4 text-gray-600'>
+            <div className='mr-4 flex items-center gap-4 text-gray-600'>
                 {/* Desktop Search */}
                 <div className='relative hidden max-w-sm sm:block'>
                     <Search className='text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 transform' />
@@ -111,15 +110,17 @@ export function Header() {
                 </div>
                 <LanguageSwitcher />
                 <ThemeSwitcher />
-                {/* {user ? (
-                    <NavUser user={{
-                        name: user.name || user.username,
-                        email: user.email,
-                        avatar: user.profile_image_url
-                    }} />
+                {user ? (
+                    <NavUser
+                        user={{
+                            name: user.name || user.username,
+                            email: user.email,
+                            avatar: user.profile_image_url
+                        }}
+                    />
                 ) : (
-                    <Skeleton className="h-8 w-8 rounded-full" />
-                )} */}
+                    <Skeleton className='h-8 w-8 rounded-full' />
+                )}
             </div>
         </header>
     );

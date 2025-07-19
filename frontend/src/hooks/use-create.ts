@@ -17,7 +17,6 @@ export default async function useCreate(
     }
 ) {
     const queryString = tranQueryToSting(query);
-    console.log(queryString);
     const response = await http.post(`/${path}${store === 'chat' ? `?${queryString}` : ''}`, data, config);
 
     const newData =

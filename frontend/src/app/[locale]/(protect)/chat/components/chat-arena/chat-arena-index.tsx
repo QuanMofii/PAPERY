@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 
 import useCreate from '@/hooks/use-create';
 import useQuery from '@/hooks/use-query';
@@ -22,6 +22,7 @@ interface ChatSubmitOptions {
 
 type ChatSubmitHandler = (event?: ChatSubmitEvent, options?: ChatSubmitOptions) => void;
 export default function ChatIndex() {
+    const router = useRouter();
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
@@ -54,6 +55,7 @@ export default function ChatIndex() {
                 'chat',
                 query
             );
+            // router.push(`/chat/${param.id}?projectId=${projectId}`);
         }
 
         const newMessages = [...messages, userMessage];

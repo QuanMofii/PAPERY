@@ -122,6 +122,10 @@
     }
 }
 
+@theme {
+    --shadow-primary: rgba(0, 0, 0, 0.15) 0px 3px 3px 0px;
+    --shadow-choose: rgba(240, 46, 170, 0.2) 0px 3px 3px 0px;
+}
 @layer base {
     body {
         background-color: var(--background);

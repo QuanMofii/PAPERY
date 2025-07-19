@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Checkbox } from '@/registry/new-york-v4/ui/checkbox';
 
 import { FileItem } from './file-list-item';
+import { Trash2 } from 'lucide-react';
 
 // Mock data cho danh sách file
 const mockFiles = [
@@ -21,13 +22,21 @@ const mockFiles = [
 ];
 
 export function FileList() {
+    const [selectAll, setSelectAll] = useState(false);
+
     return (
         <div className='h-full flex-1 overflow-hidden rounded-lg p-4'>
             <div className='flex w-full items-center justify-between p-2 text-sm font-medium'>
                 Library
-                <div className='flex gap-2'>
-                    <Checkbox className='h-5 w-5 border-stone-500 ring-stone-500 data-[state=checked]:border-stone-500' />
-                    <Checkbox className='h-5 w-5 rounded-full border-stone-500 ring-stone-500 data-[state=checked]:border-stone-500' />
+                <div className='flex items-center gap-2'>
+                    <div
+                        className={`rounded-full p-1 transition-all hover:bg-red-500 ${selectAll ? 'visible' : 'invisible'}`}>
+                        <Trash2 className='h-5 w-5 text-red-600 hover:text-white' />
+                    </div>
+                    <Checkbox
+                        onCheckedChange={() => setSelectAll(!selectAll)}
+                        className='h-5 w-5 border-stone-500 ring-stone-500 data-[state=checked]:border-stone-500'
+                    />
                 </div>
             </div>
             <div className='flex h-full flex-col gap-2 overflow-y-scroll p-2'>
