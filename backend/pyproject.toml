@@ -3,6 +3,7 @@ name = "Papery"
 version = "0.1.0"
 description = "A backend chatbot papery"
 readme = "README.md"
+
 authors = [
   { name = "QuanMofii", email = "haminhquan12c7@gmail.com" }
 ]
@@ -15,7 +16,7 @@ packages = [{ include = "app", from = "backend/src" }]
 
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.12"
 python-dotenv = "^1.0.0"
 pydantic = { extras = ["email"], version = "^2.6.1" }
 fastapi = "^0.109.1"
@@ -46,6 +47,10 @@ celery = "^5.5.3"
 poetry-plugin-shell = "^1.0.1"
 minio = "^7.2.15"
 pdfminer = "^20191125"
+pdfminer-six = "^20250506"
+pymupdf = "^1.26.3"
+tqdm = "^4.67.1"
+requests = "^2.32.4"
 
 
 [build-system]
